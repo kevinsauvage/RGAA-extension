@@ -1,14 +1,20 @@
 import { create } from 'zustand';
-import type { AiFix, ScanResult } from '@/lib/types';
+import type { AccessibilityIssue, AiAuditProgress, AiFix, ScanResult } from '@/lib/types';
 import type { QuotaStatus } from '@/lib/scan-limits';
+import { summarizeIssues } from '@/lib/scan-summary';
 
 type ScanStatus = 'idle' | 'scanning' | 'done' | 'error';
+type AiAuditStatus = 'idle' | 'running' | 'done' | 'error';
 
 interface PanelState {
   status: ScanStatus;
   result: ScanResult | null;
   error: string | null;
   quota: QuotaStatus | null;
+  aiAuditStatus: AiAuditStatus;
+  aiAuditProgress: AiAuditProgress | null;
+  aiAuditError: string | null;
+  aiAuditInfo: { itemsChecked: number; found: number } | null;
   fixes: Record<string, AiFix>;
   fixLoading: Record<string, boolean>;
   fixError: Record<string, string>;
@@ -16,9 +22,22 @@ interface PanelState {
   setResult: (result: ScanResult) => void;
   setError: (error: string | null) => void;
   setQuota: (quota: QuotaStatus) => void;
+  setAiAuditStatus: (status: AiAuditStatus) => void;
+  setAiAuditProgress: (progress: AiAuditProgress | null) => void;
+  setAiAuditError: (error: string | null) => void;
+  setAiAuditInfo: (info: { itemsChecked: number; found: number } | null) => void;
+  mergeAiIssues: (issues: AccessibilityIssue[]) => void;
   setFix: (issueId: string, fix: AiFix) => void;
   setFixLoading: (issueId: string, loading: boolean) => void;
   setFixError: (issueId: string, error: string) => void;
+}
+
+function recomputeSummary(result: ScanResult): ScanResult {
+  const allSeverities = [
+    ...result.accessibilityIssues.map((i) => ({ severity: i.severity })),
+    ...result.performanceIssues.map((i) => ({ severity: i.severity })),
+  ];
+  return { ...result, summary: summarizeIssues(allSeverities) };
 }
 
 export const usePanelStore = create<PanelState>((set) => ({
@@ -26,13 +45,39 @@ export const usePanelStore = create<PanelState>((set) => ({
   result: null,
   error: null,
   quota: null,
+  aiAuditStatus: 'idle',
+  aiAuditProgress: null,
+  aiAuditError: null,
+  aiAuditInfo: null,
   fixes: {},
   fixLoading: {},
   fixError: {},
   setStatus: (status) => set({ status }),
-  setResult: (result) => set({ result, status: 'done', error: null }),
+  setResult: (result) =>
+    set({
+      result,
+      status: 'done',
+      error: null,
+      aiAuditStatus: 'idle',
+      aiAuditProgress: null,
+      aiAuditError: null,
+      aiAuditInfo: null,
+    }),
   setError: (error) => set({ error, status: error ? 'error' : 'idle' }),
   setQuota: (quota) => set({ quota }),
+  setAiAuditStatus: (aiAuditStatus) => set({ aiAuditStatus }),
+  setAiAuditProgress: (aiAuditProgress) => set({ aiAuditProgress }),
+  setAiAuditError: (aiAuditError) => set({ aiAuditError }),
+  setAiAuditInfo: (aiAuditInfo) => set({ aiAuditInfo }),
+  mergeAiIssues: (issues) =>
+    set((state) => {
+      if (!state.result || issues.length === 0) return state;
+      const next = recomputeSummary({
+        ...state.result,
+        accessibilityIssues: [...state.result.accessibilityIssues, ...issues],
+      });
+      return { result: next };
+    }),
   setFix: (issueId, fix) =>
     set((state) => ({
       fixes: { ...state.fixes, [issueId]: fix },

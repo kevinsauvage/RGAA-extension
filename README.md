@@ -34,6 +34,10 @@ src/
 │   └── audit/
 │       ├── axe-runner.ts       # axe-core runner + scoring
 │       ├── rgaa-mapping.ts     # axe rule → RGAA/WCAG criteria
+│       ├── rgaa-rules.ts       # deterministic RGAA rules axe misses
+│       ├── candidates.ts       # extracts elements for AI verification
+│       ├── accessible-name.ts  # lightweight AccName computation
+│       ├── dom-utils.ts        # selectors, visibility, context helpers
 │       ├── user-impact.ts      # human-readable impact strings
 │       └── performance.ts      # Core Web Vitals collection
 ├── lib/
@@ -42,7 +46,11 @@ src/
 │   ├── storage.ts              # chrome.storage wrapper (settings/usage/history)
 │   ├── scan-limits.ts          # free/pro quota logic
 │   ├── utils.ts                # tab/highlight helpers
-│   ├── ai/                     # OpenAI client + prompts
+│   ├── ai/
+│   │   ├── checks.ts           # AI verification checks (question + few-shot)
+│   │   ├── audit-client.ts     # classification pipeline (OpenAI)
+│   │   └── client.ts           # AI fix generation
+│   ├── rgaa/criteria.ts        # RGAA themes + helper links
 │   └── report/pdf.ts           # PDF export
 ├── sidepanel/                  # main results UI (React)
 ├── popup/                      # toolbar popup
@@ -74,10 +82,23 @@ Chrome Web Store.
 
 ## How the audit works
 
-1. The **content script** runs axe-core against the live DOM and samples Core Web Vitals.
-2. Each axe violation is mapped to its **RGAA criterion** and WCAG success criteria via `rgaa-mapping.ts`, and assigned a normalized severity and a composite 0–100 score.
-3. Results stream to the **side panel**, where hovering a finding highlights the element on the page.
-4. Clicking **Generate AI fix** sends only the offending markup to OpenAI and returns a JSON fix (explanation + code + rationale), cached locally.
+The audit has three layers, from most to least deterministic:
+
+1. **axe-core** — runs against the live DOM; every violation is mapped to its
+   **RGAA criterion** via `rgaa-mapping.ts` and scored 0–100.
+2. **Deterministic RGAA rules** (`rgaa-rules.ts`) — checks axe misses: missing
+   skip link, `target="_blank"` without warning, document links without format
+   indication, ungrouped radio buttons. Run with the classic scan, no AI.
+3. **AI checks** (verification, not detection) — code extracts *candidates*
+   (images with alt, links, buttons, form fields, page title) and the AI only
+   answers one narrow question per check ("is this alt text relevant?") with a
+   pass / fail / uncertain verdict. Few-shot examples anchor each judgment;
+   only clear fails become issues. The AI never picks elements, criteria or
+   severities — this keeps hallucinations structurally impossible.
+
+Clicking **Generate AI fix** on any issue sends only the offending markup to
+OpenAI and returns a ready-to-paste fix, cached locally. Criteria link to the
+official [RGAA 4.1.2 referential](https://accessibilite.numerique.gouv.fr/methode/criteres-et-tests/).
 
 ## Privacy
 

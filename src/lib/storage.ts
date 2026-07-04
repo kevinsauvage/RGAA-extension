@@ -1,4 +1,5 @@
 import type { AiFix, ScanResult } from './types';
+import { DEFAULT_OPENAI_MODEL } from './ai/models';
 
 /**
  * Thin typed wrapper over chrome.storage. Settings and usage counters live in
@@ -20,7 +21,7 @@ export interface UsageState {
 
 export const DEFAULT_SETTINGS: Settings = {
   openaiApiKey: '',
-  model: 'gpt-4o-mini',
+  model: DEFAULT_OPENAI_MODEL,
   language: 'fr',
   plan: 'free',
 };

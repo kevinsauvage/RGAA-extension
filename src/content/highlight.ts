@@ -4,6 +4,10 @@
  */
 const OVERLAY_ID = '__a11yfix_highlight__';
 
+let pinnedKey: string | null = null;
+let scrollListener: (() => void) | null = null;
+let resizeListener: (() => void) | null = null;
+
 function ensureOverlay(): HTMLDivElement {
   let overlay = document.getElementById(OVERLAY_ID) as HTMLDivElement | null;
   if (!overlay) {
@@ -16,7 +20,8 @@ function ensureOverlay(): HTMLDivElement {
       border: '2px solid #3182f6',
       boxShadow: '0 0 0 4px rgba(49,130,246,0.25)',
       borderRadius: '4px',
-      transition: 'all 120ms ease-out',
+      transition:
+        'top 120ms ease-out, left 120ms ease-out, width 120ms ease-out, height 120ms ease-out',
       display: 'none',
     } satisfies Partial<CSSStyleDeclaration>);
     document.body.appendChild(overlay);
@@ -24,16 +29,32 @@ function ensureOverlay(): HTMLDivElement {
   return overlay;
 }
 
-export function highlightNode(selector: string): void {
-  let element: Element | null = null;
-  try {
-    element = document.querySelector(selector);
-  } catch {
-    element = null;
+function resolveSelectors(selectors: string[]): string[] {
+  const unique = new Set<string>();
+  for (const selector of selectors) {
+    const trimmed = selector.trim();
+    if (trimmed) unique.add(trimmed);
   }
-  if (!element) return;
+  return [...unique];
+}
 
-  element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+function selectorKey(selectors: string[]): string {
+  return resolveSelectors(selectors).join('|');
+}
+
+function findElement(selectors: string[]): Element | null {
+  for (const selector of resolveSelectors(selectors)) {
+    try {
+      const element = document.querySelector(selector);
+      if (element) return element;
+    } catch {
+      // Invalid selector — try next alternative.
+    }
+  }
+  return null;
+}
+
+function positionOverlay(element: Element): void {
   const rect = element.getBoundingClientRect();
   const overlay = ensureOverlay();
   Object.assign(overlay.style, {
@@ -45,7 +66,76 @@ export function highlightNode(selector: string): void {
   });
 }
 
-export function clearHighlight(): void {
+function hideOverlay(): void {
   const overlay = document.getElementById(OVERLAY_ID);
   if (overlay) overlay.style.display = 'none';
+}
+
+function attachPositionListeners(selectors: string[]): void {
+  detachPositionListeners();
+
+  const update = () => {
+    const element = findElement(selectors);
+    if (!element) {
+      clearPinnedHighlight();
+      return;
+    }
+    positionOverlay(element);
+  };
+
+  scrollListener = update;
+  resizeListener = update;
+  window.addEventListener('scroll', update, true);
+  window.addEventListener('resize', update);
+}
+
+function detachPositionListeners(): void {
+  if (scrollListener) {
+    window.removeEventListener('scroll', scrollListener, true);
+    scrollListener = null;
+  }
+  if (resizeListener) {
+    window.removeEventListener('resize', resizeListener);
+    resizeListener = null;
+  }
+}
+
+export function highlightNode(
+  selector: string,
+  options: { targets?: string[]; persist?: boolean } = {},
+): boolean {
+  const selectors = options.targets?.length
+    ? options.targets
+    : selector
+      ? [selector]
+      : [];
+  const element = findElement(selectors);
+  if (!element) return false;
+
+  element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+  positionOverlay(element);
+
+  const key = selectorKey(selectors);
+  if (options.persist) {
+    pinnedKey = key;
+    attachPositionListeners(selectors);
+  } else if (!pinnedKey) {
+    attachPositionListeners(selectors);
+  }
+
+  return true;
+}
+
+/** Clear hover preview. Keeps a pinned (clicked) highlight in place. */
+export function clearHighlight(): void {
+  if (pinnedKey) return;
+  detachPositionListeners();
+  hideOverlay();
+}
+
+/** Clear any highlight, including a pinned one. */
+export function clearPinnedHighlight(): void {
+  pinnedKey = null;
+  detachPositionListeners();
+  hideOverlay();
 }

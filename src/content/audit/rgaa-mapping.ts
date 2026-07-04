@@ -1,4 +1,5 @@
 import type { RgaaReference, Severity } from '@/lib/types';
+import { RGAA_THEMES } from '@/lib/rgaa/criteria';
 
 /**
  * Maps axe-core rule ids to the relevant RGAA 4.1 criteria and WCAG success
@@ -8,22 +9,6 @@ import type { RgaaReference, Severity } from '@/lib/types';
  * This table is intentionally explicit rather than generated: RGAA compliance
  * work needs a defensible, auditable mapping, not a fuzzy heuristic.
  */
-
-export const RGAA_THEMES: Record<number, string> = {
-  1: 'Images',
-  2: 'Cadres',
-  3: 'Couleurs',
-  4: 'Multimédia',
-  5: 'Tableaux',
-  6: 'Liens',
-  7: 'Scripts',
-  8: 'Éléments obligatoires',
-  9: 'Structuration de l’information',
-  10: 'Présentation de l’information',
-  11: 'Formulaires',
-  12: 'Navigation',
-  13: 'Consultation',
-};
 
 interface MappingEntry {
   criteria: RgaaReference[];

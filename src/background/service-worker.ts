@@ -1,5 +1,6 @@
-import type { ContentResponse } from '@/lib/messaging';
-import type { ScanResult } from '@/lib/types';
+import type { ContentResponse, RuntimeMessage } from '@/lib/messaging';
+import type { KnownIssueRef, PageCandidates, ScanResult } from '@/lib/types';
+import { ensureContentScript } from '@/lib/content-script-inject';
 import {
   getSettings,
   getUsage,
@@ -8,13 +9,9 @@ import {
 } from '@/lib/storage';
 import { evaluateQuota } from '@/lib/scan-limits';
 
-/** Messages the side panel / popup send to the background worker. */
-type BgRequest =
-  | { type: 'RUN_SCAN'; tabId: number }
-  | { type: 'OPEN_SIDE_PANEL'; tabId: number };
-
 type BgResponse =
   | { ok: true; result: ScanResult }
+  | { ok: true; candidates: PageCandidates }
   | { ok: true }
   | { ok: false; error: string; reason?: 'quota' | 'runtime' };
 
@@ -24,20 +21,16 @@ chrome.runtime.onInstalled.addListener(() => {
     .catch(() => undefined);
 });
 
-/** Ensure the content script is present before messaging it. */
-async function ensureContentScript(tabId: number): Promise<void> {
-  try {
-    const res = (await chrome.tabs.sendMessage(tabId, { type: 'PING' })) as
-      | ContentResponse
-      | undefined;
-    if (res && 'ok' in res && res.ok) return;
-  } catch {
-    // Not injected yet — fall through and inject programmatically.
-  }
-  await chrome.scripting.executeScript({
-    target: { tabId },
-    files: ['src/content/content-script.ts'],
-  });
+async function messageTab<T extends ContentResponse>(
+  tabId: number,
+  message: unknown,
+): Promise<T> {
+  await ensureContentScript(tabId);
+  return (await chrome.tabs.sendMessage(tabId, message)) as T;
+}
+
+function toError(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback;
 }
 
 async function runScan(tabId: number): Promise<BgResponse> {
@@ -52,12 +45,9 @@ async function runScan(tabId: number): Promise<BgResponse> {
   }
 
   try {
-    await ensureContentScript(tabId);
-    const response = (await chrome.tabs.sendMessage(tabId, {
-      type: 'RUN_SCAN',
-    })) as ContentResponse;
+    const response = await messageTab<ContentResponse>(tabId, { type: 'RUN_SCAN' });
 
-    if (!('ok' in response) || !response.ok || !('result' in response)) {
+    if (!response.ok || !('result' in response)) {
       const error = 'error' in response ? response.error : 'Scan failed.';
       return { ok: false, reason: 'runtime', error };
     }
@@ -69,29 +59,71 @@ async function runScan(tabId: number): Promise<BgResponse> {
     return {
       ok: false,
       reason: 'runtime',
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Unable to scan this page (it may be a protected browser page).',
+      error: toError(error, 'Unable to scan this page (it may be a protected browser page).'),
+    };
+  }
+}
+
+async function collectCandidates(
+  tabId: number,
+  knownIssues: KnownIssueRef[] = [],
+): Promise<BgResponse> {
+  try {
+    const response = await messageTab<ContentResponse>(tabId, {
+      type: 'COLLECT_CANDIDATES',
+      knownIssues,
+    });
+
+    if (!response.ok || !('candidates' in response)) {
+      const error = 'error' in response ? response.error : 'Candidate collection failed.';
+      return { ok: false, reason: 'runtime', error };
+    }
+
+    return { ok: true, candidates: response.candidates };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: 'runtime',
+      error: toError(error, 'Unable to read this page (it may be a protected browser page).'),
     };
   }
 }
 
 chrome.runtime.onMessage.addListener(
-  (message: BgRequest, _sender, sendResponse: (r: BgResponse) => void) => {
+  (message: RuntimeMessage, _sender, sendResponse: (r: BgResponse) => void) => {
     switch (message.type) {
       case 'RUN_SCAN':
         runScan(message.tabId).then(sendResponse);
+        return true;
+      case 'COLLECT_CANDIDATES':
+        collectCandidates(message.tabId, message.knownIssues).then(sendResponse);
+        return true;
+      case 'HIGHLIGHT_NODE':
+        messageTab<ContentResponse>(message.tabId, {
+          type: 'HIGHLIGHT_NODE',
+          target: message.target,
+          targets: message.targets,
+          persist: message.persist,
+        })
+          .then((response) => sendResponse(response.ok ? { ok: true } : response))
+          .catch((error: unknown) =>
+            sendResponse({ ok: false, error: toError(error, 'Highlight failed.') }),
+          );
+        return true;
+      case 'CLEAR_HIGHLIGHT':
+        messageTab<ContentResponse>(message.tabId, {
+          type: 'CLEAR_HIGHLIGHT',
+          pinned: message.pinned,
+        })
+          .then(() => sendResponse({ ok: true }))
+          .catch(() => sendResponse({ ok: true }));
         return true;
       case 'OPEN_SIDE_PANEL':
         chrome.sidePanel
           .open({ tabId: message.tabId })
           .then(() => sendResponse({ ok: true }))
           .catch((error: unknown) =>
-            sendResponse({
-              ok: false,
-              error: error instanceof Error ? error.message : String(error),
-            }),
+            sendResponse({ ok: false, error: toError(error, 'Could not open side panel.') }),
           );
         return true;
       default: {

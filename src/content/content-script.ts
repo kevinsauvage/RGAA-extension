@@ -1,8 +1,10 @@
 import type { ContentMessage, ContentResponse } from '@/lib/messaging';
 import type { ScanResult } from '@/lib/types';
 import { runAxeAudit, summarize } from './audit/axe-runner';
+import { runRgaaRules } from './audit/rgaa-rules';
+import { collectPageCandidates } from './audit/candidates';
 import { collectPerformance } from './audit/performance';
-import { clearHighlight, highlightNode } from './highlight';
+import { clearHighlight, clearPinnedHighlight, highlightNode } from './highlight';
 
 function uid(): string {
   return `scan-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -10,10 +12,8 @@ function uid(): string {
 
 async function runScan(): Promise<ScanResult> {
   const started = performance.now();
-  const [accessibilityIssues, perf] = await Promise.all([
-    runAxeAudit(),
-    collectPerformance(),
-  ]);
+  const [axeIssues, perf] = await Promise.all([runAxeAudit(), collectPerformance()]);
+  const accessibilityIssues = [...axeIssues, ...runRgaaRules()];
 
   const allSeverities = [
     ...accessibilityIssues.map((issue) => ({ severity: issue.severity })),
@@ -49,12 +49,32 @@ chrome.runtime.onMessage.addListener(
             }),
           );
         return true; // keep the message channel open for the async response
-      case 'HIGHLIGHT_NODE':
-        highlightNode(message.target);
-        sendResponse({ ok: true });
+      case 'COLLECT_CANDIDATES': {
+        try {
+          const candidates = collectPageCandidates(message.knownIssues ?? []);
+          sendResponse({ ok: true, candidates });
+        } catch (error: unknown) {
+          sendResponse({
+            ok: false,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
         return false;
+      }
+      case 'HIGHLIGHT_NODE': {
+        const found = highlightNode(message.target, {
+          targets: message.targets,
+          persist: message.persist,
+        });
+        sendResponse(found ? { ok: true } : { ok: false, error: 'Element not found on page.' });
+        return false;
+      }
       case 'CLEAR_HIGHLIGHT':
-        clearHighlight();
+        if (message.pinned) {
+          clearPinnedHighlight();
+        } else {
+          clearHighlight();
+        }
         sendResponse({ ok: true });
         return false;
       default: {

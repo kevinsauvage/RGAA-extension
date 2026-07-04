@@ -1,30 +1,31 @@
 import axe from 'axe-core';
-import type {
-  AccessibilityIssue,
-  AffectedNode,
-  ScanSummary,
-} from '@/lib/types';
+import type { AccessibilityIssue, AffectedNode } from '@/lib/types';
+import { summarizeIssues } from '@/lib/scan-summary';
 import { normalizeSeverity, rgaaForRule } from './rgaa-mapping';
 import { userImpactFor } from './user-impact';
-
-const SEVERITY_WEIGHT = {
-  critical: 10,
-  serious: 6,
-  moderate: 3,
-  minor: 1,
-} as const;
 
 function truncateHtml(html: string, max = 240): string {
   const clean = html.replace(/\s+/g, ' ').trim();
   return clean.length > max ? `${clean.slice(0, max)}…` : clean;
 }
 
+function axeTargetToSelectors(target: axe.NodeResult['target']): string[] {
+  if (!Array.isArray(target)) return [String(target)];
+  return target
+    .map((chain) => (Array.isArray(chain) ? chain.join(' ') : String(chain)))
+    .filter((s) => s.length > 0);
+}
+
 function toAffectedNodes(nodes: axe.NodeResult[]): AffectedNode[] {
-  return nodes.map((node) => ({
-    target: Array.isArray(node.target) ? node.target.join(' ') : String(node.target),
-    html: truncateHtml(node.html),
-    failureSummary: node.failureSummary,
-  }));
+  return nodes.map((node) => {
+    const targets = axeTargetToSelectors(node.target);
+    return {
+      target: targets[0] ?? '',
+      targets,
+      html: truncateHtml(node.html),
+      failureSummary: node.failureSummary,
+    };
+  });
 }
 
 /** Run axe-core against the live document and map results to RGAA issues. */
@@ -43,6 +44,8 @@ export async function runAxeAudit(): Promise<AccessibilityIssue[]> {
       id: `a11y-${violation.id}`,
       kind: 'accessibility',
       ruleId: violation.id,
+      source: 'axe',
+      confidence: 'certain',
       severity,
       title: violation.help,
       description: violation.description,
@@ -54,17 +57,4 @@ export async function runAxeAudit(): Promise<AccessibilityIssue[]> {
   });
 }
 
-/** Compute a 0-100 composite score plus severity counts. */
-export function summarize(
-  issues: Array<{ severity: keyof typeof SEVERITY_WEIGHT }>,
-): ScanSummary {
-  const counts = { critical: 0, serious: 0, moderate: 0, minor: 0 };
-  let penalty = 0;
-  for (const issue of issues) {
-    counts[issue.severity] += 1;
-    penalty += SEVERITY_WEIGHT[issue.severity];
-  }
-  // Diminishing-returns curve so a handful of minor issues doesn't tank the score.
-  const score = Math.max(0, Math.round(100 - Math.min(100, penalty * 1.5)));
-  return { total: issues.length, ...counts, score };
-}
+export { summarizeIssues as summarize };

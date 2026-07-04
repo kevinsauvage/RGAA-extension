@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import type { AccessibilityIssue } from '@/lib/types';
-import { clearHighlightOnPage, highlightOnPage } from '@/lib/utils';
+import type { AccessibilityIssue, AffectedNode } from '@/lib/types';
+import { clearHighlightOnPage, focusIssueOnPage, highlightOnPage } from '@/lib/utils';
 import { SeverityBadge } from './SeverityBadge';
 import { AIFixPanel } from './AIFixPanel';
 
@@ -21,6 +21,21 @@ export function IssueCard({ issue }: { issue: AccessibilityIssue }) {
             {issue.title}
           </p>
           <div className="mt-1 flex flex-wrap gap-1">
+            {issue.source === 'ai' && (
+              <span className="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-semibold text-brand-700 dark:bg-brand-900/50 dark:text-brand-200">
+                AI
+              </span>
+            )}
+            {issue.source === 'rule' && (
+              <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700 dark:bg-violet-950/50 dark:text-violet-200">
+                Rule
+              </span>
+            )}
+            {issue.confidence === 'needs-review' && (
+              <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+                Review
+              </span>
+            )}
             {issue.rgaa.map((r) => (
               <span
                 key={r.criterion}
@@ -47,19 +62,7 @@ export function IssueCard({ issue }: { issue: AccessibilityIssue }) {
 
           <div className="space-y-1.5">
             {issue.nodes.slice(0, 5).map((node, index) => (
-              <div
-                key={index}
-                className="group rounded-md bg-slate-50 p-2 dark:bg-slate-800/60"
-                onMouseEnter={() => void highlightOnPage(node.target)}
-                onMouseLeave={() => void clearHighlightOnPage()}
-              >
-                <code className="block break-all text-[11px] text-slate-500">
-                  {node.target}
-                </code>
-                <code className="mt-1 block break-all text-[11px] text-slate-700 dark:text-slate-300">
-                  {node.html}
-                </code>
-              </div>
+              <IssueNodeBlock key={index} node={node} />
             ))}
             {issue.nodes.length > 5 && (
               <p className="text-[11px] text-slate-400">
@@ -83,6 +86,38 @@ export function IssueCard({ issue }: { issue: AccessibilityIssue }) {
         </div>
       )}
     </div>
+  );
+}
+
+function IssueNodeBlock({ node }: { node: AffectedNode }) {
+  const [active, setActive] = useState(false);
+
+  const scrollToNode = async () => {
+    const found = await focusIssueOnPage(node.target, { targets: node.targets });
+    setActive(found);
+  };
+
+  return (
+    <button
+      type="button"
+      className={`group w-full rounded-md border p-2 text-left transition-colors ${
+        active
+          ? 'border-brand-400 bg-brand-50 dark:border-brand-700 dark:bg-brand-950/30'
+          : 'border-transparent bg-slate-50 hover:border-slate-200 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:border-slate-700 dark:hover:bg-slate-800'
+      }`}
+      onClick={() => void scrollToNode()}
+      onMouseEnter={() => void highlightOnPage(node.target, node.targets)}
+      onMouseLeave={() => void clearHighlightOnPage()}
+      title="Scroll to element on page"
+    >
+      <code className="block break-all text-[11px] text-slate-500">{node.target}</code>
+      <code className="mt-1 block break-all text-[11px] text-slate-700 dark:text-slate-300">
+        {node.html}
+      </code>
+      <span className="mt-1 block text-[10px] font-medium text-brand-600 opacity-0 transition-opacity group-hover:opacity-100 dark:text-brand-300">
+        Click to scroll →
+      </span>
+    </button>
   );
 }
 

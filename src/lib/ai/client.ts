@@ -1,8 +1,7 @@
 import type { AccessibilityIssue, AiFix } from '@/lib/types';
 import type { Settings } from '@/lib/storage';
 import { buildUserPrompt, SYSTEM_PROMPT } from './prompts';
-
-const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
+import { buildChatCompletionBody, OPENAI_CHAT_URL } from './chat-completions';
 
 interface RawFix {
   explanation: string;
@@ -40,21 +39,22 @@ export async function generateFix(
     );
   }
 
-  const response = await fetch(OPENAI_URL, {
+  const response = await fetch(OPENAI_CHAT_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${settings.openaiApiKey}`,
     },
-    body: JSON.stringify({
-      model: settings.model,
-      temperature: 0.2,
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: buildUserPrompt(issue, settings.language) },
-      ],
-    }),
+    body: JSON.stringify(
+      buildChatCompletionBody(
+        settings.model,
+        [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: buildUserPrompt(issue, settings.language) },
+        ],
+        { temperature: 0.2, jsonMode: true },
+      ),
+    ),
   });
 
   if (!response.ok) {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   DEFAULT_SETTINGS,
   getSettings,
@@ -7,12 +7,15 @@ import {
   type Settings,
 } from '@/lib/storage';
 import { FREE_TIER_MONTHLY_SCANS } from '@/lib/scan-limits';
+import {
+  MODEL_GROUPS,
+  OPENAI_MODELS,
+  modelsByGroup,
+  resolveModelOption,
+  type ModelGroup,
+} from '@/lib/ai/models';
 
-const MODELS = [
-  { id: 'gpt-4o-mini', label: 'GPT-4o mini (fast, low cost)' },
-  { id: 'gpt-4o', label: 'GPT-4o (highest quality)' },
-  { id: 'gpt-4.1-mini', label: 'GPT-4.1 mini' },
-];
+const MODEL_GROUP_ORDER: ModelGroup[] = ['gpt-5', 'gpt-4'];
 
 export function Options() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
@@ -37,6 +40,14 @@ export function Options() {
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
+
+  const selectedModel = useMemo(
+    () => resolveModelOption(settings.model),
+    [settings.model],
+  );
+
+  const showCustomModel =
+    !OPENAI_MODELS.some((model) => model.id === settings.model);
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-6 py-10">
@@ -65,7 +76,7 @@ export function Options() {
               value={settings.openaiApiKey}
               onChange={(e) => update('openaiApiKey', e.target.value)}
               placeholder="sk-…"
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono dark:border-slate-700 dark:bg-slate-800"
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm dark:border-slate-700 dark:bg-slate-800"
             />
             <button
               type="button"
@@ -77,7 +88,7 @@ export function Options() {
           </div>
           <span className="mt-1 block text-[11px] text-slate-400">
             Stored locally in this browser only. Used to call OpenAI directly for
-            AI fixes.
+            AI fixes and AI checks.
           </span>
         </label>
 
@@ -90,12 +101,23 @@ export function Options() {
             onChange={(e) => update('model', e.target.value)}
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
           >
-            {MODELS.map((model) => (
-              <option key={model.id} value={model.id}>
-                {model.label}
-              </option>
+            {MODEL_GROUP_ORDER.map((group) => (
+              <optgroup key={group} label={MODEL_GROUPS[group]}>
+                {modelsByGroup(group).map((model) => (
+                  <option key={model.id} value={model.id}>
+                    {model.label}
+                    {model.recommended ? ' · recommended' : ''}
+                  </option>
+                ))}
+              </optgroup>
             ))}
+            {showCustomModel && (
+              <option value={settings.model}>{settings.model} (custom)</option>
+            )}
           </select>
+          <span className="mt-1 block text-[11px] text-slate-400">
+            {selectedModel.hint}
+          </span>
         </label>
 
         <label className="block">
