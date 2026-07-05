@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AccessibilityIssue } from '@/lib/types';
 import type { Settings } from '@/lib/storage';
 import { generateFix } from '../client';
+import { OpenAiApiError } from '../openai-errors';
 
 vi.mock('../openai', () => ({
   openaiChatCompletion: vi.fn(),
@@ -59,8 +60,10 @@ describe('generateFix', () => {
   });
 
   it('surfaces OpenAI HTTP errors', async () => {
-    vi.mocked(openaiChatCompletion).mockRejectedValue(new Error('AI fix generation failed (401).'));
+    vi.mocked(openaiChatCompletion).mockRejectedValue(
+      OpenAiApiError.fromResponse(401, JSON.stringify({ error: { message: 'Invalid API key' } })),
+    );
 
-    await expect(generateFix(issue, settings)).rejects.toThrow('AI fix generation failed (401)');
+    await expect(generateFix(issue, settings)).rejects.toBeInstanceOf(OpenAiApiError);
   });
 });

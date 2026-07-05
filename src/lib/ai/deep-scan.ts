@@ -155,7 +155,7 @@ async function scanBatch(
         content: buildBatchPrompt(criteria, html, settings.language, styleSnippets),
       },
     ],
-    { temperature: 0, jsonMode: true, context: `Deep scan "${batch.label.en}"` },
+    { temperature: 0, jsonMode: true, context: `Deep scan "${batch.label[settings.language]}"` },
   );
   return parseFindings(content);
 }

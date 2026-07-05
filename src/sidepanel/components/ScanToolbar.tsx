@@ -2,6 +2,7 @@ import type { AiAuditProgress } from '@/lib/types';
 import { Spinner } from '@/components/Spinner';
 import { useI18n } from '@/lib/i18n/useI18n';
 import type { AiAuditInfo } from '../store';
+import { DeepScanErrorAlert } from './DeepScanErrorAlert';
 import { SparkleIcon } from './icons';
 
 interface ScanToolbarProps {
@@ -83,6 +84,7 @@ export function DeepScanProgress({
   error,
   quotaBlocked,
   proRequired,
+  onOpenSettings,
 }: {
   progress: AiAuditProgress | null;
   status: 'idle' | 'running' | 'done' | 'error';
@@ -90,6 +92,7 @@ export function DeepScanProgress({
   error: string | null;
   quotaBlocked: boolean;
   proRequired: boolean;
+  onOpenSettings: () => void;
 }) {
   const { t } = useI18n();
 
@@ -136,14 +139,7 @@ export function DeepScanProgress({
           })}
         </p>
       )}
-      {error && (
-        <p
-          role="alert"
-          className="border-b border-slate-200 bg-white px-4 pb-3 text-[11px] text-red-500 dark:border-slate-800 dark:bg-slate-900"
-        >
-          {error}
-        </p>
-      )}
+      {error && <DeepScanErrorAlert error={error} onOpenSettings={onOpenSettings} />}
       {quotaBlocked && (
         <p
           role="status"

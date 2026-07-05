@@ -10,6 +10,7 @@ import {
 import { getSettings, getScanHistory, pushScanHistory, type ScanHistoryEntry } from '@/lib/storage';
 import { canUseProFeature } from '@/lib/scan-limits';
 import { runDeepScan } from '@/lib/ai/deep-scan';
+import { encodeDeepScanError } from '@/lib/ai/openai-errors';
 import { formatProtectedPageError, formatScanError } from '@/lib/scan-errors';
 import { useI18n } from '@/lib/i18n/useI18n';
 import { Logo } from '@/components/Logo';
@@ -169,7 +170,7 @@ export function App() {
       });
       setAiAuditStatus('done');
     } catch (err) {
-      setAiAuditError(err instanceof Error ? err.message : String(err));
+      setAiAuditError(encodeDeepScanError(err));
       setAiAuditStatus('error');
     } finally {
       setAiAuditProgress(null);
@@ -246,6 +247,7 @@ export function App() {
         error={aiAuditError}
         quotaBlocked={quota?.allowed === false}
         proRequired={Boolean(result && !isPro)}
+        onOpenSettings={() => chrome.runtime.openOptionsPage()}
       />
 
       <main id="main-content" className="flex-1 space-y-3 overflow-y-auto p-4" tabIndex={-1}>

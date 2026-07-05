@@ -59,6 +59,51 @@ const en = {
     proRequired: 'Deep scan, AI fixes, and PDF export require Pro (preview) in Settings.',
     quotaBlocked: 'Monthly free scan limit reached — enable Pro (preview) in Settings for unlimited scans.',
     noApiKey: 'Add an OpenAI API key in Settings to run the deep scan.',
+    errors: {
+      unknownBatch: 'this step',
+      openSettings: 'Open Settings',
+      technicalDetails: 'Technical details',
+      pro: {
+        title: 'Pro feature required',
+        body: 'Enable Pro (preview) in Settings to run the AI deep scan.',
+      },
+      noApiKey: {
+        title: 'OpenAI API key missing',
+        body: 'Add your API key in Settings to run the deep scan.',
+      },
+      quota: {
+        title: 'OpenAI quota exceeded',
+        body: 'The deep scan stopped during “{batch}”. Your OpenAI account has no remaining credits or hit its usage limit.',
+        hint: 'Add billing credits on OpenAI or wait for your limit to reset, then try again.',
+        billing: 'OpenAI billing →',
+        usage: 'View usage →',
+      },
+      rateLimit: {
+        title: 'OpenAI rate limit reached',
+        body: 'The deep scan paused during “{batch}” because too many requests were sent in a short time.',
+        hint: 'Wait a minute and try again, or switch to a lighter model in Settings.',
+      },
+      auth: {
+        title: 'Invalid OpenAI API key',
+        body: 'Authentication failed during “{batch}”.',
+        hint: 'Check your API key in Settings — create a new one if needed.',
+      },
+      model: {
+        title: 'Model not available',
+        body: 'The configured model could not be used during “{batch}”.',
+        hint: 'Pick another model in Settings (e.g. gpt-4o-mini).',
+      },
+      server: {
+        title: 'OpenAI service unavailable',
+        body: 'OpenAI returned a server error during “{batch}”.',
+        hint: 'Try again in a few minutes.',
+      },
+      generic: {
+        title: 'Deep scan failed',
+        body: 'An unexpected error occurred during “{batch}”.',
+        hint: 'Check your API key and network connection, then try again.',
+      },
+    },
   },
   coverage: {
     title: 'RGAA 4.1.2 coverage',
@@ -165,6 +210,51 @@ const fr: MessageTree = {
     quotaBlocked:
       'Limite mensuelle gratuite atteinte — activez Pro (aperçu) dans Paramètres pour des scans illimités.',
     noApiKey: 'Ajoutez une clé API OpenAI dans Paramètres pour lancer l’analyse approfondie.',
+    errors: {
+      unknownBatch: 'cette étape',
+      openSettings: 'Ouvrir Paramètres',
+      technicalDetails: 'Détails techniques',
+      pro: {
+        title: 'Fonction Pro requise',
+        body: 'Activez Pro (aperçu) dans Paramètres pour lancer l’analyse approfondie IA.',
+      },
+      noApiKey: {
+        title: 'Clé API OpenAI manquante',
+        body: 'Ajoutez votre clé API dans Paramètres pour lancer l’analyse approfondie.',
+      },
+      quota: {
+        title: 'Quota OpenAI dépassé',
+        body: 'L’analyse approfondie s’est arrêtée pendant « {batch} ». Votre compte OpenAI n’a plus de crédits ou a atteint sa limite d’utilisation.',
+        hint: 'Ajoutez des crédits sur OpenAI ou attendez la réinitialisation du quota, puis réessayez.',
+        billing: 'Facturation OpenAI →',
+        usage: 'Voir l’utilisation →',
+      },
+      rateLimit: {
+        title: 'Limite de débit OpenAI atteinte',
+        body: 'L’analyse approfondie a été interrompue pendant « {batch} » : trop de requêtes en peu de temps.',
+        hint: 'Attendez une minute et réessayez, ou choisissez un modèle plus léger dans Paramètres.',
+      },
+      auth: {
+        title: 'Clé API OpenAI invalide',
+        body: 'Échec d’authentification pendant « {batch} ».',
+        hint: 'Vérifiez votre clé API dans Paramètres — créez-en une nouvelle si besoin.',
+      },
+      model: {
+        title: 'Modèle indisponible',
+        body: 'Le modèle configuré n’a pas pu être utilisé pendant « {batch} ».',
+        hint: 'Choisissez un autre modèle dans Paramètres (ex. gpt-4o-mini).',
+      },
+      server: {
+        title: 'Service OpenAI indisponible',
+        body: 'OpenAI a renvoyé une erreur serveur pendant « {batch} ».',
+        hint: 'Réessayez dans quelques minutes.',
+      },
+      generic: {
+        title: 'Échec de l’analyse approfondie',
+        body: 'Une erreur inattendue s’est produite pendant « {batch} ».',
+        hint: 'Vérifiez votre clé API et votre connexion, puis réessayez.',
+      },
+    },
   },
   coverage: {
     title: 'Couverture RGAA 4.1.2',

@@ -1,3 +1,5 @@
+import { OpenAiApiError } from './openai-errors';
+
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
@@ -69,8 +71,7 @@ export async function openaiChatCompletion(
 
   if (!response.ok) {
     const detail = await response.text().catch(() => '');
-    const prefix = options.context ? `${options.context} ` : 'OpenAI request ';
-    throw new Error(`${prefix}failed (${response.status}). ${detail.slice(0, 200)}`);
+    throw OpenAiApiError.fromResponse(response.status, detail, options.context);
   }
 
   const data = (await response.json()) as {

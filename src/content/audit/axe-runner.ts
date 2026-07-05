@@ -1,7 +1,6 @@
 import type { AxeResults, NodeResult, run as axeRun } from 'axe-core';
 import type { AccessibilityIssue, AffectedNode } from '@/lib/types';
 import { summarizeIssues } from '@/lib/scan-summary';
-import { getAuditableDocuments } from './audit-context';
 import { normalizeSeverity, rgaaForRule } from './rgaa-mapping';
 import { userImpactFor } from './user-impact';
 import { truncate } from './dom-utils';
@@ -47,13 +46,11 @@ function toAffectedNodes(nodes: NodeResult[]): AffectedNode[] {
   });
 }
 
-function violationsToIssues(results: AxeResults, frameIndex: number): AccessibilityIssue[] {
-  const frameSuffix = frameIndex > 0 ? `-frame${frameIndex}` : '';
-
+function violationsToIssues(results: AxeResults): AccessibilityIssue[] {
   return results.violations.map((violation): AccessibilityIssue => {
     const severity = normalizeSeverity(violation.impact);
     return {
-      id: `a11y-${violation.id}${frameSuffix}`,
+      id: `a11y-${violation.id}`,
       kind: 'accessibility',
       ruleId: violation.id,
       source: 'axe',
@@ -69,18 +66,15 @@ function violationsToIssues(results: AxeResults, frameIndex: number): Accessibil
   });
 }
 
-/** Run axe-core against the live document (and same-origin frames) and map results to RGAA issues. */
+/**
+ * Run axe-core against the live page and map results to RGAA issues.
+ * Axe descends into same-origin iframes itself — do not pass iframe Documents
+ * (cross-realm nodes fail axe's context validation and throw "arguments are invalid").
+ */
 export async function runAxeAudit(): Promise<AccessibilityIssue[]> {
   const axe = await loadAxe();
-  const documents = getAuditableDocuments();
-  const allIssues: AccessibilityIssue[] = [];
-
-  for (let frameIndex = 0; frameIndex < documents.length; frameIndex += 1) {
-    const results = await axe.run(documents[frameIndex], AXE_RUN_OPTIONS);
-    allIssues.push(...violationsToIssues(results, frameIndex));
-  }
-
-  return allIssues;
+  const results = await axe.run(document, AXE_RUN_OPTIONS);
+  return violationsToIssues(results);
 }
 
 export { summarizeIssues as summarize };

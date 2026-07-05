@@ -52,7 +52,7 @@ Side panel
 
 ### Gaps in current engine
 
-- [x] **Run axe-core inside same-origin iframes** — `axe-runner.ts` runs on every document from `getAuditableDocuments()`
+- [x] **Run axe-core inside same-origin iframes** — single `axe.run(document)`; axe descends into same-origin frames via postMessage (custom rules use `getAuditableDocuments()`)
 - [x] **Recursive iframe traversal** — `getAuditableDocuments()` walks nested same-origin frames
 - [x] **Shadow DOM / Web Components** — `auditQueryAll()` pierces open shadow roots; all custom rules migrated
 - [x] **Cross-origin iframe UX** — scan warnings surfaced in side panel when frames are skipped
