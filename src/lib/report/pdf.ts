@@ -1,16 +1,11 @@
-import type { IssueSource, ScanResult } from '@/lib/types';
+import type { ScanResult } from '@/lib/types';
+import { pdfConfidenceLabel } from '@/lib/confidence';
 
 const SEVERITY_LABEL: Record<string, string> = {
   critical: 'Critical',
   serious: 'Serious',
   moderate: 'Moderate',
   minor: 'Minor',
-};
-
-const SOURCE_LABEL: Record<IssueSource, string> = {
-  axe: 'Automated (axe-core)',
-  rule: 'Automated (RGAA rule)',
-  ai: 'AI analysis',
 };
 
 /** Build a client-ready PDF audit report and trigger a download. */
@@ -57,19 +52,16 @@ export async function exportReportPdf(result: ScanResult): Promise<void> {
     11,
   );
 
-  const bySource = result.accessibilityIssues.reduce(
+  const byConfidence = result.accessibilityIssues.reduce(
     (acc, issue) => {
-      acc[issue.source] += 1;
+      acc[issue.confidence] += 1;
       return acc;
     },
-    { axe: 0, rule: 0, ai: 0 } as Record<IssueSource, number>,
+    { certain: 0, likely: 0, 'needs-review': 0 },
   );
-  const needsReview = result.accessibilityIssues.filter(
-    (issue) => issue.confidence === 'needs-review',
-  ).length;
   line(
-    `Sources: ${bySource.axe} axe-core, ${bySource.rule} RGAA rules, ${bySource.ai} AI` +
-      (needsReview > 0 ? ` (${needsReview} pending manual review).` : '.'),
+    `Confidence: ${byConfidence.certain} certain, ${byConfidence.likely} likely, ` +
+      `${byConfidence['needs-review']} needs review.`,
     10,
   );
   y += 8;
@@ -78,10 +70,9 @@ export async function exportReportPdf(result: ScanResult): Promise<void> {
   result.accessibilityIssues.forEach((issue, index) => {
     y += 4;
     const rgaa = issue.rgaa.map((r) => r.criterion).join(', ');
-    const reviewFlag = issue.confidence === 'needs-review' ? ' — NEEDS MANUAL REVIEW' : '';
     line(`${index + 1}. [${SEVERITY_LABEL[issue.severity]}] ${issue.title}`, 11, true);
     line(
-      `RGAA ${rgaa} — ${issue.nodes.length} element(s) — ${SOURCE_LABEL[issue.source]}${reviewFlag}`,
+      `RGAA ${rgaa} — ${issue.nodes.length} element(s) — ${pdfConfidenceLabel(issue.confidence, issue.source)}`,
       9,
     );
     line(`Impact: ${issue.userImpact}`, 9);

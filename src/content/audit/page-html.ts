@@ -128,15 +128,4 @@ export function buildPageHtml(): string {
   return html.slice(0, MAX_HTML_LENGTH) + TRUNCATION_MARKER;
 }
 
-/** Check which of the given CSS selectors resolve on the live page. */
-export function verifySelectors(selectors: string[]): Record<string, boolean> {
-  const results: Record<string, boolean> = {};
-  for (const selector of selectors) {
-    try {
-      results[selector] = document.querySelector(selector) !== null;
-    } catch {
-      results[selector] = false;
-    }
-  }
-  return results;
-}
+export { verifySelectors } from './dom-resolve';

@@ -47,6 +47,11 @@ export default defineConfig(({ mode }) => ({
       input: {
         // HTML entry points not referenced by the manifest can go here.
       },
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/axe-core')) return 'axe-core';
+        },
+      },
     },
   },
   test: {

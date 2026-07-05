@@ -2,6 +2,8 @@
  * Draws a transient overlay around an audited element so the user can locate it
  * on the page from the side panel. Uses a single reusable overlay element.
  */
+import { findElement, normalizeSelectors } from './audit/dom-resolve';
+
 const OVERLAY_ID = '__a11yfix_highlight__';
 
 let pinnedKey: string | null = null;
@@ -29,29 +31,8 @@ function ensureOverlay(): HTMLDivElement {
   return overlay;
 }
 
-function resolveSelectors(selectors: string[]): string[] {
-  const unique = new Set<string>();
-  for (const selector of selectors) {
-    const trimmed = selector.trim();
-    if (trimmed) unique.add(trimmed);
-  }
-  return [...unique];
-}
-
 function selectorKey(selectors: string[]): string {
-  return resolveSelectors(selectors).join('|');
-}
-
-function findElement(selectors: string[]): Element | null {
-  for (const selector of resolveSelectors(selectors)) {
-    try {
-      const element = document.querySelector(selector);
-      if (element) return element;
-    } catch {
-      // Invalid selector — try next alternative.
-    }
-  }
-  return null;
+  return normalizeSelectors(selectors).join('|');
 }
 
 function positionOverlay(element: Element): void {

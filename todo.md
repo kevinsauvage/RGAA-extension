@@ -157,10 +157,10 @@ Multi-page / interaction criteria (12.1–12.5, 11.3, 11.12) require a **site cr
 
 ## Technical debt
 
-- [ ] **Content script bundle size** — axe-core dominates; monitor 400 KB gzip CI budget; consider lazy-loading axe after injection
-- [ ] **Duplicate skip-link coverage** — 12.7 mapped to axe `bypass`, `skip-link` and rule `rgaa-skip-link`; ensure findings dedupe in UI
-- [ ] **Highlight reliability** — complex selectors from axe iframes/shadow DOM may fail; align with `verifySelectorsOnTab`
-- [ ] **Consolidate confidence display** — axe = certain, rules = likely, AI = needs-review; make badges consistent in IssueCard and PDF
+- [x] **Content script bundle size** — axe-core split into lazy chunk; entry loads axe-runner on first scan only
+- [x] **Duplicate skip-link coverage** — `dedupeAccessibilityIssues()` merges axe `bypass`/`skip-link` with `rgaa-skip-link` (12.7)
+- [x] **Highlight reliability** — shared `dom-resolve.ts` queries frames + open shadow roots (highlight + verifySelectors)
+- [x] **Consolidate confidence display** — `ConfidenceBadge` + `pdfConfidenceLabel` (certain / likely / needs review)
 
 ---
 

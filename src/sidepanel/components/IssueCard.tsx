@@ -3,6 +3,7 @@ import type { AccessibilityIssue, AffectedNode } from '@/lib/types';
 import { clearHighlightOnPage, focusIssueOnPage, highlightOnPage } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n/useI18n';
 import { SeverityBadge } from './SeverityBadge';
+import { ConfidenceBadge } from './ConfidenceBadge';
 import { AIFixPanel } from './AIFixPanel';
 
 export function IssueCard({ issue }: { issue: AccessibilityIssue }) {
@@ -23,24 +24,7 @@ export function IssueCard({ issue }: { issue: AccessibilityIssue }) {
             {issue.title}
           </p>
           <div className="mt-1 flex flex-wrap gap-1">
-            {issue.source === 'ai' && (
-              <span className="rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-semibold text-brand-700 dark:bg-brand-900/50 dark:text-brand-200">
-                AI
-              </span>
-            )}
-            {issue.source === 'rule' && (
-              <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700 dark:bg-violet-950/50 dark:text-violet-200">
-                Rule
-              </span>
-            )}
-            {issue.confidence === 'needs-review' && (
-              <span
-                className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-300"
-                title="AI finding from full-page analysis — verify manually before reporting"
-              >
-                {t('issues.review')}
-              </span>
-            )}
+            <ConfidenceBadge issue={issue} />
             {issue.rgaa.map((r) => (
               <span
                 key={r.criterion}

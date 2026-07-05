@@ -1,7 +1,7 @@
 import type { ContentMessage, ContentResponse } from '@/lib/messaging';
 import type { ScanResult } from '@/lib/types';
 import { getIframeAuditSummary } from './audit/audit-context';
-import { runAxeAudit, summarize } from './audit/axe-runner';
+import { dedupeAccessibilityIssues } from './audit/dedupe-issues';
 import { runRgaaRules } from './audit/rules';
 import type { ScanWarning } from '@/lib/types';
 import { buildPageHtml, verifySelectors } from './audit/page-html';
@@ -28,8 +28,12 @@ function buildScanWarnings(): ScanWarning[] {
 
 async function runScan(): Promise<ScanResult> {
   const started = performance.now();
-  const [axeIssues, perf] = await Promise.all([runAxeAudit(), collectPerformance()]);
-  const accessibilityIssues = [...axeIssues, ...runRgaaRules()];
+  const [{ runAxeAudit, summarize }, perf] = await Promise.all([
+    import('./audit/axe-runner'),
+    collectPerformance(),
+  ]);
+  const axeIssues = await runAxeAudit();
+  const accessibilityIssues = dedupeAccessibilityIssues([...axeIssues, ...runRgaaRules()]);
 
   const allSeverities = [
     ...accessibilityIssues.map((issue) => ({ severity: issue.severity })),
