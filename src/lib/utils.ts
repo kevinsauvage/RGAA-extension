@@ -9,18 +9,18 @@ export async function getActiveTab(): Promise<chrome.tabs.Tab | undefined> {
   return tab;
 }
 
-export async function getPageHtmlFromTab(): Promise<string> {
+export async function getPageHtmlFromTab(): Promise<{ html: string; styleSnippets: string }> {
   const tab = await getActiveTab();
   if (!tab?.id) throw new Error('No active tab.');
   const response = (await chrome.runtime.sendMessage({
     type: 'GET_PAGE_HTML',
     tabId: tab.id,
-  })) as { ok: true; html: string } | { ok: false; error: string };
+  })) as { ok: true; html: string; styleSnippets: string } | { ok: false; error: string };
 
   if (!response.ok || !('html' in response)) {
     throw new Error('error' in response ? response.error : 'Failed to read the page HTML.');
   }
-  return response.html;
+  return { html: response.html, styleSnippets: response.styleSnippets ?? '' };
 }
 
 export async function verifySelectorsOnTab(selectors: string[]): Promise<Record<string, boolean>> {

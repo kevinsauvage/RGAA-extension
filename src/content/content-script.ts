@@ -3,6 +3,7 @@ import type { ScanResult } from '@/lib/types';
 import { runAxeAudit, summarize } from './audit/axe-runner';
 import { runRgaaRules } from './audit/rules';
 import { buildPageHtml, verifySelectors } from './audit/page-html';
+import { buildStyleSnippets } from './audit/style-snippets';
 import { collectPerformance } from './audit/performance';
 import { clearHighlight, clearPinnedHighlight, highlightNode } from './highlight';
 
@@ -51,7 +52,7 @@ chrome.runtime.onMessage.addListener(
         return true; // keep the message channel open for the async response
       case 'GET_PAGE_HTML': {
         try {
-          sendResponse({ ok: true, html: buildPageHtml() });
+          sendResponse({ ok: true, html: buildPageHtml(), styleSnippets: buildStyleSnippets() });
         } catch (error: unknown) {
           sendResponse({
             ok: false,

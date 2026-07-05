@@ -40,6 +40,7 @@ export interface RgaaCriterion {
 
 /**
  * Criteria assessable from static rendered HTML, for the AI deep scan.
+ * Hints are enriched at prompt time with official test methodology via referential-hints.ts.
  * Excluded on purpose (handled elsewhere):
  * - axe-core: 1.1, 2.1, 3.2, 8.3, 8.5, 11.1, 13.1…
  * - deterministic rules: 7.3, 8.1, 10.4, 10.7, 10.8, 11.5, 11.6, 11.10, 12.7, 13.2, 13.3, 13.8…

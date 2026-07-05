@@ -4,6 +4,7 @@ import { summarizeIssues } from '@/lib/scan-summary';
 import { normalizeSeverity, rgaaForRule } from './rgaa-mapping';
 import { userImpactFor } from './user-impact';
 import { truncate } from './dom-utils';
+import { AXE_RUN_TAGS } from './axe-config';
 
 type AxeCore = { run: typeof axeRun };
 
@@ -41,9 +42,10 @@ export async function runAxeAudit(): Promise<AccessibilityIssue[]> {
   const axe = await loadAxe();
   const results = await axe.run(document, {
     resultTypes: ['violations'],
+    // WCAG-tagged rules only — excludes best-practice (extra noise, weak RGAA mapping).
     runOnly: {
       type: 'tag',
-      values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'],
+      values: [...AXE_RUN_TAGS],
     },
   });
 

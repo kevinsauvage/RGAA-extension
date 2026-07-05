@@ -25,7 +25,7 @@ export type ContentMessage =
 
 export type ContentResponse =
   | { ok: true; result: ScanResult }
-  | { ok: true; html: string }
+  | { ok: true; html: string; styleSnippets: string }
   | { ok: true; selectors: Record<string, boolean> }
   | { ok: false; error: string }
   | { ok: true };

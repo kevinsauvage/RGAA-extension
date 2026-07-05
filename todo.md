@@ -129,15 +129,14 @@ Official roadmap from [docs/coverage.md](docs/coverage.md). Implement on **live 
 
 ### axe tuning
 
-- [ ] Review `best-practice` tag in `axe-runner.ts` — may add non-RGAA noise
-- [ ] Expand `user-impact.ts` beyond ~12 rules (or generate from coverage metadata)
+- [x] Review `best-practice` tag in `axe-runner.ts` — may add non-RGAA noise
+- [x] Expand `user-impact.ts` beyond ~12 rules (or generate from coverage metadata)
 
 ### AI deep scan improvements
 
-- [ ] Surface `rejected` count from `runDeepScan()` in UI (hallucinations dropped)
-- [ ] Improve hints in `criteria.ts` using official test methodologies from `docs/rgaa-criteria.md`
-- [ ] Batch sizing / token budget telemetry when HTML is large
-- [ ] Optional: send computed-style snippets for criteria AI struggles with (contrast adjacency, not full contrast calc)
+- [x] Surface `rejected` count from `runDeepScan()` in UI (hallucinations dropped)
+- [x] Improve hints in `criteria.ts` using official test methodologies from `docs/rgaa-criteria.md`
+- [x] Optional: send computed-style snippets for criteria AI struggles with (contrast adjacency, not full contrast calc)
 
 ---
 

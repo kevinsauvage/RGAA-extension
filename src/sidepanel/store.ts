@@ -10,6 +10,8 @@ type AiAuditStatus = 'idle' | 'running' | 'done' | 'error';
 export interface AiAuditInfo {
   criteriaChecked: number;
   found: number;
+  /** AI findings dropped after evidence/selector validation. */
+  rejected: number;
 }
 
 interface PanelState {

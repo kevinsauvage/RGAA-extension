@@ -6,6 +6,7 @@ import {
   themeForCriterion,
   type RgaaCriterion,
 } from '@/lib/rgaa/criteria';
+import { enrichDeepScanHint } from '@/lib/rgaa/referential-hints';
 import { buildChatCompletionBody, OPENAI_CHAT_URL } from './chat-completions';
 
 /**
@@ -70,20 +71,33 @@ function criteriaForBatch(batch: ScanBatch): RgaaCriterion[] {
   );
 }
 
-function buildBatchPrompt(criteria: RgaaCriterion[], html: string, language: 'fr' | 'en'): string {
-  const criteriaBlock = criteria.map((c) => `- RGAA ${c.id} — ${c.title}\n  ${c.hint}`).join('\n');
+function buildBatchPrompt(
+  criteria: RgaaCriterion[],
+  html: string,
+  language: 'fr' | 'en',
+  styleSnippets?: string,
+): string {
+  const criteriaBlock = criteria
+    .map((c) => `- RGAA ${c.id} — ${c.title}\n  ${enrichDeepScanHint(c.id, c.hint)}`)
+    .join('\n');
 
-  return [
+  const parts = [
     'Criteria to audit:',
     criteriaBlock,
     '',
     `Write each "description" in ${language === 'fr' ? 'French' : 'English'}.`,
-    '',
-    'Rendered page HTML:',
-    '```html',
-    html,
-    '```',
-  ].join('\n');
+  ];
+
+  if (styleSnippets?.trim()) {
+    parts.push(
+      '',
+      'Computed style snippets (for color/context assessment only — not contrast ratios):',
+      styleSnippets.trim(),
+    );
+  }
+
+  parts.push('', 'Rendered page HTML:', '```html', html, '```');
+  return parts.join('\n');
 }
 
 function parseFindings(content: string): RawFinding[] {
@@ -134,6 +148,7 @@ async function scanBatch(
   criteria: RgaaCriterion[],
   html: string,
   settings: Settings,
+  styleSnippets?: string,
 ): Promise<RawFinding[]> {
   const response = await fetch(OPENAI_CHAT_URL, {
     method: 'POST',
@@ -146,7 +161,10 @@ async function scanBatch(
         settings.model,
         [
           { role: 'system', content: DEEP_SCAN_SYSTEM_PROMPT },
-          { role: 'user', content: buildBatchPrompt(criteria, html, settings.language) },
+          {
+            role: 'user',
+            content: buildBatchPrompt(criteria, html, settings.language, styleSnippets),
+          },
         ],
         { temperature: 0, jsonMode: true },
       ),
@@ -208,6 +226,7 @@ export async function runDeepScan(
   settings: Settings,
   verifySelectors: (selectors: string[]) => Promise<Record<string, boolean>>,
   onProgress?: (progress: AiAuditProgress) => void,
+  styleSnippets?: string,
 ): Promise<DeepScanResult> {
   if (!settings.openaiApiKey) {
     throw new Error('No OpenAI API key configured. Add one in Settings to run the deep scan.');
@@ -233,7 +252,7 @@ export async function runDeepScan(
       total: batches.length,
       checkLabel: batch.label[settings.language],
     });
-    rawFindings.push(...(await scanBatch(batch, criteria, html, settings)));
+    rawFindings.push(...(await scanBatch(batch, criteria, html, settings, styleSnippets)));
   }
 
   // Validation pass 1: criterion known + evidence quoted from the actual HTML.

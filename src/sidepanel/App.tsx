@@ -129,16 +129,21 @@ export function App() {
     setAiAuditInfo(null);
 
     try {
-      const html = await getPageHtmlFromTab();
+      const { html, styleSnippets } = await getPageHtmlFromTab();
       const scan = await runDeepScan(
         html,
         knownIssueRefs(),
         settings,
         verifySelectorsOnTab,
         setAiAuditProgress,
+        styleSnippets,
       );
       mergeAiIssues(scan.issues);
-      setAiAuditInfo({ criteriaChecked: scan.criteriaChecked, found: scan.issues.length });
+      setAiAuditInfo({
+        criteriaChecked: scan.criteriaChecked,
+        found: scan.issues.length,
+        rejected: scan.rejected,
+      });
       setAiAuditStatus('done');
     } catch (err) {
       setAiAuditError(err instanceof Error ? err.message : String(err));
@@ -258,7 +263,11 @@ export function App() {
           <p className="text-[11px] text-lime-600 dark:text-lime-400">
             Deep scan complete — {aiAuditInfo.found} finding
             {aiAuditInfo.found === 1 ? '' : 's'} to review across {aiAuditInfo.criteriaChecked} RGAA
-            criteria.
+            criteria
+            {aiAuditInfo.rejected > 0
+              ? ` (${aiAuditInfo.rejected} unverified AI suggestion${aiAuditInfo.rejected === 1 ? '' : 's'} dropped)`
+              : ''}
+            .
           </p>
         )}
         {aiAuditError && <p className="text-[11px] text-red-500">{aiAuditError}</p>}
