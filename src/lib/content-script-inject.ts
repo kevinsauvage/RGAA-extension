@@ -10,8 +10,7 @@ export function getContentScriptFiles(): string[] {
 export async function ensureContentScript(tabId: number): Promise<void> {
   try {
     const res = (await chrome.tabs.sendMessage(tabId, { type: 'PING' })) as
-      | ContentResponse
-      | undefined;
+      ContentResponse | undefined;
     if (res && 'ok' in res && res.ok) return;
   } catch {
     // Not injected yet — inject the built bundle from the manifest.

@@ -8,9 +8,7 @@ const SEVERITY_WEIGHT: Record<Severity, number> = {
 };
 
 /** Compute a 0-100 composite score plus severity counts. */
-export function summarizeIssues(
-  issues: Array<{ severity: Severity }>,
-): ScanSummary {
+export function summarizeIssues(issues: Array<{ severity: Severity }>): ScanSummary {
   const counts = { critical: 0, serious: 0, moderate: 0, minor: 0 };
   let penalty = 0;
   for (const issue of issues) {

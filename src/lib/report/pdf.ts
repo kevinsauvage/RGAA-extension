@@ -79,11 +79,7 @@ export function exportReportPdf(result: ScanResult): void {
     y += 4;
     const rgaa = issue.rgaa.map((r) => r.criterion).join(', ');
     const reviewFlag = issue.confidence === 'needs-review' ? ' — NEEDS MANUAL REVIEW' : '';
-    line(
-      `${index + 1}. [${SEVERITY_LABEL[issue.severity]}] ${issue.title}`,
-      11,
-      true,
-    );
+    line(`${index + 1}. [${SEVERITY_LABEL[issue.severity]}] ${issue.title}`, 11, true);
     line(
       `RGAA ${rgaa} — ${issue.nodes.length} element(s) — ${SOURCE_LABEL[issue.source]}${reviewFlag}`,
       9,

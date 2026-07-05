@@ -47,9 +47,7 @@ beforeEach(() => {
   document.documentElement.innerHTML = '<head></head><body></body>';
   mockDoctype('html');
 
-  vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (
-    this: Element,
-  ) {
+  vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
     if (!(this instanceof HTMLElement)) return new DOMRect(0, 0, 100, 20);
     const style = getComputedStyle(this);
     const inline = this.getAttribute('style') ?? '';

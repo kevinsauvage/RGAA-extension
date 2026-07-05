@@ -29,10 +29,7 @@ function describeNodes(nodes: AffectedNode[]): string {
     .join('\n');
 }
 
-export function buildUserPrompt(
-  issue: AccessibilityIssue,
-  language: 'fr' | 'en',
-): string {
+export function buildUserPrompt(issue: AccessibilityIssue, language: 'fr' | 'en'): string {
   const rgaa = issue.rgaa
     .map((r) => `RGAA ${r.criterion} (${r.theme}) / WCAG ${r.wcag.join(', ') || 'n/a'}`)
     .join('; ');

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { AccessibilityIssue } from '@/lib/types';
 import { getSettings, cacheFix, getCachedFix } from '@/lib/storage';
+import { canUseProFeature, proFeatureMessage } from '@/lib/scan-limits';
 import { generateFix } from '@/lib/ai/client';
 import { usePanelStore } from '../store';
 import { SparkleIcon } from './icons';
@@ -30,13 +31,18 @@ export function AIFixPanel({ issue }: { issue: AccessibilityIssue }) {
 
   const requestFix = async () => {
     setFixLoading(issue.id, true);
+    setFixError(issue.id, null);
     try {
+      const settings = await getSettings();
+      if (!canUseProFeature(settings, 'ai_fix')) {
+        setFixError(issue.id, proFeatureMessage('ai_fix'));
+        return;
+      }
       const cached = await getCachedFix(issue.id);
       if (cached) {
         setFix(issue.id, cached);
         return;
       }
-      const settings = await getSettings();
       const generated = await generateFix(issue, settings);
       await cacheFix(generated);
       setFix(issue.id, generated);

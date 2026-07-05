@@ -21,7 +21,8 @@ export function checkSvgInformative(): RuleFinding | null {
     const ariaHidden = svg.getAttribute('aria-hidden') === 'true';
     if (ariaHidden) continue;
     // Decorative SVGs should be hidden; informative ones need role=img + alt mechanism.
-    const isMarkedImg = role === 'img' || role === 'graphics-document' || role === 'graphics-symbol';
+    const isMarkedImg =
+      role === 'img' || role === 'graphics-document' || role === 'graphics-symbol';
     const hasAlt = svgHasTextAlternative(svg);
     if (!hasAlt && (isMarkedImg || svg.querySelector('text, path, circle, rect, polygon, g'))) {
       offenders.push(svg);
@@ -55,6 +56,7 @@ export function checkCanvasAlt(): RuleFinding | null {
     title: 'Canvas sans alternative textuelle',
     description:
       'Des éléments canvas porteurs d’information n’ont pas d’alternative textuelle ni de contenu de secours.',
-    userImpact: 'Le contenu bitmap dessiné dans le canvas est invisible pour les technologies d’assistance.',
+    userImpact:
+      'Le contenu bitmap dessiné dans le canvas est invisible pour les technologies d’assistance.',
   });
 }

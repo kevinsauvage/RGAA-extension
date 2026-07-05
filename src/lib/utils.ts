@@ -23,9 +23,7 @@ export async function getPageHtmlFromTab(): Promise<string> {
   return response.html;
 }
 
-export async function verifySelectorsOnTab(
-  selectors: string[],
-): Promise<Record<string, boolean>> {
+export async function verifySelectorsOnTab(selectors: string[]): Promise<Record<string, boolean>> {
   if (selectors.length === 0) return {};
   const tab = await getActiveTab();
   if (!tab?.id) throw new Error('No active tab.');

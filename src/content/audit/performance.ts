@@ -10,9 +10,7 @@ const THRESHOLDS = {
 } as const;
 
 function readNavigationTiming(): { ttfb: number | null; fcp: number | null } {
-  const [nav] = performance.getEntriesByType(
-    'navigation',
-  ) as PerformanceNavigationTiming[];
+  const [nav] = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
   const paint = performance
     .getEntriesByType('paint')
     .find((entry) => entry.name === 'first-contentful-paint');

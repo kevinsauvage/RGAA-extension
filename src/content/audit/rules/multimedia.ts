@@ -19,8 +19,7 @@ export function checkVideoCaptions(): RuleFinding | null {
     ruleId: 'rgaa-video-captions',
     severity: 'serious',
     title: 'Vidéo sans piste de sous-titres',
-    description:
-      'Des éléments video n’ont pas de piste track kind="captions" ou "subtitles".',
+    description: 'Des éléments video n’ont pas de piste track kind="captions" ou "subtitles".',
     userImpact: 'Les personnes sourdes ou malentendantes ne peuvent pas accéder au contenu audio.',
   });
 }
@@ -30,7 +29,11 @@ export function checkAutoplayMedia(): RuleFinding | null {
   const offenders: Element[] = [];
   for (const media of document.querySelectorAll('video, audio')) {
     if (!isAuditableMedia(media)) continue;
-    if (media.hasAttribute('autoplay') && !media.hasAttribute('controls') && !media.hasAttribute('muted')) {
+    if (
+      media.hasAttribute('autoplay') &&
+      !media.hasAttribute('controls') &&
+      !media.hasAttribute('muted')
+    ) {
       offenders.push(media);
     }
   }
@@ -39,8 +42,7 @@ export function checkAutoplayMedia(): RuleFinding | null {
     ruleId: 'rgaa-autoplay-media',
     severity: 'serious',
     title: 'Média en lecture automatique sans contrôle',
-    description:
-      'Des éléments video/audio se lancent automatiquement sans contrôles utilisateur.',
+    description: 'Des éléments video/audio se lancent automatiquement sans contrôles utilisateur.',
     userImpact:
       'Les utilisateurs sont surpris par du son ou du mouvement qu’ils ne peuvent pas arrêter facilement.',
   });

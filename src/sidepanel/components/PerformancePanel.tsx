@@ -51,9 +51,7 @@ export function PerformancePanel({
               {issue.unit} (target ≤ {issue.threshold}
               {issue.unit})
             </p>
-            <p className="text-xs text-slate-600 dark:text-slate-300">
-              {issue.description}
-            </p>
+            <p className="text-xs text-slate-600 dark:text-slate-300">{issue.description}</p>
           </div>
         ))
       )}

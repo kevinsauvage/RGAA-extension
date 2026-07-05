@@ -4,14 +4,14 @@ Living backlog for the RGAA Chrome extension. Update this file when closing item
 
 **Current baseline** (see [docs/coverage.md](docs/coverage.md)):
 
-| Metric | Value |
-|--------|------:|
-| RGAA 4.1.2 criteria | 106 |
+| Metric                               |          Value |
+| ------------------------------------ | -------------: |
+| RGAA 4.1.2 criteria                  |            106 |
 | Deterministic coverage (axe + rules) | **46.2%** (49) |
-| + AI deep scan | **55.7%** (59) |
-| Manual only | 44.3% (47) |
-| Deterministic rules implemented | 20 |
-| Rule unit tests | 105 |
+| + AI deep scan                       | **55.7%** (59) |
+| Manual only                          |     44.3% (47) |
+| Deterministic rules implemented      |             20 |
+| Rule unit tests                      |            111 |
 
 ---
 
@@ -33,50 +33,40 @@ Deep scan (on demand, OpenAI)
 - **Do not** merge layers into one score without labeling confidence.
 - **Do not** present AI findings as confirmed violations.
 
-### ADR-2 — Single source of truth for coverage (to implement)
+### ADR-2 — Single source of truth for coverage (implemented)
 
 Today coverage is split across three hand-maintained files:
 
-| File | Role |
-|------|------|
-| `src/lib/rgaa/coverage.ts` | Per-criterion method map (axe / rule / ai / manual) |
-| `src/content/audit/rgaa-mapping.ts` | axe rule id → RGAA criterion |
-| `src/lib/rgaa/criteria.ts` | AI deep-scan criterion hints |
+| File                                | Role                                                |
+| ----------------------------------- | --------------------------------------------------- |
+| `src/lib/rgaa/coverage.ts`          | Per-criterion method map (axe / rule / ai / manual) |
+| `src/content/audit/rgaa-mapping.ts` | axe rule id → RGAA criterion                        |
+| `src/lib/rgaa/criteria.ts`          | AI deep-scan criterion hints                        |
 
-**Decision:** `coverage.ts` is authoritative. Add a CI test that validates:
+**Decision:** `coverage.ts` is authoritative. CI test in `src/lib/rgaa/coverage.test.ts` validates:
 
 - Every `rules[]` in coverage exists in `rules/index.ts`
 - Every implemented rule is declared in coverage
 - Every `axeRules[]` entry exists in `AXE_TO_RGAA`
 - Every `methods: ['ai']` criterion has a `DEEP_SCAN_CRITERIA` entry (and vice versa for AI-only)
 
-### ADR-3 — Rule registry (to implement)
+### ADR-3 — Rule registry (implemented)
 
 Replace the manual `RULE_CHECKS[]` array in `rules/index.ts` and the hardcoded list in `rules/__tests__/index.test.ts` with a registry:
 
 ```ts
 interface RgaaRule {
-  id: string;           // e.g. 'rgaa-skip-link'
-  criterion: string;    // e.g. '12.7'
+  id: string; // e.g. 'rgaa-skip-link'
+  criterion: string; // e.g. '12.7'
   check: () => RuleFinding | null;
 }
 ```
 
 `runRgaaRules()` iterates the registry. Tests derive the rule list from it.
 
-### ADR-4 — Content script injection strategy (to decide)
+### ADR-4 — Content script injection strategy (implemented)
 
-**Current:** Manifest injects content script on `<all_urls>` at `document_idle` **and** `ensureContentScript()` can inject dynamically (~608 KB bundle on every page load).
-
-**Options:**
-
-| Strategy | Pros | Cons |
-|----------|------|------|
-| A. On-demand only | Smaller footprint, no idle cost | First scan slower |
-| B. Manifest + lazy axe | axe loaded on first scan inside CS | More complex loader |
-| C. Keep as-is | Simplest | 608 KB on all URLs |
-
-**Recommendation:** A + B — remove manifest `content_scripts`, inject on first scan, dynamic `import('axe-core')` inside content script.
+**Current:** On-demand injection via `ensureContentScript()`; manifest uses a non-matching URL so the content script is never auto-injected. axe-core is lazy-loaded in a separate chunk (~158 KB gzip).
 
 ### ADR-5 — Where OpenAI calls run (to decide)
 
@@ -102,17 +92,17 @@ interface RgaaRule {
 
 ## P0 — Release blockers
 
-- [ ] **CI pipeline** — GitHub Actions: `npm ci` → `typecheck` → `test` → `docs` (fail if drift) → `build`
-- [ ] **Lint tooling** — `package.json` has `lint`/`format` scripts but no ESLint/Prettier configs or devDependencies; add and fix violations
-- [ ] **Coverage sync test** — validate `coverage.ts` ↔ rules ↔ axe mapping ↔ deep-scan criteria (see ADR-2)
-- [ ] **Pro tier honesty** — `Options.tsx` toggles `plan: 'pro'` locally; README/marketing mention $12/mo. Either implement billing or remove claims until ready
-- [ ] **Quota consistency** — only classic scan increments usage (`scan-limits.ts`); deep scan, AI fixes, and PDF are ungated. Define and enforce Pro gates:
-  - [ ] Classic scan: 10/month free (done)
-  - [ ] Deep scan: gate or quota?
-  - [ ] AI fix generation: gate or quota?
-  - [ ] PDF export: gate or quota?
-- [ ] **Bundle size** — content script ~608 KB (axe inlined). Lazy-load axe; consider on-demand injection (ADR-4)
-- [ ] **Real icons** — replace placeholder PNGs from `scripts/generate-icons.mjs`
+- [x] **CI pipeline** — GitHub Actions: `npm ci` → `typecheck` → `test` → `docs` (fail if drift) → `lint` → `format:check` → `build` → content-script gzip budget (400 KB)
+- [x] **Lint tooling** — ESLint + Prettier configs, devDependencies, violations fixed
+- [x] **Coverage sync test** — `src/lib/rgaa/coverage.test.ts` validates coverage ↔ rules ↔ axe mapping ↔ deep-scan criteria (ADR-2)
+- [x] **Pro tier honesty** — Pro is a preview toggle in Settings; no $12/mo claims; README updated
+- [x] **Quota consistency** — Pro gates for deep scan, AI fixes, and PDF; classic scan 10/month free
+  - [x] Classic scan: 10/month free
+  - [x] Deep scan: Pro preview gate
+  - [x] AI fix generation: Pro preview gate
+  - [x] PDF export: Pro preview gate
+- [x] **Bundle size** — content script ~10 KB gzip (axe lazy-loaded in separate chunk); on-demand injection (ADR-4)
+- [x] **Real icons** — accessibility silhouette on brand blue via `scripts/generate-icons.mjs`
 
 ---
 
@@ -218,18 +208,18 @@ Official roadmap from [docs/coverage.md](docs/coverage.md). Implement on **live 
 
 **Still needed:**
 
-| Module | File | Priority |
-|--------|------|----------|
-| Deep scan validation | `lib/ai/deep-scan.ts` | High — mock fetch, test evidence/selector filtering |
-| Coverage sync | `lib/rgaa/coverage.ts` | High — ADR-2 validator |
-| Page HTML serializer | `content/audit/page-html.ts` | Medium |
-| Accessible name | `content/audit/accessible-name.ts` | Medium |
-| DOM utils | `content/audit/dom-utils.ts` | Medium |
-| axe → RGAA mapping | `content/audit/rgaa-mapping.ts` | Medium |
-| Performance collector | `content/audit/performance.ts` | Medium |
-| AI fix client | `lib/ai/client.ts`, `prompts.ts` | Medium |
-| Scan limits / quota | `lib/scan-limits.ts` | Low |
-| PDF export | `lib/report/pdf.ts` | Low |
+| Module                | File                               | Priority                                            |
+| --------------------- | ---------------------------------- | --------------------------------------------------- |
+| Deep scan validation  | `lib/ai/deep-scan.ts`              | High — mock fetch, test evidence/selector filtering |
+| Coverage sync         | `lib/rgaa/coverage.ts`             | High — ADR-2 validator                              |
+| Page HTML serializer  | `content/audit/page-html.ts`       | Medium                                              |
+| Accessible name       | `content/audit/accessible-name.ts` | Medium                                              |
+| DOM utils             | `content/audit/dom-utils.ts`       | Medium                                              |
+| axe → RGAA mapping    | `content/audit/rgaa-mapping.ts`    | Medium                                              |
+| Performance collector | `content/audit/performance.ts`     | Medium                                              |
+| AI fix client         | `lib/ai/client.ts`, `prompts.ts`   | Medium                                              |
+| Scan limits / quota   | `lib/scan-limits.ts`               | Low                                                 |
+| PDF export            | `lib/report/pdf.ts`                | Low                                                 |
 
 ### Integration / E2E
 
@@ -264,13 +254,13 @@ Official roadmap from [docs/coverage.md](docs/coverage.md). Implement on **live 
 
 Themes with the most **manual-only** criteria — highest ROI for new rules:
 
-| Theme | Manual only | Suggested focus |
-|-------|------------:|-----------------|
-| 4. Multimédia | 10/13 | Player controls, track presence (not content quality) |
-| 12. Navigation | 7/11 | Keyboard trap, skip links (done), tab order |
-| 10. Présentation | 8/14 | Text spacing, focus overlays, reflow at 320px |
-| 11. Formulaires | 6/13 | optgroup, error hints, fieldset (partially done) |
-| 13. Consultation | 7/12 | Popup-on-load, motion (partially done) |
+| Theme            | Manual only | Suggested focus                                       |
+| ---------------- | ----------: | ----------------------------------------------------- |
+| 4. Multimédia    |       10/13 | Player controls, track presence (not content quality) |
+| 12. Navigation   |        7/11 | Keyboard trap, skip links (done), tab order           |
+| 10. Présentation |        8/14 | Text spacing, focus overlays, reflow at 320px         |
+| 11. Formulaires  |        6/13 | optgroup, error hints, fieldset (partially done)      |
+| 13. Consultation |        7/12 | Popup-on-load, motion (partially done)                |
 
 **Fully automated themes** (maintain, don't over-invest): 3. Couleurs, 6. Liens, 2. Cadres.
 
@@ -278,21 +268,21 @@ Themes with the most **manual-only** criteria — highest ROI for new rules:
 
 ## Quick reference — key files
 
-| Area | Path |
-|------|------|
-| Content script entry | `src/content/content-script.ts` |
-| Deterministic rules | `src/content/audit/rules/` |
-| axe runner | `src/content/audit/axe-runner.ts` |
-| RGAA axe mapping | `src/content/audit/rgaa-mapping.ts` |
-| AI deep scan | `src/lib/ai/deep-scan.ts` |
-| Coverage map | `src/lib/rgaa/coverage.ts` |
-| Side panel UI | `src/sidepanel/App.tsx` |
-| Background worker | `src/background/service-worker.ts` |
-| Settings | `src/options/Options.tsx` |
-| Manifest | `src/manifest.config.ts` |
-| Coverage docs | `docs/coverage.md` |
-| RGAA referential docs | `docs/rgaa-criteria.md` |
-| Rule tests | `src/content/audit/rules/__tests__/` |
+| Area                  | Path                                 |
+| --------------------- | ------------------------------------ |
+| Content script entry  | `src/content/content-script.ts`      |
+| Deterministic rules   | `src/content/audit/rules/`           |
+| axe runner            | `src/content/audit/axe-runner.ts`    |
+| RGAA axe mapping      | `src/content/audit/rgaa-mapping.ts`  |
+| AI deep scan          | `src/lib/ai/deep-scan.ts`            |
+| Coverage map          | `src/lib/rgaa/coverage.ts`           |
+| Side panel UI         | `src/sidepanel/App.tsx`              |
+| Background worker     | `src/background/service-worker.ts`   |
+| Settings              | `src/options/Options.tsx`            |
+| Manifest              | `src/manifest.config.ts`             |
+| Coverage docs         | `docs/coverage.md`                   |
+| RGAA referential docs | `docs/rgaa-criteria.md`              |
+| Rule tests            | `src/content/audit/rules/__tests__/` |
 
 ---
 

@@ -38,7 +38,7 @@ interface PanelState {
   mergeAiIssues: (issues: AccessibilityIssue[]) => void;
   setFix: (issueId: string, fix: AiFix) => void;
   setFixLoading: (issueId: string, loading: boolean) => void;
-  setFixError: (issueId: string, error: string) => void;
+  setFixError: (issueId: string, error: string | null) => void;
 }
 
 function recomputeSummary(result: ScanResult): ScanResult {
@@ -99,8 +99,16 @@ export const usePanelStore = create<PanelState>((set) => ({
       fixLoading: { ...state.fixLoading, [issueId]: loading },
     })),
   setFixError: (issueId, error) =>
-    set((state) => ({
-      fixError: { ...state.fixError, [issueId]: error },
-      fixLoading: { ...state.fixLoading, [issueId]: false },
-    })),
+    set((state) => {
+      const fixError = { ...state.fixError };
+      if (error === null) {
+        delete fixError[issueId];
+      } else {
+        fixError[issueId] = error;
+      }
+      return {
+        fixError,
+        fixLoading: { ...state.fixLoading, [issueId]: false },
+      };
+    }),
 }));

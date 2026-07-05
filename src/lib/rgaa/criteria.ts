@@ -3,8 +3,7 @@
  * Official referential: https://accessibilite.numerique.gouv.fr/methode/criteres-et-tests/
  */
 
-export const RGAA_SOURCE_URL =
-  'https://accessibilite.numerique.gouv.fr/methode/criteres-et-tests/';
+export const RGAA_SOURCE_URL = 'https://accessibilite.numerique.gouv.fr/methode/criteres-et-tests/';
 
 export const RGAA_THEMES: Record<number, string> = {
   1: 'Images',

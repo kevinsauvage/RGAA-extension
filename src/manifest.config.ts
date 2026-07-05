@@ -33,7 +33,8 @@ export default defineManifest({
   },
   content_scripts: [
     {
-      matches: ['<all_urls>'],
+      // Built by CRXJS but never auto-injected — injected on demand via scripting API.
+      matches: ['http://127.0.0.1:65535/*'],
       js: ['src/content/content-script.ts'],
       run_at: 'document_idle',
       all_frames: false,

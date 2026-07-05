@@ -1,7 +1,8 @@
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
-const INTERACTIVE = 'a[href], button, [role="button"], [role="link"], [onclick], [tabindex]:not([tabindex="-1"])';
+const INTERACTIVE =
+  'a[href], button, [role="button"], [role="link"], [onclick], [tabindex]:not([tabindex="-1"])';
 
 /** RGAA 7.3 — non-native elements acting as controls without keyboard access. */
 export function checkKeyboardAccessible(): RuleFinding | null {

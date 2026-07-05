@@ -1,8 +1,4 @@
-import type {
-  AccessibilityIssue,
-  AiAuditProgress,
-  KnownIssueRef,
-} from '@/lib/types';
+import type { AccessibilityIssue, AiAuditProgress, KnownIssueRef } from '@/lib/types';
 import type { Settings } from '@/lib/storage';
 import {
   criterionHelpUrl,
@@ -29,7 +25,10 @@ interface ScanBatch {
 
 const SCAN_BATCHES: ScanBatch[] = [
   { label: { fr: 'Images, médias et cadres', en: 'Images, media and frames' }, themes: [1, 2, 4] },
-  { label: { fr: 'Navigation et consultation', en: 'Navigation and consultation' }, themes: [6, 12] },
+  {
+    label: { fr: 'Navigation et consultation', en: 'Navigation and consultation' },
+    themes: [6, 12],
+  },
   { label: { fr: 'Formulaires', en: 'Forms' }, themes: [11] },
   {
     label: { fr: 'Structure, présentation et tableaux', en: 'Structure, presentation and tables' },
@@ -71,14 +70,8 @@ function criteriaForBatch(batch: ScanBatch): RgaaCriterion[] {
   );
 }
 
-function buildBatchPrompt(
-  criteria: RgaaCriterion[],
-  html: string,
-  language: 'fr' | 'en',
-): string {
-  const criteriaBlock = criteria
-    .map((c) => `- RGAA ${c.id} — ${c.title}\n  ${c.hint}`)
-    .join('\n');
+function buildBatchPrompt(criteria: RgaaCriterion[], html: string, language: 'fr' | 'en'): string {
+  const criteriaBlock = criteria.map((c) => `- RGAA ${c.id} — ${c.title}\n  ${c.hint}`).join('\n');
 
   return [
     'Criteria to audit:',
@@ -175,10 +168,7 @@ async function scanBatch(
   return parseFindings(content);
 }
 
-function toIssue(
-  finding: RawFinding,
-  criterion: RgaaCriterion,
-): AccessibilityIssue {
+function toIssue(finding: RawFinding, criterion: RgaaCriterion): AccessibilityIssue {
   return {
     id: `deep-${criterion.id}-${finding.selector.replace(/\W+/g, '-').slice(0, 40)}`,
     kind: 'accessibility',
@@ -257,9 +247,9 @@ export async function runDeepScan(
   });
 
   // Validation pass 2: selector must resolve on the live page.
-  const selectorResults = await verifySelectors(
-    [...new Set(evidenceValidated.map((finding) => finding.selector))],
-  );
+  const selectorResults = await verifySelectors([
+    ...new Set(evidenceValidated.map((finding) => finding.selector)),
+  ]);
 
   const issues: AccessibilityIssue[] = [];
   const seen = new Set<string>();

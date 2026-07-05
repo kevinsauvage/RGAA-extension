@@ -63,9 +63,7 @@ export function Popup() {
         Open A11yFix panel
       </button>
       {!scannable && (
-        <p className="mt-2 text-center text-[11px] text-slate-400">
-          This page can’t be scanned.
-        </p>
+        <p className="mt-2 text-center text-[11px] text-slate-400">This page can’t be scanned.</p>
       )}
 
       {!hasKey && (

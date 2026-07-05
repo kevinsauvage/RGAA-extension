@@ -21,7 +21,9 @@ export function checkColorOnlyRequired(): RuleFinding | null {
 
     // Look for a colored asterisk or marker in the label wrapper without text.
     const wrapper = input.closest('.form-group, .field, label, div') ?? input.parentElement;
-    const marker = wrapper?.querySelector('[class*="required"], [class*="asterisk"], .required, .asterisk');
+    const marker = wrapper?.querySelector(
+      '[class*="required"], [class*="asterisk"], .required, .asterisk',
+    );
     if (!marker || !isVisible(marker)) continue;
     const markerText = marker.textContent?.replace(/\s/g, '') ?? '';
     if (markerText && markerText !== '*' && !/^\*+$/.test(markerText)) continue;

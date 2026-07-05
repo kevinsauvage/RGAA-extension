@@ -90,10 +90,7 @@ function pruneElement(el: Element): void {
 
 function pruneNode(node: Node): void {
   const toRemove: Node[] = [];
-  const walker = document.createTreeWalker(
-    node,
-    NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_TEXT,
-  );
+  const walker = document.createTreeWalker(node, NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_TEXT);
   let current = walker.nextNode();
   while (current) {
     if (current.nodeType === Node.COMMENT_NODE) {

@@ -27,11 +27,22 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
   // ── Theme 1 — Images ──────────────────────────────────────────────────────
   '1.1': {
     methods: ['axe', 'rule'],
-    axeRules: ['image-alt', 'input-image-alt', 'area-alt', 'role-img-alt', 'svg-img-alt', 'object-alt'],
+    axeRules: [
+      'image-alt',
+      'input-image-alt',
+      'area-alt',
+      'role-img-alt',
+      'svg-img-alt',
+      'object-alt',
+    ],
     rules: ['rgaa-svg-informative', 'rgaa-canvas-alt'],
     note: 'Informative vs decorative judgment for edge cases may need manual review.',
   },
-  '1.2': { methods: ['axe', 'ai'], axeRules: ['image-redundant-alt'], note: 'Decorative intent partially AI-assessed.' },
+  '1.2': {
+    methods: ['axe', 'ai'],
+    axeRules: ['image-redundant-alt'],
+    note: 'Decorative intent partially AI-assessed.',
+  },
   '1.3': { methods: ['ai'], note: 'Alt relevance requires semantic judgment.' },
   '1.4': { methods: ['manual'], note: 'CAPTCHA/test images — manual audit.' },
   '1.5': { methods: ['manual'], note: 'CAPTCHA alternative mechanism — manual audit.' },
@@ -42,7 +53,11 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
 
   // ── Theme 2 — Frames ──────────────────────────────────────────────────────
   '2.1': { methods: ['axe'], axeRules: ['frame-title'] },
-  '2.2': { methods: ['axe', 'ai'], axeRules: ['frame-title-unique'], note: 'Title relevance partially AI-assessed.' },
+  '2.2': {
+    methods: ['axe', 'ai'],
+    axeRules: ['frame-title-unique'],
+    note: 'Title relevance partially AI-assessed.',
+  },
 
   // ── Theme 3 — Couleurs ────────────────────────────────────────────────────
   '3.1': {
@@ -55,16 +70,28 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
   '3.3': { methods: ['axe'], axeRules: ['color-contrast-enhanced'] },
 
   // ── Theme 4 — Multimédia ──────────────────────────────────────────────────
-  '4.1': { methods: ['axe', 'ai'], axeRules: ['audio-caption', 'video-caption'], note: 'Transcript presence AI; quality manual.' },
+  '4.1': {
+    methods: ['axe', 'ai'],
+    axeRules: ['audio-caption', 'video-caption'],
+    note: 'Transcript presence AI; quality manual.',
+  },
   '4.2': { methods: ['manual'], note: 'Transcript/AD relevance — manual.' },
-  '4.3': { methods: ['rule'], rules: ['rgaa-video-captions'], note: 'Checks track[kind=captions/subtitles] presence.' },
+  '4.3': {
+    methods: ['rule'],
+    rules: ['rgaa-video-captions'],
+    note: 'Checks track[kind=captions/subtitles] presence.',
+  },
   '4.4': { methods: ['manual'], note: 'Caption relevance — manual.' },
   '4.5': { methods: ['manual'], note: 'Audio description — manual playback.' },
   '4.6': { methods: ['manual'], note: 'AD relevance — manual.' },
   '4.7': { methods: ['manual'], note: 'Media identification — partial manual.' },
   '4.8': { methods: ['manual'], note: 'Non-temporal media alternatives — manual.' },
   '4.9': { methods: ['manual'], note: 'Alternative relevance — manual.' },
-  '4.10': { methods: ['axe', 'rule'], axeRules: ['no-autoplay-audio'], rules: ['rgaa-autoplay-media'] },
+  '4.10': {
+    methods: ['axe', 'rule'],
+    axeRules: ['no-autoplay-audio'],
+    rules: ['rgaa-autoplay-media'],
+  },
   '4.11': { methods: ['manual'], note: 'Keyboard control of media player — interaction test.' },
   '4.12': { methods: ['manual'], note: 'Non-temporal media keyboard control — manual.' },
   '4.13': { methods: ['manual'], note: 'Media AT compatibility — manual.' },
@@ -76,11 +103,18 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
   '5.4': { methods: ['axe'], axeRules: ['table-fake-caption'] },
   '5.5': { methods: ['manual'], note: 'Caption relevance — manual.' },
   '5.6': { methods: ['ai'], note: 'Header declaration — AI flags td-as-header patterns.' },
-  '5.7': { methods: ['axe'], axeRules: ['td-headers-attr', 'th-has-data-cells', 'scope-attr-valid'] },
+  '5.7': {
+    methods: ['axe'],
+    axeRules: ['td-headers-attr', 'th-has-data-cells', 'scope-attr-valid'],
+  },
   '5.8': { methods: ['rule'], rules: ['rgaa-layout-table-semantics'] },
 
   // ── Theme 6 — Liens ───────────────────────────────────────────────────────
-  '6.1': { methods: ['axe', 'ai'], axeRules: ['link-name', 'identical-links-same-purpose'], note: 'Vague link text AI-assessed.' },
+  '6.1': {
+    methods: ['axe', 'ai'],
+    axeRules: ['link-name', 'identical-links-same-purpose'],
+    note: 'Vague link text AI-assessed.',
+  },
   '6.2': { methods: ['axe'], axeRules: ['link-name'] },
 
   // ── Theme 7 — Scripts ─────────────────────────────────────────────────────
@@ -106,12 +140,20 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
 
   // ── Theme 8 — Éléments obligatoires ───────────────────────────────────────
   '8.1': { methods: ['rule'], rules: ['rgaa-doctype'] },
-  '8.2': { methods: ['axe'], axeRules: ['duplicate-id-aria'], note: 'Full HTML validation not automated.' },
+  '8.2': {
+    methods: ['axe'],
+    axeRules: ['duplicate-id-aria'],
+    note: 'Full HTML validation not automated.',
+  },
   '8.3': { methods: ['axe'], axeRules: ['html-has-lang'] },
   '8.4': { methods: ['axe'], axeRules: ['html-lang-valid', 'html-xml-lang-mismatch'] },
   '8.5': { methods: ['axe'], axeRules: ['document-title'] },
   '8.6': { methods: ['ai'], note: 'Page title relevance — AI judgment.' },
-  '8.7': { methods: ['axe', 'ai'], axeRules: ['valid-lang'], note: 'Missing lang on foreign passages AI-assessed.' },
+  '8.7': {
+    methods: ['axe', 'ai'],
+    axeRules: ['valid-lang'],
+    note: 'Missing lang on foreign passages AI-assessed.',
+  },
   '8.8': { methods: ['axe'], axeRules: ['valid-lang'] },
   '8.9': { methods: ['ai'], note: 'Presentational tag misuse — AI on markup.' },
   '8.10': { methods: ['rule'], rules: ['rgaa-text-direction'] },
@@ -123,10 +165,18 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
   '9.4': { methods: ['ai'], note: 'Citation markup — AI on markup.' },
 
   // ── Theme 10 — Présentation ─────────────────────────────────────────────────
-  '10.1': { methods: ['ai', 'rule'], rules: ['rgaa-presentational-html'], note: 'Legacy presentational tags via rule; CSS-only checks AI.' },
+  '10.1': {
+    methods: ['ai', 'rule'],
+    rules: ['rgaa-presentational-html'],
+    note: 'Legacy presentational tags via rule; CSS-only checks AI.',
+  },
   '10.2': { methods: ['manual'], note: 'CSS disabled test — manual.' },
   '10.3': { methods: ['manual'], note: 'Comprehension without CSS — manual.' },
-  '10.4': { methods: ['axe', 'rule'], axeRules: ['meta-viewport', 'meta-viewport-large'], rules: ['rgaa-text-scaling'] },
+  '10.4': {
+    methods: ['axe', 'rule'],
+    axeRules: ['meta-viewport', 'meta-viewport-large'],
+    rules: ['rgaa-text-scaling'],
+  },
   '10.5': { methods: ['manual'], note: 'Background/font color CSS pairing — manual.' },
   '10.6': { methods: ['axe'], axeRules: ['link-in-text-block'] },
   '10.7': { methods: ['rule'], rules: ['rgaa-focus-visible'] },
@@ -141,7 +191,13 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
   // ── Theme 11 — Formulaires ──────────────────────────────────────────────────
   '11.1': {
     methods: ['axe'],
-    axeRules: ['label', 'label-title-only', 'form-field-multiple-labels', 'select-name', 'aria-input-field-name'],
+    axeRules: [
+      'label',
+      'label-title-only',
+      'form-field-multiple-labels',
+      'select-name',
+      'aria-input-field-name',
+    ],
   },
   '11.2': { methods: ['ai'], note: 'Label relevance — AI judgment.' },
   '11.3': { methods: ['manual'], note: 'Cross-page label consistency — multi-page.' },
@@ -151,7 +207,11 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
   '11.7': { methods: ['manual'], note: 'Legend relevance — manual.' },
   '11.8': { methods: ['manual'], note: 'Optgroup grouping — partial manual.' },
   '11.9': { methods: ['ai'], note: 'Button label relevance — AI judgment.' },
-  '11.10': { methods: ['ai', 'rule'], rules: ['rgaa-required-indication'], note: 'Required field indication rule + AI for format hints.' },
+  '11.10': {
+    methods: ['ai', 'rule'],
+    rules: ['rgaa-required-indication'],
+    note: 'Required field indication rule + AI for format hints.',
+  },
   '11.11': { methods: ['manual'], note: 'Error correction suggestions — manual.' },
   '11.12': { methods: ['manual'], note: 'Reversible submissions — manual.' },
   '11.13': { methods: ['axe'], axeRules: ['autocomplete-valid'] },
@@ -162,8 +222,16 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
   '12.3': { methods: ['manual'], note: 'Sitemap relevance — manual.' },
   '12.4': { methods: ['manual'], note: 'Sitemap access — multi-page.' },
   '12.5': { methods: ['manual'], note: 'Search engine access — multi-page.' },
-  '12.6': { methods: ['axe', 'ai'], axeRules: ['region', 'landmark-one-main'], note: 'Landmark reachability AI-assessed.' },
-  '12.7': { methods: ['axe', 'rule'], axeRules: ['bypass', 'skip-link'], rules: ['rgaa-skip-link'] },
+  '12.6': {
+    methods: ['axe', 'ai'],
+    axeRules: ['region', 'landmark-one-main'],
+    note: 'Landmark reachability AI-assessed.',
+  },
+  '12.7': {
+    methods: ['axe', 'rule'],
+    axeRules: ['bypass', 'skip-link'],
+    rules: ['rgaa-skip-link'],
+  },
   '12.8': { methods: ['axe'], axeRules: ['tabindex'] },
   '12.9': { methods: ['manual'], note: 'Keyboard trap — tab simulation planned.' },
   '12.10': { methods: ['axe'], axeRules: ['accesskeys'] },
@@ -171,13 +239,25 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
 
   // ── Theme 13 — Consultation ─────────────────────────────────────────────────
   '13.1': { methods: ['axe'], axeRules: ['meta-refresh', 'meta-refresh-no-exceptions'] },
-  '13.2': { methods: ['rule'], rules: ['rgaa-new-window-warning'], note: 'Popup-on-load not detected; target=_blank warning only.' },
-  '13.3': { methods: ['rule'], rules: ['rgaa-doc-link-format'], note: 'Accessible document version not verified.' },
+  '13.2': {
+    methods: ['rule'],
+    rules: ['rgaa-new-window-warning'],
+    note: 'Popup-on-load not detected; target=_blank warning only.',
+  },
+  '13.3': {
+    methods: ['rule'],
+    rules: ['rgaa-doc-link-format'],
+    note: 'Accessible document version not verified.',
+  },
   '13.4': { methods: ['manual'], note: 'Accessible doc equivalence — manual.' },
   '13.5': { methods: ['manual'], note: 'Cryptic content alternatives — manual.' },
   '13.6': { methods: ['manual'], note: 'Cryptic alternative relevance — manual.' },
   '13.7': { methods: ['manual'], note: 'Flash/luminance changes — manual.' },
-  '13.8': { methods: ['axe', 'rule'], axeRules: ['blink', 'marquee'], rules: ['rgaa-moving-content'] },
+  '13.8': {
+    methods: ['axe', 'rule'],
+    axeRules: ['blink', 'marquee'],
+    rules: ['rgaa-moving-content'],
+  },
   '13.9': { methods: ['axe'], axeRules: ['css-orientation-lock'] },
   '13.10': { methods: ['manual'], note: 'Complex gestures — manual/device test.' },
   '13.11': { methods: ['manual'], note: 'Pointer cancellation — manual.' },

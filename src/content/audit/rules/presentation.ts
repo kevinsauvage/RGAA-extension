@@ -4,8 +4,7 @@ import { multiNodeFinding, type RuleFinding } from './shared';
 const FOCUSABLE =
   'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
 
-const FOCUS_RING_HINT =
-  /focus-visible|:focus|focus-ring|focusable|ring-offset|outline-offset/i;
+const FOCUS_RING_HINT = /focus-visible|:focus|focus-ring|focusable|ring-offset|outline-offset/i;
 
 /** RGAA 10.7 — focus indicator likely removed on focusable elements. */
 export function checkFocusVisible(): RuleFinding | null {
@@ -93,17 +92,13 @@ export function checkTextScaling(): RuleFinding | null {
   for (const meta of document.querySelectorAll('meta[name="viewport"]')) {
     const content = meta.getAttribute('content') ?? '';
     const blocksScale =
-      /user-scalable\s*=\s*no/i.test(content) ||
-      /maximum-scale\s*=\s*([0-9.]+)/i.test(content);
+      /user-scalable\s*=\s*no/i.test(content) || /maximum-scale\s*=\s*([0-9.]+)/i.test(content);
     if (blocksScale) {
       const maxMatch = content.match(/maximum-scale\s*=\s*([0-9.]+)/i);
       if (!maxMatch || parseFloat(maxMatch[1]) < 2) offenders.push(meta);
     }
   }
-  if (
-    blocksTextSizeAdjust(document.documentElement) ||
-    blocksTextSizeAdjust(document.body)
-  ) {
+  if (blocksTextSizeAdjust(document.documentElement) || blocksTextSizeAdjust(document.body)) {
     offenders.push(document.documentElement);
   }
   return multiNodeFinding(offenders, {

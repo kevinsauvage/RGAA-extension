@@ -4,7 +4,8 @@ import { multiNodeFinding, type RuleFinding } from './shared';
 
 const NEW_WINDOW_HINTS = /nouvelle\s+fen[eê]tre|new\s+(window|tab)|ouvre\s+dans/i;
 const DOC_EXTENSIONS = /\.(pdf|docx?|xlsx?|pptx?|odt|ods|odp)([?#]|$)/i;
-const FORMAT_HINTS = /pdf|docx?|xlsx?|pptx?|word|excel|powerpoint|document|téléchargement|download|[\d,.]+\s*(ko|mo|kb|mb)/i;
+const FORMAT_HINTS =
+  /pdf|docx?|xlsx?|pptx?|word|excel|powerpoint|document|téléchargement|download|[\d,.]+\s*(ko|mo|kb|mb)/i;
 const SKIP_LINK_HINTS = /contenu|content|main|principal/i;
 const REQUIRED_MARKERS = /obligatoire|required|\*|requis/i;
 
@@ -24,8 +25,7 @@ export function checkNewWindowLinks(): RuleFinding | null {
     title: 'Ouverture de nouvelle fenêtre non signalée',
     description:
       'Des liens avec target="_blank" ne préviennent pas que le lien ouvre une nouvelle fenêtre.',
-    userImpact:
-      "Les utilisateurs de lecteur d'écran perdent leur contexte sans avertissement.",
+    userImpact: "Les utilisateurs de lecteur d'écran perdent leur contexte sans avertissement.",
   });
 }
 
@@ -143,6 +143,7 @@ export function checkRequiredIndication(): RuleFinding | null {
     title: 'Champ obligatoire sans indication visible',
     description:
       'Des champs marqués required ou aria-required n’ont pas d’indication visible dans leur étiquette.',
-    userImpact: 'Les utilisateurs ne savent pas quels champs sont obligatoires avant la soumission.',
+    userImpact:
+      'Les utilisateurs ne savent pas quels champs sont obligatoires avant la soumission.',
   });
 }

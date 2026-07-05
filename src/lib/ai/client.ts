@@ -29,10 +29,7 @@ function parseFix(content: string): RawFix {
  * Chat Completions API. Runs in the extension context; the API key never leaves
  * the user's machine except in the direct call to OpenAI.
  */
-export async function generateFix(
-  issue: AccessibilityIssue,
-  settings: Settings,
-): Promise<AiFix> {
+export async function generateFix(issue: AccessibilityIssue, settings: Settings): Promise<AiFix> {
   if (!settings.openaiApiKey) {
     throw new Error(
       'No OpenAI API key configured. Add one in the extension options to enable AI fixes.',
@@ -59,9 +56,7 @@ export async function generateFix(
 
   if (!response.ok) {
     const detail = await response.text().catch(() => '');
-    throw new Error(
-      `OpenAI request failed (${response.status}). ${detail.slice(0, 200)}`,
-    );
+    throw new Error(`OpenAI request failed (${response.status}). ${detail.slice(0, 200)}`);
   }
 
   const data = (await response.json()) as {

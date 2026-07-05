@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      - run: npm test
+
+      - name: Regenerate docs and check for drift
+        run: |
+          npm run docs
+          git diff --exit-code docs/ src/lib/rgaa/referential.json
+
+      - run: npm run lint
+
+      - run: npm run format:check
+
+      - run: npm run build
+
+      - name: Content script bundle size budget (gzip)
+        run: |
+          FILE=$(find dist/assets -name 'content-script*.js' ! -name '*loader*' | head -1)
+          if [ -z "$FILE" ]; then
+            echo "Content script bundle not found"
+            exit 1
+          fi
+          BYTES=$(gzip -c "$FILE" | wc -c | tr -d ' ')
+          echo "Content script gzipped: ${BYTES} bytes ($FILE)"
+          if [ "$BYTES" -gt 400000 ]; then
+            echo "Content script exceeds 400 KB gzip budget"
+            exit 1
+          fi

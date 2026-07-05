@@ -41,13 +41,9 @@ export function Options() {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const selectedModel = useMemo(
-    () => resolveModelOption(settings.model),
-    [settings.model],
-  );
+  const selectedModel = useMemo(() => resolveModelOption(settings.model), [settings.model]);
 
-  const showCustomModel =
-    !OPENAI_MODELS.some((model) => model.id === settings.model);
+  const showCustomModel = !OPENAI_MODELS.some((model) => model.id === settings.model);
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-6 py-10">
@@ -57,9 +53,7 @@ export function Options() {
         </div>
         <div>
           <h1 className="text-xl font-bold">A11yFix AI — Settings</h1>
-          <p className="text-sm text-slate-500">
-            Configure the AI copilot and your plan.
-          </p>
+          <p className="text-sm text-slate-500">Configure the AI copilot and your plan.</p>
         </div>
       </header>
 
@@ -87,8 +81,8 @@ export function Options() {
             </button>
           </div>
           <span className="mt-1 block text-[11px] text-slate-400">
-            Stored locally in this browser only. Used to call OpenAI directly for
-            AI fixes and the deep scan.
+            Stored locally in this browser only. Used to call OpenAI directly for AI fixes and the
+            deep scan.
           </span>
         </label>
 
@@ -111,13 +105,9 @@ export function Options() {
                 ))}
               </optgroup>
             ))}
-            {showCustomModel && (
-              <option value={settings.model}>{settings.model} (custom)</option>
-            )}
+            {showCustomModel && <option value={settings.model}>{settings.model} (custom)</option>}
           </select>
-          <span className="mt-1 block text-[11px] text-slate-400">
-            {selectedModel.hint}
-          </span>
+          <span className="mt-1 block text-[11px] text-slate-400">{selectedModel.hint}</span>
         </label>
 
         <label className="block">
@@ -137,6 +127,10 @@ export function Options() {
 
       <section className="card mb-6 space-y-3 p-5">
         <h2 className="text-sm font-semibold">Plan</h2>
+        <p className="text-xs text-slate-500">
+          Pro is a <strong>preview toggle</strong> for development — paid billing is not wired up
+          yet. Use it to test unlimited scans, AI deep scan, AI fixes, and PDF export locally.
+        </p>
         <div className="flex gap-3">
           {(['free', 'pro'] as const).map((plan) => (
             <button
@@ -152,16 +146,16 @@ export function Options() {
               <div className="text-sm font-semibold capitalize">{plan}</div>
               <div className="text-xs text-slate-500">
                 {plan === 'free'
-                  ? `${FREE_TIER_MONTHLY_SCANS} scans/month`
-                  : 'Unlimited scans, AI fixes, PDF export — $12/mo'}
+                  ? `${FREE_TIER_MONTHLY_SCANS} classic scans/month`
+                  : 'Unlimited scans · deep scan · AI fixes · PDF'}
               </div>
             </button>
           ))}
         </div>
         <p className="text-[11px] text-slate-400">
           {settings.plan === 'free'
-            ? `${usage}/${FREE_TIER_MONTHLY_SCANS} scans used this month.`
-            : 'Pro plan active.'}
+            ? `${usage}/${FREE_TIER_MONTHLY_SCANS} classic scans used this month.`
+            : 'Pro preview active — bring your own OpenAI API key for AI features.'}
         </p>
       </section>
 

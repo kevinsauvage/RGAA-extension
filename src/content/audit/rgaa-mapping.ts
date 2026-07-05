@@ -60,8 +60,8 @@ const AXE_TO_RGAA: Record<string, MappingEntry> = {
   'aria-allowed-role': { criteria: [ref('7.1', 7, ['4.1.2'])] },
   'aria-hidden-body': { criteria: [ref('7.1', 7, ['4.1.2'])] },
   'aria-hidden-focus': { criteria: [ref('7.1', 7, ['1.3.1', '4.1.2'])] },
-  'blink': { criteria: [ref('7.4', 7, ['2.2.2'])] },
-  'marquee': { criteria: [ref('7.4', 7, ['2.2.2'])] },
+  blink: { criteria: [ref('7.4', 7, ['2.2.2'])] },
+  marquee: { criteria: [ref('7.4', 7, ['2.2.2'])] },
 
   'document-title': { criteria: [ref('8.5', 8, ['2.4.2'])] },
   'html-has-lang': { criteria: [ref('8.3', 8, ['3.1.1'])] },
@@ -75,26 +75,26 @@ const AXE_TO_RGAA: Record<string, MappingEntry> = {
   'p-as-heading': { criteria: [ref('9.1', 9, ['1.3.1'])] },
   'landmark-one-main': { criteria: [ref('9.2', 9, ['1.3.1'])] },
   'landmark-unique': { criteria: [ref('9.2', 9, ['1.3.1'])] },
-  'region': { criteria: [ref('9.2', 9, ['1.3.1'])] },
-  'list': { criteria: [ref('9.3', 9, ['1.3.1'])] },
-  'listitem': { criteria: [ref('9.3', 9, ['1.3.1'])] },
+  region: { criteria: [ref('9.2', 9, ['1.3.1'])] },
+  list: { criteria: [ref('9.3', 9, ['1.3.1'])] },
+  listitem: { criteria: [ref('9.3', 9, ['1.3.1'])] },
   'definition-list': { criteria: [ref('9.3', 9, ['1.3.1'])] },
 
   'meta-viewport': { criteria: [ref('10.4', 10, ['1.4.4'])] },
   'meta-viewport-large': { criteria: [ref('10.4', 10, ['1.4.4'])] },
   'css-orientation-lock': { criteria: [ref('10.11', 10, ['1.3.4'])] },
 
-  'label': { criteria: [ref('11.1', 11, ['3.3.2', '1.3.1', '4.1.2'])] },
+  label: { criteria: [ref('11.1', 11, ['3.3.2', '1.3.1', '4.1.2'])] },
   'label-title-only': { criteria: [ref('11.1', 11, ['3.3.2'])] },
   'form-field-multiple-labels': { criteria: [ref('11.1', 11, ['3.3.2'])] },
   'select-name': { criteria: [ref('11.1', 11, ['4.1.2'])] },
   'aria-input-field-name': { criteria: [ref('11.1', 11, ['4.1.2'])] },
   'autocomplete-valid': { criteria: [ref('11.13', 11, ['1.3.5'])] },
 
-  'bypass': { criteria: [ref('12.7', 12, ['2.4.1'])] },
+  bypass: { criteria: [ref('12.7', 12, ['2.4.1'])] },
   'skip-link': { criteria: [ref('12.7', 12, ['2.4.1'])] },
-  'tabindex': { criteria: [ref('12.8', 12, ['2.4.3'])] },
-  'accesskeys': { criteria: [ref('12.10', 12, ['2.1.1'])] },
+  tabindex: { criteria: [ref('12.8', 12, ['2.4.3'])] },
+  accesskeys: { criteria: [ref('12.10', 12, ['2.1.1'])] },
 
   'meta-refresh': { criteria: [ref('13.1', 13, ['2.2.1', '2.2.4'])] },
   'meta-refresh-no-exceptions': { criteria: [ref('13.1', 13, ['2.2.1'])] },
@@ -104,6 +104,11 @@ export function rgaaForRule(ruleId: string): RgaaReference[] {
   const entry = AXE_TO_RGAA[ruleId];
   if (entry) return entry.criteria;
   return [{ criterion: 'à vérifier', theme: 'Autre', wcag: [] }];
+}
+
+/** axe rule ids with an explicit RGAA mapping (for coverage validation). */
+export function getAxeRuleIds(): string[] {
+  return Object.keys(AXE_TO_RGAA);
 }
 
 /** axe impact -> our normalized severity scale. */

@@ -1,6 +1,5 @@
 /**
- * Generates simple brand-colored rounded-square PNG icons with no external
- * dependencies. Replace public/icons/* with real artwork before publishing.
+ * Generates brand PNG icons with a simplified accessibility (person-in-circle) mark.
  */
 import { deflateSync } from 'node:zlib';
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -10,7 +9,8 @@ import { dirname, resolve } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = resolve(__dirname, '../public/icons');
 
-const BRAND = [31, 99, 235]; // #1f63eb
+const BRAND = [31, 99, 235];
+const WHITE = [255, 255, 255];
 
 function crc32(buf) {
   let crc = 0xffffffff;
@@ -32,37 +32,63 @@ function chunk(type, data) {
   return Buffer.concat([lenBuf, typeBuf, data, crcBuf]);
 }
 
-function makePng(size) {
-  const radius = Math.round(size * 0.22);
-  const raw = Buffer.alloc((size * 4 + 1) * size);
-  let pos = 0;
-  const inside = (x, y) => {
-    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-    const cx = clamp(x, radius, size - 1 - radius);
-    const cy = clamp(y, radius, size - 1 - radius);
+function roundedRect(x, y, w, h, r) {
+  return (px, py) => {
+    const cx = Math.max(x + r, Math.min(px, x + w - r));
+    const cy = Math.max(y + r, Math.min(py, y + h - r));
+    const dx = px - cx;
+    const dy = py - cy;
+    const inCorner = (px < x + r || px > x + w - r) && (py < y + r || py > y + h - r);
+    if (!inCorner) return true;
+    return dx * dx + dy * dy <= r * r;
+  };
+}
+
+/** Simple universal-accessibility silhouette centered in the icon. */
+function accessibilityMark(size) {
+  const cx = size / 2;
+  const cy = size / 2;
+  const s = size / 128;
+  const headR = 10 * s;
+  const bodyW = 34 * s;
+  const bodyH = 44 * s;
+  const armSpan = 52 * s;
+
+  return (x, y) => {
     const dx = x - cx;
     const dy = y - cy;
-    return dx * dx + dy * dy <= radius * radius + 0.5;
+    if (dx * dx + (dy + 18 * s) * (dy + 18 * s) <= headR * headR) return true;
+    if (Math.abs(dx) <= bodyW / 2 && dy >= -2 * s && dy <= bodyH) return true;
+    const armY = 8 * s;
+    if (Math.abs(dy - armY) <= 5 * s && Math.abs(dx) <= armSpan / 2) return true;
+    return false;
   };
+}
+
+function makePng(size) {
+  const bg = roundedRect(0, 0, size, size, Math.round(size * 0.22));
+  const mark = accessibilityMark(size);
+  const raw = Buffer.alloc((size * 4 + 1) * size);
+  let pos = 0;
+
   for (let y = 0; y < size; y++) {
-    raw[pos++] = 0; // filter: none
+    raw[pos++] = 0;
     for (let x = 0; x < size; x++) {
-      const on = inside(x, y);
-      raw[pos++] = BRAND[0];
-      raw[pos++] = BRAND[1];
-      raw[pos++] = BRAND[2];
-      raw[pos++] = on ? 255 : 0;
+      const onBg = bg(x, y);
+      const onMark = mark(x, y);
+      const color = onBg ? (onMark ? WHITE : BRAND) : [0, 0, 0, 0];
+      raw[pos++] = color[0];
+      raw[pos++] = color[1];
+      raw[pos++] = color[2];
+      raw[pos++] = onBg ? 255 : 0;
     }
   }
 
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(size, 0);
   ihdr.writeUInt32BE(size, 4);
-  ihdr[8] = 8; // bit depth
-  ihdr[9] = 6; // color type RGBA
-  ihdr[10] = 0;
-  ihdr[11] = 0;
-  ihdr[12] = 0;
+  ihdr[8] = 8;
+  ihdr[9] = 6;
 
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),

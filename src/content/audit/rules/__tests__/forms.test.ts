@@ -11,7 +11,9 @@ import { expectNoFinding, expectRule, setBodyHtml } from './setup';
 
 describe('checkNewWindowLinks (RGAA 13.2)', () => {
   it('passes when target=_blank link warns in label', () => {
-    setBodyHtml('<a href="https://example.com" target="_blank">Ouvre dans une nouvelle fenêtre</a>');
+    setBodyHtml(
+      '<a href="https://example.com" target="_blank">Ouvre dans une nouvelle fenêtre</a>',
+    );
     expectNoFinding(checkNewWindowLinks());
   });
 

@@ -1,0 +1,5 @@
+dist
+node_modules
+docs/source
+src/lib/rgaa/referential.json
+package-lock.json

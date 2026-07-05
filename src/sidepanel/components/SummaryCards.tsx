@@ -14,13 +14,8 @@ export function SummaryCards({ result }: { result: ScanResult }) {
       <ScoreRing score={result.summary.score} />
       <div className="grid flex-1 grid-cols-2 gap-2">
         {CELLS.map((cell) => (
-          <div
-            key={cell.key}
-            className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800/60"
-          >
-            <div className={`text-xl font-bold ${cell.className}`}>
-              {result.summary[cell.key]}
-            </div>
+          <div key={cell.key} className="rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800/60">
+            <div className={`text-xl font-bold ${cell.className}`}>{result.summary[cell.key]}</div>
             <div className="text-xs text-slate-500">{cell.label}</div>
           </div>
         ))}

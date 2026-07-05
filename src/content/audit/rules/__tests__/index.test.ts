@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { runRgaaRules } from '../index';
+import { runRgaaRules, getImplementedRuleIds } from '../index';
 import { allDeclaredRuleIds } from '@/lib/rgaa/coverage';
 import { setBodyHtml, setHeadHtml } from './setup';
 
@@ -36,37 +36,10 @@ describe('runRgaaRules integration', () => {
     expect(issues.every((i) => i.confidence === 'likely')).toBe(true);
   });
 
-  it('maps each implemented rule to a coverage entry', () => {
-    const implemented = new Set(
-      runRgaaRules.length > 0
-        ? [
-            'rgaa-doctype',
-            'rgaa-text-direction',
-            'rgaa-svg-informative',
-            'rgaa-canvas-alt',
-            'rgaa-color-only-required',
-            'rgaa-text-scaling',
-            'rgaa-focus-visible',
-            'rgaa-hidden-content',
-            'rgaa-presentational-html',
-            'rgaa-layout-table-semantics',
-            'rgaa-keyboard-accessible',
-            'rgaa-radio-grouping',
-            'rgaa-fieldset-legend',
-            'rgaa-required-indication',
-            'rgaa-skip-link',
-            'rgaa-new-window-warning',
-            'rgaa-doc-link-format',
-            'rgaa-video-captions',
-            'rgaa-autoplay-media',
-            'rgaa-moving-content',
-          ]
-        : [],
-    );
+  it('registry matches coverage declarations', () => {
+    const implemented = new Set(getImplementedRuleIds());
     const declared = new Set(allDeclaredRuleIds());
-    for (const ruleId of implemented) {
-      expect(declared.has(ruleId)).toBe(true);
-    }
+    expect(implemented).toEqual(declared);
   });
 });
 

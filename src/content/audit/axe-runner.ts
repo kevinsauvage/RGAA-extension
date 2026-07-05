@@ -1,18 +1,30 @@
-import axe from 'axe-core';
+import type { NodeResult, run as axeRun } from 'axe-core';
 import type { AccessibilityIssue, AffectedNode } from '@/lib/types';
 import { summarizeIssues } from '@/lib/scan-summary';
 import { normalizeSeverity, rgaaForRule } from './rgaa-mapping';
 import { userImpactFor } from './user-impact';
 import { truncate } from './dom-utils';
 
-function axeTargetToSelectors(target: axe.NodeResult['target']): string[] {
+type AxeCore = { run: typeof axeRun };
+
+let axeModule: AxeCore | null = null;
+
+async function loadAxe(): Promise<AxeCore> {
+  if (!axeModule) {
+    const mod = await import('axe-core');
+    axeModule = mod.default;
+  }
+  return axeModule;
+}
+
+function axeTargetToSelectors(target: NodeResult['target']): string[] {
   if (!Array.isArray(target)) return [String(target)];
   return target
     .map((chain) => (Array.isArray(chain) ? chain.join(' ') : String(chain)))
     .filter((s) => s.length > 0);
 }
 
-function toAffectedNodes(nodes: axe.NodeResult[]): AffectedNode[] {
+function toAffectedNodes(nodes: NodeResult[]): AffectedNode[] {
   return nodes.map((node) => {
     const targets = axeTargetToSelectors(node.target);
     return {
@@ -26,11 +38,12 @@ function toAffectedNodes(nodes: axe.NodeResult[]): AffectedNode[] {
 
 /** Run axe-core against the live document and map results to RGAA issues. */
 export async function runAxeAudit(): Promise<AccessibilityIssue[]> {
+  const axe = await loadAxe();
   const results = await axe.run(document, {
     resultTypes: ['violations'],
     runOnly: {
       type: 'tag',
-      values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'],
+      values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'],
     },
   });
 
@@ -54,3 +67,8 @@ export async function runAxeAudit(): Promise<AccessibilityIssue[]> {
 }
 
 export { summarizeIssues as summarize };
+
+/** @internal Test hook to reset lazy-loaded axe between runs. */
+export function resetAxeModuleForTests(): void {
+  axeModule = null;
+}

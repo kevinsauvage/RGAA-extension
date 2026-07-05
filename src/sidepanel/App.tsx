@@ -1,13 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { IssueSource, KnownIssueRef, ScanResult, Severity } from '@/lib/types';
-import {
-  getActiveTab,
-  getPageHtmlFromTab,
-  isScannable,
-  verifySelectorsOnTab,
-} from '@/lib/utils';
+import { getActiveTab, getPageHtmlFromTab, isScannable, verifySelectorsOnTab } from '@/lib/utils';
 import { getSettings, getUsage } from '@/lib/storage';
-import { evaluateQuota } from '@/lib/scan-limits';
+import { evaluateQuota, canUseProFeature, proFeatureMessage } from '@/lib/scan-limits';
 import { exportReportPdf } from '@/lib/report/pdf';
 import { runDeepScan } from '@/lib/ai/deep-scan';
 import { usePanelStore } from './store';
@@ -66,14 +61,18 @@ export function App() {
   const [tab, setTab] = useState<Tab>('accessibility');
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
   const [pageUrl, setPageUrl] = useState<string | undefined>();
+  const [isPro, setIsPro] = useState(false);
 
   const refreshQuota = async () => {
     const [settings, usage] = await Promise.all([getSettings(), getUsage()]);
     setQuota(evaluateQuota(settings, usage));
     setLanguage(settings.language);
+    setIsPro(settings.plan === 'pro');
   };
 
   useEffect(() => {
+    // Hydrate quota and language from extension storage on panel open.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async storage read on mount
     void refreshQuota();
     void getActiveTab().then((t) => setPageUrl(t?.url));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -114,6 +113,11 @@ export function App() {
   const runAiDeepScan = async () => {
     if (!result) return;
     const settings = await getSettings();
+    if (!canUseProFeature(settings, 'deep_scan')) {
+      setAiAuditError(proFeatureMessage('deep_scan'));
+      setAiAuditStatus('error');
+      return;
+    }
     if (!settings.openaiApiKey) {
       setAiAuditError('Add an OpenAI API key in Settings to run the deep scan.');
       setAiAuditStatus('error');
@@ -210,8 +214,12 @@ export function App() {
               type="button"
               className="btn-ghost flex-1 border border-brand-200 text-brand-700 hover:bg-brand-50 dark:border-brand-900 dark:text-brand-300 dark:hover:bg-brand-950/40"
               onClick={() => void runAiDeepScan()}
-              disabled={aiAuditStatus === 'running'}
-              title="Full-page AI analysis against the RGAA criteria list — findings need manual review"
+              disabled={aiAuditStatus === 'running' || !isPro}
+              title={
+                isPro
+                  ? 'Full-page AI analysis against the RGAA criteria list — findings need manual review'
+                  : proFeatureMessage('deep_scan')
+              }
             >
               {aiAuditStatus === 'running' ? (
                 <>
@@ -249,16 +257,19 @@ export function App() {
         {aiAuditStatus === 'done' && aiAuditInfo && (
           <p className="text-[11px] text-lime-600 dark:text-lime-400">
             Deep scan complete — {aiAuditInfo.found} finding
-            {aiAuditInfo.found === 1 ? '' : 's'} to review across {aiAuditInfo.criteriaChecked}{' '}
-            RGAA criteria.
+            {aiAuditInfo.found === 1 ? '' : 's'} to review across {aiAuditInfo.criteriaChecked} RGAA
+            criteria.
           </p>
         )}
-        {aiAuditError && (
-          <p className="text-[11px] text-red-500">{aiAuditError}</p>
-        )}
+        {aiAuditError && <p className="text-[11px] text-red-500">{aiAuditError}</p>}
         {quota?.allowed === false && (
           <p className="text-center text-[11px] text-red-500">
-            Monthly free limit reached — upgrade to Pro in Settings.
+            Monthly free scan limit reached — enable Pro (preview) in Settings for unlimited scans.
+          </p>
+        )}
+        {result && !isPro && (
+          <p className="text-center text-[11px] text-slate-500">
+            Deep scan, AI fixes, and PDF export require Pro (preview) in Settings.
           </p>
         )}
       </div>
@@ -292,8 +303,16 @@ export function App() {
               <button
                 type="button"
                 className="btn-ghost text-xs"
-                onClick={() => exportReportPdf(result)}
-                title="Export a client-ready PDF report"
+                disabled={!isPro}
+                onClick={async () => {
+                  const settings = await getSettings();
+                  if (!canUseProFeature(settings, 'pdf_export')) {
+                    setError(proFeatureMessage('pdf_export'));
+                    return;
+                  }
+                  exportReportPdf(result);
+                }}
+                title={isPro ? 'Export a client-ready PDF report' : proFeatureMessage('pdf_export')}
               >
                 PDF
               </button>
@@ -332,10 +351,7 @@ export function App() {
                 )}
               </>
             ) : (
-              <PerformancePanel
-                webVitals={result.webVitals}
-                issues={result.performanceIssues}
-              />
+              <PerformancePanel webVitals={result.webVitals} issues={result.performanceIssues} />
             )}
           </>
         )}
@@ -408,8 +424,8 @@ function EmptyState() {
       <Logo size={48} />
       <h2 className="mt-4 text-base font-semibold">Ready to audit</h2>
       <p className="mt-1 max-w-xs text-xs text-slate-500">
-        Run a real-time RGAA/WCAG accessibility and Core Web Vitals scan, then
-        use Deep scan for AI-assisted RGAA review.
+        Run a real-time RGAA/WCAG accessibility and Core Web Vitals scan, then use Deep scan for
+        AI-assisted RGAA review.
       </p>
     </div>
   );

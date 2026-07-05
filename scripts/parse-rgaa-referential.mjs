@@ -18,10 +18,9 @@ const outputPath = resolve(process.argv[3] ?? defaultOutput);
 
 const md = readFileSync(inputPath, 'utf8');
 
-const CRITERION_RE =
-  /^\* ### (\d+\.\d+) (.+?)Critère \1\s/gm;
+const CRITERION_RE = /^\* ### (\d+\.\d+) (.+?)Critère \1\s/gm;
 
-const TEST_RE = /^#### (\d+\.\d+\.\d+)\s*\n(.+?) Test \1/mg;
+const TEST_RE = /^#### (\d+\.\d+\.\d+)\s*\n(.+?) Test \1/gm;
 
 /** @type {Array<{ id: string; title: string; theme: number; tests: Array<{ id: string; title: string }> }>} */
 const criteria = [];

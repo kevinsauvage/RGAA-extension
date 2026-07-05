@@ -104,11 +104,7 @@ export function highlightNode(
   selector: string,
   options: { targets?: string[]; persist?: boolean } = {},
 ): boolean {
-  const selectors = options.targets?.length
-    ? options.targets
-    : selector
-      ? [selector]
-      : [];
+  const selectors = options.targets?.length ? options.targets : selector ? [selector] : [];
   const element = findElement(selectors);
   if (!element) return false;
 

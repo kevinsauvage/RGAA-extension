@@ -1,12 +1,7 @@
 import type { ContentResponse, RuntimeMessage } from '@/lib/messaging';
 import type { ScanResult } from '@/lib/types';
 import { ensureContentScript } from '@/lib/content-script-inject';
-import {
-  getSettings,
-  getUsage,
-  incrementUsage,
-  pushHistory,
-} from '@/lib/storage';
+import { getSettings, getUsage, incrementUsage, pushHistory } from '@/lib/storage';
 import { evaluateQuota } from '@/lib/scan-limits';
 
 type BgResponse =
@@ -17,15 +12,10 @@ type BgResponse =
   | { ok: false; error: string; reason?: 'quota' | 'runtime' };
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.sidePanel
-    .setPanelBehavior({ openPanelOnActionClick: false })
-    .catch(() => undefined);
+  chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false }).catch(() => undefined);
 });
 
-async function messageTab<T extends ContentResponse>(
-  tabId: number,
-  message: unknown,
-): Promise<T> {
+async function messageTab<T extends ContentResponse>(tabId: number, message: unknown): Promise<T> {
   await ensureContentScript(tabId);
   return (await chrome.tabs.sendMessage(tabId, message)) as T;
 }
