@@ -1,7 +1,7 @@
 import type { AccessibilityIssue, AiFix } from '@/lib/types';
 import type { Settings } from '@/lib/storage';
 import { buildUserPrompt, SYSTEM_PROMPT } from './prompts';
-import { buildChatCompletionBody, OPENAI_CHAT_URL } from './chat-completions';
+import { openaiChatCompletion, stripJsonFences } from './openai-fetch';
 
 interface RawFix {
   explanation: string;
@@ -10,13 +10,7 @@ interface RawFix {
 }
 
 function parseFix(content: string): RawFix {
-  // The model is asked for pure JSON, but strip fences defensively.
-  const cleaned = content
-    .trim()
-    .replace(/^```(?:json)?/i, '')
-    .replace(/```$/i, '')
-    .trim();
-  const parsed = JSON.parse(cleaned) as Partial<RawFix>;
+  const parsed = JSON.parse(stripJsonFences(content)) as Partial<RawFix>;
   return {
     explanation: parsed.explanation ?? '',
     codeFix: parsed.codeFix ?? '',
@@ -36,34 +30,15 @@ export async function generateFix(issue: AccessibilityIssue, settings: Settings)
     );
   }
 
-  const response = await fetch(OPENAI_CHAT_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${settings.openaiApiKey}`,
-    },
-    body: JSON.stringify(
-      buildChatCompletionBody(
-        settings.model,
-        [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: buildUserPrompt(issue, settings.language) },
-        ],
-        { temperature: 0.2, jsonMode: true },
-      ),
-    ),
-  });
-
-  if (!response.ok) {
-    const detail = await response.text().catch(() => '');
-    throw new Error(`OpenAI request failed (${response.status}). ${detail.slice(0, 200)}`);
-  }
-
-  const data = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) throw new Error('OpenAI returned an empty response.');
+  const content = await openaiChatCompletion(
+    settings.openaiApiKey,
+    settings.model,
+    [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: buildUserPrompt(issue, settings.language) },
+    ],
+    { temperature: 0.2, jsonMode: true, context: 'AI fix generation' },
+  );
 
   const raw = parseFix(content);
   return {

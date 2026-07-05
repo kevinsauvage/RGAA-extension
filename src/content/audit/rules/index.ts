@@ -15,23 +15,24 @@ import { checkKeyboardAccessible } from './scripts';
 import { checkLayoutTableSemantics } from './tables';
 import { checkDoctype, checkTextDirection } from './mandatory';
 import {
-  checkDocumentLinks,
-  checkFieldsetLegend,
-  checkNewWindowLinks,
   checkRadioGroups,
+  checkFieldsetLegend,
   checkRequiredIndication,
-  checkSkipLink,
   checkSelectOptgroup,
   checkInvalidFieldHint,
-  checkPopupOnLoad,
 } from './forms';
+import { checkSkipLink, checkKeyboardTrap } from './navigation';
+import {
+  checkNewWindowLinks,
+  checkDocumentLinks,
+  checkPopupOnLoad,
+} from './consultation';
 import {
   checkAutoplayMedia,
   checkMovingContent,
   checkVideoCaptions,
   checkMediaControlFocus,
 } from './multimedia';
-import { checkKeyboardTrap } from './navigation';
 import { checkStatusMessages } from './status-messages';
 
 export interface RegisteredRule {

@@ -69,10 +69,9 @@ export async function getHistory(): Promise<ScanResult[]> {
   return (stored[HISTORY_KEY] as ScanResult[] | undefined) ?? [];
 }
 
-export async function pushHistory(result: ScanResult, limit = 20): Promise<void> {
-  const history = await getHistory();
-  const next = [result, ...history].slice(0, limit);
-  await chrome.storage.local.set({ [HISTORY_KEY]: next });
+/** Reserved for P2 scan history UI — not written until the panel exists. */
+export async function pushHistory(_result: ScanResult, _limit = 20): Promise<void> {
+  // intentionally no-op
 }
 
 export async function getCachedFix(issueId: string): Promise<AiFix | undefined> {

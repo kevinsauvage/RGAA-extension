@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import type { AccessibilityIssue, AiAuditProgress, AiFix, ScanResult } from '@/lib/types';
-import type { QuotaStatus } from '@/lib/scan-limits';
 import { summarizeIssues } from '@/lib/scan-summary';
 
 type ScanStatus = 'idle' | 'scanning' | 'done' | 'error';
@@ -18,7 +17,6 @@ interface PanelState {
   status: ScanStatus;
   result: ScanResult | null;
   error: string | null;
-  quota: QuotaStatus | null;
   /** UI language, mirrored from Settings. */
   language: 'fr' | 'en';
   aiAuditStatus: AiAuditStatus;
@@ -31,7 +29,6 @@ interface PanelState {
   setStatus: (status: ScanStatus) => void;
   setResult: (result: ScanResult) => void;
   setError: (error: string | null) => void;
-  setQuota: (quota: QuotaStatus) => void;
   setLanguage: (language: 'fr' | 'en') => void;
   setAiAuditStatus: (status: AiAuditStatus) => void;
   setAiAuditProgress: (progress: AiAuditProgress | null) => void;
@@ -55,7 +52,6 @@ export const usePanelStore = create<PanelState>((set) => ({
   status: 'idle',
   result: null,
   error: null,
-  quota: null,
   language: 'fr',
   aiAuditStatus: 'idle',
   aiAuditProgress: null,
@@ -76,7 +72,6 @@ export const usePanelStore = create<PanelState>((set) => ({
       aiAuditInfo: null,
     }),
   setError: (error) => set({ error, status: error ? 'error' : 'idle' }),
-  setQuota: (quota) => set({ quota }),
   setLanguage: (language) => set({ language }),
   setAiAuditStatus: (aiAuditStatus) => set({ aiAuditStatus }),
   setAiAuditProgress: (aiAuditProgress) => set({ aiAuditProgress }),

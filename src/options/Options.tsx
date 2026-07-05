@@ -7,6 +7,7 @@ import {
   type Settings,
 } from '@/lib/storage';
 import { FREE_TIER_MONTHLY_SCANS } from '@/lib/scan-limits';
+import { Logo } from '@/components/Logo';
 import {
   MODEL_GROUPS,
   OPENAI_MODELS,
@@ -48,9 +49,7 @@ export function Options() {
   return (
     <div className="mx-auto min-h-screen max-w-2xl px-6 py-10">
       <header className="mb-8 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 text-lg font-bold text-white">
-          A
-        </div>
+        <Logo size={40} />
         <div>
           <h1 className="text-xl font-bold">A11yFix AI — Settings</h1>
           <p className="text-sm text-slate-500">Configure the AI copilot and your plan.</p>

@@ -1,4 +1,3 @@
-import { jsPDF } from 'jspdf';
 import type { IssueSource, ScanResult } from '@/lib/types';
 
 const SEVERITY_LABEL: Record<string, string> = {
@@ -15,7 +14,8 @@ const SOURCE_LABEL: Record<IssueSource, string> = {
 };
 
 /** Build a client-ready PDF audit report and trigger a download. */
-export function exportReportPdf(result: ScanResult): void {
+export async function exportReportPdf(result: ScanResult): Promise<void> {
+  const { jsPDF } = await import('jspdf');
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 40;

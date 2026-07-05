@@ -1,83 +1,9 @@
 import { auditDoc } from '../audit-context';
-import { computeAccessibleName } from '../accessible-name';
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
-const NEW_WINDOW_HINTS = /nouvelle\s+fen[eê]tre|new\s+(window|tab)|ouvre\s+dans/i;
-const DOC_EXTENSIONS = /\.(pdf|docx?|xlsx?|pptx?|odt|ods|odp)([?#]|$)/i;
-const FORMAT_HINTS =
-  /pdf|docx?|xlsx?|pptx?|word|excel|powerpoint|document|téléchargement|download|[\d,.]+\s*(ko|mo|kb|mb)/i;
-const SKIP_LINK_HINTS = /contenu|content|main|principal/i;
 const REQUIRED_MARKERS = /obligatoire|required|\*|requis/i;
-
-/** RGAA 13.2 — target=_blank without warning. */
-export function checkNewWindowLinks(): RuleFinding | null {
-  const offenders: Element[] = [];
-  for (const link of auditDoc().querySelectorAll('a[target="_blank"]')) {
-    if (!isVisible(link)) continue;
-    const name = computeAccessibleName(link) ?? '';
-    const title = link.getAttribute('title') ?? '';
-    if (!NEW_WINDOW_HINTS.test(name) && !NEW_WINDOW_HINTS.test(title)) offenders.push(link);
-  }
-  return multiNodeFinding(offenders, {
-    criterion: '13.2',
-    ruleId: 'rgaa-new-window-warning',
-    severity: 'minor',
-    title: 'Ouverture de nouvelle fenêtre non signalée',
-    description:
-      'Des liens avec target="_blank" ne préviennent pas que le lien ouvre une nouvelle fenêtre.',
-    userImpact: "Les utilisateurs de lecteur d'écran perdent leur contexte sans avertissement.",
-  });
-}
-
-/** RGAA 13.3 — document download links without format in label. */
-export function checkDocumentLinks(): RuleFinding | null {
-  const offenders: Element[] = [];
-  for (const link of auditDoc().querySelectorAll('a[href]')) {
-    if (!isVisible(link)) continue;
-    const href = link.getAttribute('href') ?? '';
-    if (!DOC_EXTENSIONS.test(href)) continue;
-    const name = computeAccessibleName(link) ?? '';
-    if (!FORMAT_HINTS.test(name)) offenders.push(link);
-  }
-  return multiNodeFinding(offenders, {
-    criterion: '13.3',
-    ruleId: 'rgaa-doc-link-format',
-    severity: 'minor',
-    title: 'Document en téléchargement sans indication de format',
-    description:
-      "Des liens vers des documents bureautiques n'indiquent pas le format dans l'intitulé.",
-    userImpact: "Les utilisateurs ne savent pas qu'ils vont télécharger un fichier.",
-  });
-}
-
-/** RGAA 12.7 — skip link to main content. */
-export function checkSkipLink(): RuleFinding | null {
-  const doc = auditDoc();
-  const main = doc.querySelector('main, [role="main"]');
-  if (!main) return null;
-  const firstLinks = [...doc.querySelectorAll('a[href^="#"]')].slice(0, 8);
-  const hasSkipLink = firstLinks.some((link) => {
-    const name = computeAccessibleName(link) ?? '';
-    const targetId = link.getAttribute('href')?.slice(1) ?? '';
-    if (!targetId) return false;
-    const target = doc.getElementById(targetId);
-    return (
-      SKIP_LINK_HINTS.test(name) &&
-      (target === main || main.contains(target) || target?.contains(main) === true)
-    );
-  });
-  if (hasSkipLink) return null;
-  return {
-    criterion: '12.7',
-    ruleId: 'rgaa-skip-link',
-    severity: 'moderate',
-    title: "Lien d'évitement vers le contenu principal absent",
-    description: "Aucun lien d'accès rapide vers la zone de contenu principal n'a été détecté.",
-    userImpact: 'Les utilisateurs au clavier doivent tabuler à travers tout le menu.',
-    nodes: [{ selector: 'main, [role="main"]', html: main.outerHTML.slice(0, 220) }],
-  };
-}
+const ERROR_HINT_PATTERN = /erreur|error|correction|invalid|aide|suggestion|exemple|format attendu/i;
 
 /** RGAA 11.5 — radio groups not in fieldset. */
 export function checkRadioGroups(): RuleFinding | null {
@@ -151,8 +77,6 @@ export function checkRequiredIndication(): RuleFinding | null {
   });
 }
 
-const ERROR_HINT_PATTERN = /erreur|error|correction|invalid|aide|suggestion|exemple|format attendu/i;
-
 /** RGAA 11.8 — long select lists with visual grouping but no optgroup. */
 export function checkSelectOptgroup(): RuleFinding | null {
   const offenders: Element[] = [];
@@ -223,36 +147,5 @@ export function checkInvalidFieldHint(): RuleFinding | null {
       'Des champs marqués aria-invalid="true" n’ont pas de message d’erreur ou de suggestion associé à proximité.',
     userImpact:
       'Les utilisateurs ne savent pas comment corriger leur saisie après une erreur de validation.',
-  });
-}
-
-const POPUP_ON_LOAD_PATTERN = /window\.open\s*\(|showModalDialog\s*\(/;
-
-/** RGAA 13.2 (extend) — popup-on-load via inline scripts or handlers. */
-export function checkPopupOnLoad(): RuleFinding | null {
-  const doc = auditDoc();
-  const offenders: Element[] = [];
-
-  for (const script of doc.querySelectorAll('script:not([src])')) {
-    const body = script.textContent ?? '';
-    if (POPUP_ON_LOAD_PATTERN.test(body) && /load|DOMContentLoaded|ready/i.test(body)) {
-      offenders.push(script);
-    }
-  }
-
-  for (const el of doc.querySelectorAll<HTMLElement>('[onload], body[onload]')) {
-    const handler = el.getAttribute('onload') ?? '';
-    if (POPUP_ON_LOAD_PATTERN.test(handler)) offenders.push(el);
-  }
-
-  return multiNodeFinding(offenders, {
-    criterion: '13.2',
-    ruleId: 'rgaa-popup-on-load',
-    severity: 'serious',
-    title: 'Ouverture de fenêtre au chargement de la page',
-    description:
-      'Un script ou gestionnaire onload ouvre une nouvelle fenêtre (window.open) au chargement de la page.',
-    userImpact:
-      'Les utilisateurs sont surpris par une fenêtre popup qu’ils n’ont pas demandée, perturbant la navigation.',
   });
 }

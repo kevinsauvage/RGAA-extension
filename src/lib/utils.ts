@@ -1,4 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
+import type { ContentResponse } from './messaging';
+import { sendRuntimeMessage } from './tab-messaging';
 
 export function cn(...inputs: ClassValue[]): string {
   return clsx(inputs);
@@ -12,10 +14,12 @@ export async function getActiveTab(): Promise<chrome.tabs.Tab | undefined> {
 export async function getPageHtmlFromTab(): Promise<{ html: string; styleSnippets: string }> {
   const tab = await getActiveTab();
   if (!tab?.id) throw new Error('No active tab.');
-  const response = (await chrome.runtime.sendMessage({
+  const response = await sendRuntimeMessage<
+    { ok: true; html: string; styleSnippets: string } | { ok: false; error: string }
+  >({
     type: 'GET_PAGE_HTML',
     tabId: tab.id,
-  })) as { ok: true; html: string; styleSnippets: string } | { ok: false; error: string };
+  });
 
   if (!response.ok || !('html' in response)) {
     throw new Error('error' in response ? response.error : 'Failed to read the page HTML.');
@@ -27,11 +31,13 @@ export async function verifySelectorsOnTab(selectors: string[]): Promise<Record<
   if (selectors.length === 0) return {};
   const tab = await getActiveTab();
   if (!tab?.id) throw new Error('No active tab.');
-  const response = (await chrome.runtime.sendMessage({
+  const response = await sendRuntimeMessage<
+    { ok: true; selectors: Record<string, boolean> } | { ok: false; error: string }
+  >({
     type: 'VERIFY_SELECTORS',
     tabId: tab.id,
     selectors,
-  })) as { ok: true; selectors: Record<string, boolean> } | { ok: false; error: string };
+  });
 
   if (!response.ok || !('selectors' in response)) {
     throw new Error('error' in response ? response.error : 'Selector verification failed.');
@@ -50,13 +56,13 @@ export async function focusIssueOnPage(
 ): Promise<boolean> {
   const tab = await getActiveTab();
   if (!tab?.id) return false;
-  const response = (await chrome.runtime.sendMessage({
+  const response = await sendRuntimeMessage<{ ok: true } | { ok: false; error: string }>({
     type: 'HIGHLIGHT_NODE',
     tabId: tab.id,
     target,
     targets: options.targets,
     persist: options.persist ?? true,
-  })) as { ok: true } | { ok: false; error: string };
+  });
   return response.ok;
 }
 
@@ -68,7 +74,7 @@ export async function clearHighlightOnPage(pinned = false): Promise<void> {
   const tab = await getActiveTab();
   if (!tab?.id) return;
   try {
-    await chrome.runtime.sendMessage({
+    await sendRuntimeMessage({
       type: 'CLEAR_HIGHLIGHT',
       tabId: tab.id,
       pinned,
@@ -76,4 +82,10 @@ export async function clearHighlightOnPage(pinned = false): Promise<void> {
   } catch {
     // ignore
   }
+}
+
+export async function runScanOnActiveTab(): Promise<ContentResponse> {
+  const tab = await getActiveTab();
+  if (!tab?.id) throw new Error('No active tab.');
+  return sendRuntimeMessage<ContentResponse>({ type: 'RUN_SCAN', tabId: tab.id });
 }

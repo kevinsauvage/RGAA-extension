@@ -1,10 +1,41 @@
 import { auditDoc } from '../audit-context';
+import { computeAccessibleName } from '../accessible-name';
 import { getTabbableElements, hasFocusTrap } from '../focus-utils';
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
 const DISMISS_SELECTOR =
   'button[aria-label*="close" i], button[aria-label*="fermer" i], [data-dismiss], [data-bs-dismiss], [data-close], [aria-label*="Close" i]';
+
+const SKIP_LINK_HINTS = /contenu|content|main|principal/i;
+
+/** RGAA 12.7 — skip link to main content. */
+export function checkSkipLink(): RuleFinding | null {
+  const doc = auditDoc();
+  const main = doc.querySelector('main, [role="main"]');
+  if (!main) return null;
+  const firstLinks = [...doc.querySelectorAll('a[href^="#"]')].slice(0, 8);
+  const hasSkipLink = firstLinks.some((link) => {
+    const name = computeAccessibleName(link) ?? '';
+    const targetId = link.getAttribute('href')?.slice(1) ?? '';
+    if (!targetId) return false;
+    const target = doc.getElementById(targetId);
+    return (
+      SKIP_LINK_HINTS.test(name) &&
+      (target === main || main.contains(target) || target?.contains(main) === true)
+    );
+  });
+  if (hasSkipLink) return null;
+  return {
+    criterion: '12.7',
+    ruleId: 'rgaa-skip-link',
+    severity: 'moderate',
+    title: "Lien d'évitement vers le contenu principal absent",
+    description: "Aucun lien d'accès rapide vers la zone de contenu principal n'a été détecté.",
+    userImpact: 'Les utilisateurs au clavier doivent tabuler à travers tout le menu.',
+    nodes: [{ selector: 'main, [role="main"]', html: main.outerHTML.slice(0, 220) }],
+  };
+}
 
 /** RGAA 12.9 — keyboard focus trapped inside a modal without escape. */
 export function checkKeyboardTrap(): RuleFinding | null {

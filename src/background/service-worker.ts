@@ -1,12 +1,12 @@
 import type { ContentResponse, RuntimeMessage } from '@/lib/messaging';
 import type { ScanResult } from '@/lib/types';
-import { ensureContentScript } from '@/lib/content-script-inject';
-import { getSettings, getUsage, incrementUsage, pushHistory } from '@/lib/storage';
+import { sendToTab, toError } from '@/lib/tab-messaging';
+import { getSettings, getUsage, incrementUsage } from '@/lib/storage';
 import { evaluateQuota } from '@/lib/scan-limits';
 
 type BgResponse =
   | { ok: true; result: ScanResult }
-  | { ok: true; html: string }
+  | { ok: true; html: string; styleSnippets: string }
   | { ok: true; selectors: Record<string, boolean> }
   | { ok: true }
   | { ok: false; error: string; reason?: 'quota' | 'runtime' };
@@ -14,15 +14,6 @@ type BgResponse =
 chrome.runtime.onInstalled.addListener(() => {
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false }).catch(() => undefined);
 });
-
-async function messageTab<T extends ContentResponse>(tabId: number, message: unknown): Promise<T> {
-  await ensureContentScript(tabId);
-  return (await chrome.tabs.sendMessage(tabId, message)) as T;
-}
-
-function toError(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback;
-}
 
 async function runScan(tabId: number): Promise<BgResponse> {
   const [settings, usage] = await Promise.all([getSettings(), getUsage()]);
@@ -36,7 +27,7 @@ async function runScan(tabId: number): Promise<BgResponse> {
   }
 
   try {
-    const response = await messageTab<ContentResponse>(tabId, { type: 'RUN_SCAN' });
+    const response = await sendToTab<ContentResponse>(tabId, { type: 'RUN_SCAN' });
 
     if (!response.ok || !('result' in response)) {
       const error = 'error' in response ? response.error : 'Scan failed.';
@@ -44,7 +35,6 @@ async function runScan(tabId: number): Promise<BgResponse> {
     }
 
     await incrementUsage();
-    await pushHistory(response.result);
     return { ok: true, result: response.result };
   } catch (error) {
     return {
@@ -55,6 +45,19 @@ async function runScan(tabId: number): Promise<BgResponse> {
   }
 }
 
+function relayTabMessage(
+  tabId: number,
+  message: Parameters<typeof sendToTab>[1],
+  fallback: string,
+  sendResponse: (r: BgResponse) => void,
+): void {
+  sendToTab<ContentResponse>(tabId, message)
+    .then((response) => sendResponse(response as BgResponse))
+    .catch((error: unknown) =>
+      sendResponse({ ok: false, reason: 'runtime', error: toError(error, fallback) }),
+    );
+}
+
 chrome.runtime.onMessage.addListener(
   (message: RuntimeMessage, _sender, sendResponse: (r: BgResponse) => void) => {
     switch (message.type) {
@@ -62,32 +65,18 @@ chrome.runtime.onMessage.addListener(
         runScan(message.tabId).then(sendResponse);
         return true;
       case 'GET_PAGE_HTML':
-        messageTab<ContentResponse>(message.tabId, { type: 'GET_PAGE_HTML' })
-          .then((response) => sendResponse(response as BgResponse))
-          .catch((error: unknown) =>
-            sendResponse({
-              ok: false,
-              reason: 'runtime',
-              error: toError(error, 'Unable to read this page.'),
-            }),
-          );
+        relayTabMessage(message.tabId, { type: 'GET_PAGE_HTML' }, 'Unable to read this page.', sendResponse);
         return true;
       case 'VERIFY_SELECTORS':
-        messageTab<ContentResponse>(message.tabId, {
-          type: 'VERIFY_SELECTORS',
-          selectors: message.selectors,
-        })
-          .then((response) => sendResponse(response as BgResponse))
-          .catch((error: unknown) =>
-            sendResponse({
-              ok: false,
-              reason: 'runtime',
-              error: toError(error, 'Selector verification failed.'),
-            }),
-          );
+        relayTabMessage(
+          message.tabId,
+          { type: 'VERIFY_SELECTORS', selectors: message.selectors },
+          'Selector verification failed.',
+          sendResponse,
+        );
         return true;
       case 'HIGHLIGHT_NODE':
-        messageTab<ContentResponse>(message.tabId, {
+        sendToTab<ContentResponse>(message.tabId, {
           type: 'HIGHLIGHT_NODE',
           target: message.target,
           targets: message.targets,
@@ -99,7 +88,7 @@ chrome.runtime.onMessage.addListener(
           );
         return true;
       case 'CLEAR_HIGHLIGHT':
-        messageTab<ContentResponse>(message.tabId, {
+        sendToTab<ContentResponse>(message.tabId, {
           type: 'CLEAR_HIGHLIGHT',
           pinned: message.pinned,
         })

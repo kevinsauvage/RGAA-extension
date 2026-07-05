@@ -311,6 +311,7 @@ export interface CoverageStats {
   byTheme: Record<number, { total: number; automated: number; ai: number; manual: number }>;
 }
 
+/** @docs-only Used by `npm run docs` — not surfaced in the extension UI (see P2 coverage dashboard). */
 export function computeCoverageStats(): CoverageStats {
   const ids = Object.keys(CRITERION_COVERAGE);
   let automated = 0;

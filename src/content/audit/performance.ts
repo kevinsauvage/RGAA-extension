@@ -4,7 +4,6 @@ import type { CoreWebVitals, PerformanceIssue, Severity } from '@/lib/types';
 const THRESHOLDS = {
   lcp: 2500,
   cls: 0.1,
-  inp: 200,
   ttfb: 800,
   fcp: 1800,
 } as const;
@@ -81,7 +80,7 @@ export async function collectPerformance(): Promise<{
   const { ttfb, fcp } = readNavigationTiming();
   const [lcp, cls] = await Promise.all([readLcp(), readCls()]);
 
-  const webVitals: CoreWebVitals = { lcp, cls, inp: null, ttfb, fcp };
+  const webVitals: CoreWebVitals = { lcp, cls, ttfb, fcp };
   const issues: PerformanceIssue[] = [];
 
   const push = (

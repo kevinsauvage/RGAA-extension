@@ -7,7 +7,7 @@ import {
   type RgaaCriterion,
 } from '@/lib/rgaa/criteria';
 import { enrichDeepScanHint } from '@/lib/rgaa/referential-hints';
-import { buildChatCompletionBody, OPENAI_CHAT_URL } from './chat-completions';
+import { openaiChatCompletion, stripJsonFences } from './openai-fetch';
 
 /**
  * AI deep scan: sends the pruned rendered HTML plus a batch of RGAA criteria
@@ -101,12 +101,7 @@ function buildBatchPrompt(
 }
 
 function parseFindings(content: string): RawFinding[] {
-  const cleaned = content
-    .trim()
-    .replace(/^```(?:json)?/i, '')
-    .replace(/```$/i, '')
-    .trim();
-  const parsed = JSON.parse(cleaned) as { findings?: unknown[] };
+  const parsed = JSON.parse(stripJsonFences(content)) as { findings?: unknown[] };
   if (!Array.isArray(parsed.findings)) return [];
 
   return parsed.findings
@@ -150,39 +145,18 @@ async function scanBatch(
   settings: Settings,
   styleSnippets?: string,
 ): Promise<RawFinding[]> {
-  const response = await fetch(OPENAI_CHAT_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${settings.openaiApiKey}`,
-    },
-    body: JSON.stringify(
-      buildChatCompletionBody(
-        settings.model,
-        [
-          { role: 'system', content: DEEP_SCAN_SYSTEM_PROMPT },
-          {
-            role: 'user',
-            content: buildBatchPrompt(criteria, html, settings.language, styleSnippets),
-          },
-        ],
-        { temperature: 0, jsonMode: true },
-      ),
-    ),
-  });
-
-  if (!response.ok) {
-    const detail = await response.text().catch(() => '');
-    throw new Error(
-      `Deep scan "${batch.label.en}" failed (${response.status}). ${detail.slice(0, 160)}`,
-    );
-  }
-
-  const data = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) return [];
+  const content = await openaiChatCompletion(
+    settings.openaiApiKey,
+    settings.model,
+    [
+      { role: 'system', content: DEEP_SCAN_SYSTEM_PROMPT },
+      {
+        role: 'user',
+        content: buildBatchPrompt(criteria, html, settings.language, styleSnippets),
+      },
+    ],
+    { temperature: 0, jsonMode: true, context: `Deep scan "${batch.label.en}"` },
+  );
   return parseFindings(content);
 }
 

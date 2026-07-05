@@ -1,29 +1,20 @@
 import { useEffect, useState } from 'react';
-import { getSettings, getUsage } from '@/lib/storage';
-import { evaluateQuota, type QuotaStatus } from '@/lib/scan-limits';
+import { Logo } from '@/components/Logo';
+import { useQuota } from '@/hooks/useQuota';
 import { getActiveTab, isScannable } from '@/lib/utils';
+import { sendRuntimeMessage } from '@/lib/tab-messaging';
 
 export function Popup() {
-  const [quota, setQuota] = useState<QuotaStatus | null>(null);
+  const { quota, hasApiKey } = useQuota();
   const [tab, setTab] = useState<chrome.tabs.Tab | undefined>();
-  const [hasKey, setHasKey] = useState(false);
 
   useEffect(() => {
-    void (async () => {
-      const [settings, usage, activeTab] = await Promise.all([
-        getSettings(),
-        getUsage(),
-        getActiveTab(),
-      ]);
-      setQuota(evaluateQuota(settings, usage));
-      setHasKey(Boolean(settings.openaiApiKey));
-      setTab(activeTab);
-    })();
+    void getActiveTab().then(setTab);
   }, []);
 
   const openPanel = async () => {
     if (!tab?.id) return;
-    await chrome.runtime.sendMessage({ type: 'OPEN_SIDE_PANEL', tabId: tab.id });
+    await sendRuntimeMessage({ type: 'OPEN_SIDE_PANEL', tabId: tab.id });
     window.close();
   };
 
@@ -32,9 +23,7 @@ export function Popup() {
   return (
     <div className="w-80 bg-slate-50 p-4 dark:bg-slate-950">
       <div className="mb-3 flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">
-          A
-        </div>
+        <Logo size={32} />
         <div>
           <h1 className="text-sm font-bold">A11yFix AI</h1>
           <p className="text-[10px] text-slate-400">Accessibility & Performance Copilot</p>
@@ -66,7 +55,7 @@ export function Popup() {
         <p className="mt-2 text-center text-[11px] text-slate-400">This page can’t be scanned.</p>
       )}
 
-      {!hasKey && (
+      {!hasApiKey && (
         <p className="mt-3 rounded-lg bg-amber-50 px-2 py-1.5 text-[11px] text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
           Add an OpenAI API key in settings to unlock AI fixes.
         </p>

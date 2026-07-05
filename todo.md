@@ -144,20 +144,20 @@ Official roadmap from [docs/coverage.md](docs/coverage.md). Implement on **live 
 
 ### Refactors
 
-- [ ] **Rule registry** — implement ADR-3; remove `rgaa-rules.ts` deprecated shim
-- [ ] **Split `rules/forms.ts`** — move 12.7, 13.2, 13.3 to `rules/navigation.ts` and `rules/consultation.ts`
-- [ ] **Shared OpenAI transport** — merge duplicate fetch/parse in `deep-scan.ts` and `client.ts` via `lib/ai/openai-fetch.ts`
-- [ ] **Shared UI components** — extract `Logo` from `App.tsx` / `Popup.tsx` / `Options.tsx` → `src/components/Logo.tsx`
-- [ ] **Shared quota hook** — `useQuota()` for `App.tsx` and `Popup.tsx`
-- [ ] **Messaging helper** — DRY tab message dispatch in `service-worker.ts` and `utils.ts`
-- [ ] **Split `App.tsx`** — extract `ScanToolbar`, `IssueFilters`, `DeepScanProgress` as components when adding features
+- [x] **Rule registry** — implement ADR-3; remove `rgaa-rules.ts` deprecated shim
+- [x] **Split `rules/forms.ts`** — move 12.7, 13.2, 13.3 to `rules/navigation.ts` and `rules/consultation.ts`
+- [x] **Shared OpenAI transport** — merge duplicate fetch/parse in `deep-scan.ts` and `client.ts` via `lib/ai/openai-fetch.ts`
+- [x] **Shared UI components** — extract `Logo` from `App.tsx` / `Popup.tsx` / `Options.tsx` → `src/components/Logo.tsx`
+- [x] **Shared quota hook** — `useQuota()` for `App.tsx` and `Popup.tsx`
+- [x] **Messaging helper** — DRY tab message dispatch in `service-worker.ts` and `utils.ts`
+- [x] **Split `App.tsx`** — extract `ScanToolbar`, `IssueFilters`, `DeepScanProgress` as components when adding features
 
 ### Dead / incomplete code
 
-- [ ] **Scan history** — `pushHistory()` stores 20 scans in `storage.ts` but no UI; build history panel or remove writes
-- [ ] **`computeCoverageStats()`** — only used by doc generation; expose in side panel or keep docs-only intentionally
-- [ ] **INP metric** — typed in `types.ts`, always `null` in `performance.ts`; implement or remove from UI/types
-- [ ] **Side panel PDF deps** — jsPDF bundle pulls `html2canvas` + `dompurify` transitively; audit `lib/report/pdf.ts` imports, dynamic-import PDF module
+- [x] **Scan history** — `pushHistory()` stores 20 scans in `storage.ts` but no UI; build history panel or remove writes
+- [x] **`computeCoverageStats()`** — only used by doc generation; expose in side panel or keep docs-only intentionally
+- [x] **INP metric** — typed in `types.ts`, always `null` in `performance.ts`; implement or remove from UI/types
+- [x] **Side panel PDF deps** — jsPDF bundle pulls `html2canvas` + `dompurify` transitively; audit `lib/report/pdf.ts` imports, dynamic-import PDF module
 
 ---
 

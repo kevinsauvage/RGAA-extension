@@ -67,7 +67,6 @@ export interface PerformanceIssue {
 export interface CoreWebVitals {
   lcp: number | null;
   cls: number | null;
-  inp: number | null;
   ttfb: number | null;
   fcp: number | null;
 }

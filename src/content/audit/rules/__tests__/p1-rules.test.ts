@@ -4,11 +4,8 @@ import {
   checkHoverFocusOverlay,
   checkCssInteractiveReachability,
 } from '../presentation';
-import {
-  checkSelectOptgroup,
-  checkInvalidFieldHint,
-  checkPopupOnLoad,
-} from '../forms';
+import { checkPopupOnLoad } from '../consultation';
+import { checkSelectOptgroup, checkInvalidFieldHint } from '../forms';
 import { checkDecorativeImageAlt } from '../images';
 import { checkMediaControlFocus } from '../multimedia';
 import { expectNoFinding, expectRule, setBodyHtml, setHeadHtml } from './setup';
