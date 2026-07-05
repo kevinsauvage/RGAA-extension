@@ -1,3 +1,4 @@
+import { auditDoc } from '../audit-context';
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
@@ -6,10 +7,13 @@ const FOCUSABLE =
 
 const FOCUS_RING_HINT = /focus-visible|:focus|focus-ring|focusable|ring-offset|outline-offset/i;
 
+const DISMISS_SELECTOR =
+  'button[aria-label*="close" i], button[aria-label*="fermer" i], [data-dismiss], [data-bs-dismiss]';
+
 /** RGAA 10.7 — focus indicator likely removed on focusable elements. */
 export function checkFocusVisible(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const el of document.querySelectorAll<HTMLElement>(FOCUSABLE)) {
+  for (const el of auditDoc().querySelectorAll<HTMLElement>(FOCUSABLE)) {
     if (!isVisible(el)) continue;
     if (el.getAttribute('tabindex') === '-1') continue;
     const style = getComputedStyle(el);
@@ -44,7 +48,7 @@ const OFFSCREEN_SELECTORS = [
 /** RGAA 10.8 — off-screen / visually-hidden content still exposed to AT. */
 export function checkHiddenContent(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const el of document.querySelectorAll<HTMLElement>(OFFSCREEN_SELECTORS)) {
+  for (const el of auditDoc().querySelectorAll<HTMLElement>(OFFSCREEN_SELECTORS)) {
     if (!el.textContent?.trim()) continue;
     if (el.getAttribute('aria-hidden') === 'true') continue;
     if (el.closest('[aria-hidden="true"]')) continue;
@@ -89,7 +93,7 @@ function blocksTextSizeAdjust(el: HTMLElement): boolean {
 /** RGAA 10.4 — viewport or CSS blocks text scaling beyond 200%. */
 export function checkTextScaling(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const meta of document.querySelectorAll('meta[name="viewport"]')) {
+  for (const meta of auditDoc().querySelectorAll('meta[name="viewport"]')) {
     const content = meta.getAttribute('content') ?? '';
     const blocksScale =
       /user-scalable\s*=\s*no/i.test(content) || /maximum-scale\s*=\s*([0-9.]+)/i.test(content);
@@ -98,8 +102,9 @@ export function checkTextScaling(): RuleFinding | null {
       if (!maxMatch || parseFloat(maxMatch[1]) < 2) offenders.push(meta);
     }
   }
-  if (blocksTextSizeAdjust(document.documentElement) || blocksTextSizeAdjust(document.body)) {
-    offenders.push(document.documentElement);
+  const doc = auditDoc();
+  if (blocksTextSizeAdjust(doc.documentElement) || blocksTextSizeAdjust(doc.body)) {
+    offenders.push(doc.documentElement);
   }
   return multiNodeFinding(offenders, {
     criterion: '10.4',
@@ -128,7 +133,7 @@ const LEGACY_PRESENTATIONAL = new Set([
 export function checkPresentationalHtml(): RuleFinding | null {
   const offenders: Element[] = [];
   for (const tag of LEGACY_PRESENTATIONAL) {
-    for (const el of document.querySelectorAll(tag)) {
+    for (const el of auditDoc().querySelectorAll(tag)) {
       if (isVisible(el)) offenders.push(el);
     }
   }
@@ -141,5 +146,122 @@ export function checkPresentationalHtml(): RuleFinding | null {
       'Des balises de présentation obsolètes (font, center, big, u, blink, marquee…) sont utilisées au lieu du CSS.',
     userImpact:
       'La présentation devrait être gérée par les feuilles de styles pour permettre l’adaptation utilisateur.',
+  });
+}
+
+const SPACING_PROBES: Array<[prop: string, value: string]> = [
+  ['letter-spacing', '0.12em'],
+  ['line-height', '2.5'],
+  ['word-spacing', '0.16em'],
+];
+
+function spacingBlocked(el: HTMLElement): boolean {
+  const view = auditDoc().defaultView;
+  if (!view) return false;
+
+  for (const [prop, value] of SPACING_PROBES) {
+    const before = view.getComputedStyle(el).getPropertyValue(prop);
+    el.style.setProperty(prop, value, 'important');
+    const after = view.getComputedStyle(el).getPropertyValue(prop);
+    el.style.removeProperty(prop);
+    if (before === after && before !== value) return true;
+  }
+  return false;
+}
+
+/** RGAA 10.12 — CSS blocks user text spacing overrides (WCAG 1.4.12 style probe). */
+export function checkTextSpacingOverride(): RuleFinding | null {
+  const doc = auditDoc();
+  const probe = doc.createElement('p');
+  probe.textContent = 'A11yFix spacing probe';
+  probe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none';
+  doc.body.appendChild(probe);
+
+  const blocked = spacingBlocked(probe);
+  probe.remove();
+
+  if (!blocked) return null;
+
+  return {
+    criterion: '10.12',
+    ruleId: 'rgaa-text-spacing-override',
+    severity: 'moderate',
+    title: 'Espacement du texte non modifiable',
+    description:
+      'La page empêche l’augmentation de l’interlettrage, de l’interlignage ou de l’espacement des mots via CSS !important.',
+    userImpact:
+      'Les utilisateurs dyslexiques ou malvoyants ne peuvent pas adapter l’espacement du texte pour lire confortablement.',
+    nodes: [{ selector: 'html', html: '<html>…</html>' }],
+  };
+}
+
+const EXPANDED_POPUP_SELECTOR = '[aria-expanded="true"][aria-haspopup], [aria-expanded="true"][aria-controls]';
+
+/** RGAA 10.13 (partial) — expanded hover/focus popups without dismiss control. */
+export function checkHoverFocusOverlay(): RuleFinding | null {
+  const doc = auditDoc();
+  const offenders: Element[] = [];
+
+  for (const trigger of doc.querySelectorAll<HTMLElement>(EXPANDED_POPUP_SELECTOR)) {
+    if (!isVisible(trigger)) continue;
+
+    const popupId = trigger.getAttribute('aria-controls');
+    const popup = popupId ? doc.getElementById(popupId) : null;
+    if (!popup) continue;
+
+    const popupHasDismiss = popup.querySelector(DISMISS_SELECTOR) !== null;
+    const triggerCanToggle =
+      trigger.matches('button, a[href], summary, [role="button"]') ||
+      trigger.hasAttribute('data-dismiss');
+
+    if (!popupHasDismiss && !triggerCanToggle) {
+      offenders.push(trigger);
+    }
+  }
+
+  return multiNodeFinding(offenders, {
+    criterion: '10.13',
+    ruleId: 'rgaa-hover-focus-overlay',
+    severity: 'moderate',
+    title: 'Contenu additionnel au focus/survol non dismissible',
+    description:
+      'Un contenu additionnel affiché au focus ou au survol (aria-expanded) ne propose pas de mécanisme de fermeture.',
+    userImpact:
+      'Les utilisateurs qui naviguent au clavier ou au survol ne peuient pas masquer le contenu qui recouvre la page.',
+  });
+}
+
+/** RGAA 10.14 (partial) — pointer-styled elements not reachable by keyboard. */
+export function checkCssInteractiveReachability(): RuleFinding | null {
+  const offenders: Element[] = [];
+
+  for (const el of auditDoc().querySelectorAll<HTMLElement>('*')) {
+    if (!isVisible(el)) continue;
+    if (el.matches('a[href], button, input, select, textarea, summary, [role="button"], [role="link"]')) {
+      continue;
+    }
+    if (el.tabIndex >= 0) continue;
+
+    const style = getComputedStyle(el);
+    if (style.cursor !== 'pointer') continue;
+
+    const hasClickHandler =
+      el.hasAttribute('onclick') ||
+      el.hasAttribute('ng-click') ||
+      el.hasAttribute('@click') ||
+      el.dataset.action !== undefined;
+    if (!hasClickHandler && !el.closest('[onclick], [role="button"]')) continue;
+
+    offenders.push(el);
+  }
+
+  return multiNodeFinding(offenders, {
+    criterion: '10.14',
+    ruleId: 'rgaa-css-interactive',
+    severity: 'serious',
+    title: 'Contenu CSS interactif inaccessible au clavier',
+    description:
+      'Des éléments stylés comme cliquables (cursor:pointer) avec action scriptée ne sont pas atteignables au clavier.',
+    userImpact: 'Les utilisateurs au clavier ne peuvent pas activer ces contrôles visuels.',
   });
 }

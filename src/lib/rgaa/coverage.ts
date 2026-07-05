@@ -39,9 +39,10 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
     note: 'Informative vs decorative judgment for edge cases may need manual review.',
   },
   '1.2': {
-    methods: ['axe', 'ai'],
+    methods: ['axe', 'ai', 'rule'],
     axeRules: ['image-redundant-alt'],
-    note: 'Decorative intent partially AI-assessed.',
+    rules: ['rgaa-decorative-image-alt'],
+    note: 'Decorative images with non-empty alt; full intent may need manual review.',
   },
   '1.3': { methods: ['ai'], note: 'Alt relevance requires semantic judgment.' },
   '1.4': { methods: ['manual'], note: 'CAPTCHA/test images — manual audit.' },
@@ -92,7 +93,11 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
     axeRules: ['no-autoplay-audio'],
     rules: ['rgaa-autoplay-media'],
   },
-  '4.11': { methods: ['manual'], note: 'Keyboard control of media player — interaction test.' },
+  '4.11': {
+    methods: ['rule'],
+    rules: ['rgaa-media-control-focus'],
+    note: 'Custom player control focusability; full keyboard playback manual.',
+  },
   '4.12': { methods: ['manual'], note: 'Non-temporal media keyboard control — manual.' },
   '4.13': { methods: ['manual'], note: 'Media AT compatibility — manual.' },
 
@@ -136,7 +141,11 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
   '7.2': { methods: ['manual'], note: 'Script alternative relevance — manual.' },
   '7.3': { methods: ['rule'], rules: ['rgaa-keyboard-accessible'] },
   '7.4': { methods: ['axe'], axeRules: ['blink', 'marquee'] },
-  '7.5': { methods: ['manual'], note: 'Status message AT restitution — needs live SR test.' },
+  '7.5': {
+    methods: ['rule'],
+    rules: ['rgaa-status-messages'],
+    note: 'Toast/notification regions without aria-live; live SR test still manual.',
+  },
 
   // ── Theme 8 — Éléments obligatoires ───────────────────────────────────────
   '8.1': { methods: ['rule'], rules: ['rgaa-doctype'] },
@@ -184,9 +193,21 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
   '10.9': { methods: ['manual'], note: 'Information by shape/size/position — manual.' },
   '10.10': { methods: ['manual'], note: 'Implementation of shape/size cues — manual.' },
   '10.11': { methods: ['axe'], axeRules: ['css-orientation-lock'] },
-  '10.12': { methods: ['manual'], note: 'Text spacing override — manual resize test.' },
-  '10.13': { methods: ['manual'], note: 'Hover/focus additional content — interaction test.' },
-  '10.14': { methods: ['manual'], note: 'CSS-only content keyboard access — interaction test.' },
+  '10.12': {
+    methods: ['rule'],
+    rules: ['rgaa-text-spacing-override'],
+    note: 'CSS !important blocks text spacing override probe.',
+  },
+  '10.13': {
+    methods: ['rule'],
+    rules: ['rgaa-hover-focus-overlay'],
+    note: 'Expanded aria-haspopup overlays without dismiss; full hover test manual.',
+  },
+  '10.14': {
+    methods: ['rule'],
+    rules: ['rgaa-css-interactive'],
+    note: 'Pointer-styled scripted elements without keyboard access.',
+  },
 
   // ── Theme 11 — Formulaires ──────────────────────────────────────────────────
   '11.1': {
@@ -205,14 +226,22 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
   '11.5': { methods: ['rule'], rules: ['rgaa-radio-grouping'] },
   '11.6': { methods: ['rule'], rules: ['rgaa-fieldset-legend'] },
   '11.7': { methods: ['manual'], note: 'Legend relevance — manual.' },
-  '11.8': { methods: ['manual'], note: 'Optgroup grouping — partial manual.' },
+  '11.8': {
+    methods: ['rule'],
+    rules: ['rgaa-select-optgroup'],
+    note: 'Long selects with prefix grouping but no optgroup.',
+  },
   '11.9': { methods: ['ai'], note: 'Button label relevance — AI judgment.' },
   '11.10': {
     methods: ['ai', 'rule'],
     rules: ['rgaa-required-indication'],
     note: 'Required field indication rule + AI for format hints.',
   },
-  '11.11': { methods: ['manual'], note: 'Error correction suggestions — manual.' },
+  '11.11': {
+    methods: ['rule'],
+    rules: ['rgaa-invalid-field-hint'],
+    note: 'aria-invalid fields without nearby correction hint.',
+  },
   '11.12': { methods: ['manual'], note: 'Reversible submissions — manual.' },
   '11.13': { methods: ['axe'], axeRules: ['autocomplete-valid'] },
 
@@ -233,7 +262,11 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
     rules: ['rgaa-skip-link'],
   },
   '12.8': { methods: ['axe'], axeRules: ['tabindex'] },
-  '12.9': { methods: ['manual'], note: 'Keyboard trap — tab simulation planned.' },
+  '12.9': {
+    methods: ['rule'],
+    rules: ['rgaa-keyboard-trap'],
+    note: 'Modal focus trap without dismiss control.',
+  },
   '12.10': { methods: ['axe'], axeRules: ['accesskeys'] },
   '12.11': { methods: ['manual'], note: 'Keyboard reachability of tooltips — interaction test.' },
 
@@ -241,8 +274,8 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
   '13.1': { methods: ['axe'], axeRules: ['meta-refresh', 'meta-refresh-no-exceptions'] },
   '13.2': {
     methods: ['rule'],
-    rules: ['rgaa-new-window-warning'],
-    note: 'Popup-on-load not detected; target=_blank warning only.',
+    rules: ['rgaa-new-window-warning', 'rgaa-popup-on-load'],
+    note: 'target=_blank warning + popup-on-load script detection.',
   },
   '13.3': {
     methods: ['rule'],

@@ -9,10 +9,10 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 | Metric | Count | % |
 |--------|------:|--:|
 | Total criteria | 106 | 100% |
-| Deterministic (axe + rules) | 49 | 46.2% |
+| Deterministic (axe + rules) | 57 | 53.8% |
 | + AI deep scan (needs review) | 20 criteria also | — |
-| Automated + AI reachable | 56 criteria | 55.7% |
-| Manual only | 47 | 44.3% |
+| Automated + AI reachable | 63 criteria | 63.2% |
+| Manual only | 39 | 36.8% |
 
 ### How to read this
 
@@ -28,15 +28,15 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 | 1. Images | 9 | 2 | 4 | 4 |
 | 2. Cadres | 2 | 2 | 1 | 0 |
 | 3. Couleurs | 3 | 3 | 0 | 0 |
-| 4. Multimédia | 13 | 3 | 1 | 10 |
+| 4. Multimédia | 13 | 4 | 1 | 9 |
 | 5. Tableaux | 8 | 3 | 2 | 3 |
 | 6. Liens | 2 | 2 | 1 | 0 |
-| 7. Scripts | 5 | 3 | 0 | 2 |
+| 7. Scripts | 5 | 4 | 0 | 1 |
 | 8. Éléments obligatoires | 10 | 8 | 3 | 0 |
 | 9. Structuration de l’information | 4 | 3 | 3 | 0 |
-| 10. Présentation de l’information | 14 | 6 | 1 | 8 |
-| 11. Formulaires | 13 | 5 | 3 | 6 |
-| 12. Navigation | 11 | 4 | 1 | 7 |
+| 10. Présentation de l’information | 14 | 9 | 1 | 5 |
+| 11. Formulaires | 13 | 7 | 3 | 4 |
+| 12. Navigation | 11 | 5 | 1 | 6 |
 | 13. Consultation | 12 | 5 | 0 | 7 |
 
 ## Per-criterion matrix
@@ -44,7 +44,7 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 | Criterion | Theme | Methods | Rules / axe | Note |
 |-----------|-------|---------|-------------|------|
 | 1.1 | Images | axe, rule | rgaa-svg-informative, rgaa-canvas-alt, image-alt, input-image-alt | Informative vs decorative judgment for edge cases may need m |
-| 1.2 | Images | axe, ai | image-redundant-alt | Decorative intent partially AI-assessed. |
+| 1.2 | Images | axe, ai, rule | rgaa-decorative-image-alt, image-redundant-alt | Decorative images with non-empty alt; full intent may need m |
 | 1.3 | Images | ai |  | Alt relevance requires semantic judgment. |
 | 1.4 | Images | manual |  | CAPTCHA/test images — manual audit. |
 | 1.5 | Images | manual |  | CAPTCHA alternative mechanism — manual audit. |
@@ -67,7 +67,7 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 | 4.8 | Multimédia | manual |  | Non-temporal media alternatives — manual. |
 | 4.9 | Multimédia | manual |  | Alternative relevance — manual. |
 | 4.10 | Multimédia | axe, rule | rgaa-autoplay-media, no-autoplay-audio |  |
-| 4.11 | Multimédia | manual |  | Keyboard control of media player — interaction test. |
+| 4.11 | Multimédia | rule | rgaa-media-control-focus | Custom player control focusability; full keyboard playback m |
 | 4.12 | Multimédia | manual |  | Non-temporal media keyboard control — manual. |
 | 4.13 | Multimédia | manual |  | Media AT compatibility — manual. |
 | 5.1 | Tableaux | manual |  | Complex table summary — manual. |
@@ -84,7 +84,7 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 | 7.2 | Scripts | manual |  | Script alternative relevance — manual. |
 | 7.3 | Scripts | rule | rgaa-keyboard-accessible |  |
 | 7.4 | Scripts | axe | blink, marquee |  |
-| 7.5 | Scripts | manual |  | Status message AT restitution — needs live SR test. |
+| 7.5 | Scripts | rule | rgaa-status-messages | Toast/notification regions without aria-live; live SR test s |
 | 8.1 | Éléments obligatoires | rule | rgaa-doctype |  |
 | 8.2 | Éléments obligatoires | axe | duplicate-id-aria | Full HTML validation not automated. |
 | 8.3 | Éléments obligatoires | axe | html-has-lang |  |
@@ -110,9 +110,9 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 | 10.9 | Présentation de l’information | manual |  | Information by shape/size/position — manual. |
 | 10.10 | Présentation de l’information | manual |  | Implementation of shape/size cues — manual. |
 | 10.11 | Présentation de l’information | axe | css-orientation-lock |  |
-| 10.12 | Présentation de l’information | manual |  | Text spacing override — manual resize test. |
-| 10.13 | Présentation de l’information | manual |  | Hover/focus additional content — interaction test. |
-| 10.14 | Présentation de l’information | manual |  | CSS-only content keyboard access — interaction test. |
+| 10.12 | Présentation de l’information | rule | rgaa-text-spacing-override | CSS !important blocks text spacing override probe. |
+| 10.13 | Présentation de l’information | rule | rgaa-hover-focus-overlay | Expanded aria-haspopup overlays without dismiss; full hover  |
+| 10.14 | Présentation de l’information | rule | rgaa-css-interactive | Pointer-styled scripted elements without keyboard access. |
 | 11.1 | Formulaires | axe | label, label-title-only |  |
 | 11.2 | Formulaires | ai |  | Label relevance — AI judgment. |
 | 11.3 | Formulaires | manual |  | Cross-page label consistency — multi-page. |
@@ -120,10 +120,10 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 | 11.5 | Formulaires | rule | rgaa-radio-grouping |  |
 | 11.6 | Formulaires | rule | rgaa-fieldset-legend |  |
 | 11.7 | Formulaires | manual |  | Legend relevance — manual. |
-| 11.8 | Formulaires | manual |  | Optgroup grouping — partial manual. |
+| 11.8 | Formulaires | rule | rgaa-select-optgroup | Long selects with prefix grouping but no optgroup. |
 | 11.9 | Formulaires | ai |  | Button label relevance — AI judgment. |
 | 11.10 | Formulaires | ai, rule | rgaa-required-indication | Required field indication rule + AI for format hints. |
-| 11.11 | Formulaires | manual |  | Error correction suggestions — manual. |
+| 11.11 | Formulaires | rule | rgaa-invalid-field-hint | aria-invalid fields without nearby correction hint. |
 | 11.12 | Formulaires | manual |  | Reversible submissions — manual. |
 | 11.13 | Formulaires | axe | autocomplete-valid |  |
 | 12.1 | Navigation | manual |  | Two navigation systems — site-wide manual. |
@@ -134,11 +134,11 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 | 12.6 | Navigation | axe, ai | region, landmark-one-main | Landmark reachability AI-assessed. |
 | 12.7 | Navigation | axe, rule | rgaa-skip-link, bypass, skip-link |  |
 | 12.8 | Navigation | axe | tabindex |  |
-| 12.9 | Navigation | manual |  | Keyboard trap — tab simulation planned. |
+| 12.9 | Navigation | rule | rgaa-keyboard-trap | Modal focus trap without dismiss control. |
 | 12.10 | Navigation | axe | accesskeys |  |
 | 12.11 | Navigation | manual |  | Keyboard reachability of tooltips — interaction test. |
 | 13.1 | Consultation | axe | meta-refresh, meta-refresh-no-exceptions |  |
-| 13.2 | Consultation | rule | rgaa-new-window-warning | Popup-on-load not detected; target=_blank warning only. |
+| 13.2 | Consultation | rule | rgaa-new-window-warning, rgaa-popup-on-load | target=_blank warning + popup-on-load script detection. |
 | 13.3 | Consultation | rule | rgaa-doc-link-format | Accessible document version not verified. |
 | 13.4 | Consultation | manual |  | Accessible doc equivalence — manual. |
 | 13.5 | Consultation | manual |  | Cryptic content alternatives — manual. |

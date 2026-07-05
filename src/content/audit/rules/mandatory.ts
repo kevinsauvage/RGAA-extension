@@ -1,8 +1,9 @@
+import { auditDoc } from '../audit-context';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
 /** RGAA 8.1 — valid doctype present. */
 export function checkDoctype(): RuleFinding | null {
-  const dt = document.doctype;
+  const dt = auditDoc().doctype;
   if (dt && dt.name.toLowerCase() === 'html') return null;
   return {
     criterion: '8.1',
@@ -24,9 +25,10 @@ export function checkDoctype(): RuleFinding | null {
 /** RGAA 8.10 — text direction changes not marked with dir attribute. */
 export function checkTextDirection(): RuleFinding | null {
   const offenders: Element[] = [];
+  const doc = auditDoc();
   const rtlChars = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
-  const pageDir = document.documentElement.getAttribute('dir') ?? 'ltr';
-  for (const el of document.querySelectorAll('p, li, td, th, span, div, blockquote')) {
+  const pageDir = doc.documentElement.getAttribute('dir') ?? 'ltr';
+  for (const el of doc.querySelectorAll('p, li, td, th, span, div, blockquote')) {
     const text = el.textContent?.trim() ?? '';
     if (text.length < 8) continue;
     const elDir = el.getAttribute('dir') ?? el.closest('[dir]')?.getAttribute('dir') ?? pageDir;

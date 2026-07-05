@@ -1,3 +1,4 @@
+import { auditDoc } from '../audit-context';
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
@@ -5,16 +6,15 @@ const REQUIRED_MARKERS = /obligatoire|required|\*|requis/i;
 
 /** RGAA 3.1 — required field indicated by color only (heuristic). */
 export function checkColorOnlyRequired(): RuleFinding | null {
+  const doc = auditDoc();
   const offenders: Element[] = [];
-  for (const input of document.querySelectorAll<HTMLInputElement>(
+  for (const input of doc.querySelectorAll<HTMLInputElement>(
     'input[required], select[required], textarea[required], [aria-required="true"]',
   )) {
     if (!isVisible(input)) continue;
     const label =
       input.labels?.[0]?.textContent ??
-      (input.id
-        ? document.querySelector(`label[for="${CSS.escape(input.id)}"]`)?.textContent
-        : null) ??
+      (input.id ? doc.querySelector(`label[for="${CSS.escape(input.id)}"]`)?.textContent : null) ??
       input.getAttribute('aria-label') ??
       '';
     if (REQUIRED_MARKERS.test(label)) continue;

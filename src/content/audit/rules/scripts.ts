@@ -1,3 +1,4 @@
+import { auditDoc } from '../audit-context';
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
@@ -7,7 +8,7 @@ const INTERACTIVE =
 /** RGAA 7.3 — non-native elements acting as controls without keyboard access. */
 export function checkKeyboardAccessible(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const el of document.querySelectorAll<HTMLElement>(INTERACTIVE)) {
+  for (const el of auditDoc().querySelectorAll<HTMLElement>(INTERACTIVE)) {
     if (!isVisible(el)) continue;
     const tag = el.tagName.toLowerCase();
     if (['a', 'button', 'input', 'select', 'textarea'].includes(tag)) continue;

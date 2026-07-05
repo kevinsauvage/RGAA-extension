@@ -1,10 +1,11 @@
+import { auditDoc } from '../audit-context';
 import { isAuditableMedia, isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
 /** RGAA 4.3 — video without caption/subtitle track. */
 export function checkVideoCaptions(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const video of document.querySelectorAll('video')) {
+  for (const video of auditDoc().querySelectorAll('video')) {
     if (!isAuditableMedia(video)) continue;
     const hasCaptions = [...video.querySelectorAll('track')].some((track) => {
       const kind = track.getAttribute('kind') ?? '';
@@ -27,7 +28,7 @@ export function checkVideoCaptions(): RuleFinding | null {
 /** RGAA 4.10 / 13.8 — autoplay media without controls. */
 export function checkAutoplayMedia(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const media of document.querySelectorAll('video, audio')) {
+  for (const media of auditDoc().querySelectorAll('video, audio')) {
     if (!isAuditableMedia(media)) continue;
     if (
       media.hasAttribute('autoplay') &&
@@ -51,10 +52,10 @@ export function checkAutoplayMedia(): RuleFinding | null {
 /** RGAA 13.8 — uncontrollable moving content. */
 export function checkMovingContent(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const el of document.querySelectorAll('marquee, blink')) {
+  for (const el of auditDoc().querySelectorAll('marquee, blink')) {
     if (isVisible(el)) offenders.push(el);
   }
-  for (const video of document.querySelectorAll('video[autoplay]')) {
+  for (const video of auditDoc().querySelectorAll('video[autoplay]')) {
     if (isAuditableMedia(video) && !video.hasAttribute('controls')) offenders.push(video);
   }
   return multiNodeFinding(offenders, {
@@ -65,5 +66,39 @@ export function checkMovingContent(): RuleFinding | null {
     description: 'Du contenu en mouvement (marquee, blink, vidéo autoplay) n’est pas contrôlable.',
     userImpact:
       'Les utilisateurs sensibles au mouvement ou utilisant un lecteur d’écran sont gênés.',
+  });
+}
+
+const CUSTOM_PLAYER_HINT = /player|media|video-js|plyr|vjs/i;
+
+/** RGAA 4.11 (partial) — custom media player controls not keyboard focusable. */
+export function checkMediaControlFocus(): RuleFinding | null {
+  const offenders: Element[] = [];
+
+  for (const media of auditDoc().querySelectorAll<HTMLMediaElement>('video, audio')) {
+    if (!isAuditableMedia(media)) continue;
+    if (media.hasAttribute('controls')) continue;
+
+    const wrapper =
+      media.closest('[class*="player"], [class*="media"], [class*="video-js"], [class*="plyr"]') ??
+      media.parentElement;
+    if (!wrapper || !CUSTOM_PLAYER_HINT.test(String(wrapper.className))) continue;
+
+    const controls = [...wrapper.querySelectorAll<HTMLElement>('button, [role="button"], [tabindex]')].filter(
+      isVisible,
+    );
+    const focusableControls = controls.filter((control) => control.tabIndex >= 0 || control.matches('button'));
+    if (focusableControls.length === 0) offenders.push(wrapper);
+  }
+
+  return multiNodeFinding(offenders, {
+    criterion: '4.11',
+    ruleId: 'rgaa-media-control-focus',
+    severity: 'moderate',
+    title: 'Contrôles du lecteur média non accessibles au clavier',
+    description:
+      'Un lecteur média personnalisé n’expose pas de contrôles focusables au clavier (play, pause, volume…).',
+    userImpact:
+      'Les utilisateurs au clavier ne peuvent pas contrôler la lecture du contenu audio ou vidéo.',
   });
 }

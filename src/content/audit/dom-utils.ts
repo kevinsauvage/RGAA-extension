@@ -1,5 +1,7 @@
 /** Shared DOM helpers for the audit modules (content-script only). */
 
+import { auditDoc } from './audit-context';
+
 /** Whether a media element should be included in audit checks. */
 export function isAuditableMedia(el: Element): boolean {
   if (el.getAttribute('aria-hidden') === 'true') return false;
@@ -53,7 +55,7 @@ export function buildSelector(element: Element): string {
   const path: string[] = [];
   let el: Element | null = element;
 
-  while (el && el !== document.documentElement && path.length < 5) {
+  while (el && el !== auditDoc().documentElement && path.length < 5) {
     const tag = el.tagName.toLowerCase();
     const parent: Element | null = el.parentElement;
     if (!parent) {

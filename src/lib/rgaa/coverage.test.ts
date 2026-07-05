@@ -52,6 +52,6 @@ describe('RGAA coverage sync (ADR-2)', () => {
 
   it('registry rule count matches declared rules count', () => {
     expect(implementedRules.size).toBe(declaredRules.size);
-    expect(implementedRules.size).toBe(20);
+    expect(implementedRules.size).toBe(30);
   });
 });

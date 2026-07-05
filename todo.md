@@ -7,11 +7,11 @@ Living backlog for the RGAA Chrome extension. Update this file when closing item
 | Metric                               |          Value |
 | ------------------------------------ | -------------: |
 | RGAA 4.1.2 criteria                  |            106 |
-| Deterministic coverage (axe + rules) | **46.2%** (49) |
-| + AI deep scan                       | **55.7%** (59) |
-| Manual only                          |     44.3% (47) |
-| Deterministic rules implemented      |             20 |
-| Rule unit tests                      |            111 |
+| Deterministic coverage (axe + rules) | **53.8%** (57) |
+| + AI deep scan                       | **63.2%** (67) |
+| Manual only                          |     36.8% (39) |
+| Deterministic rules implemented      |             30 |
+| Rule unit tests                      |            136 |
 
 ---
 
@@ -112,20 +112,20 @@ Official roadmap from [docs/coverage.md](docs/coverage.md). Implement on **live 
 
 ### High impact (single-page, interaction)
 
-- [ ] **12.9** — keyboard trap detection (programmatic tab through focusables, detect cycles)
-- [ ] **10.12** — text spacing override resistance (`letter-spacing`, `line-height`, `word-spacing` blocked by `!important`)
-- [ ] **10.13** — hover/focus overlay dismissibility (simulate focus/hover, check ESC, pointer leave)
-- [ ] **Same-origin iframes** — recurse into accessible frames in content script (`all_frames` or manual traversal)
+- [x] **12.9** — keyboard trap detection (programmatic tab through focusables, detect cycles)
+- [x] **10.12** — text spacing override resistance (`letter-spacing`, `line-height`, `word-spacing` blocked by `!important`)
+- [x] **10.13** — hover/focus overlay dismissibility (simulate focus/hover, check ESC, pointer leave)
+- [x] **Same-origin iframes** — recurse into accessible frames in content script (`all_frames` or manual traversal)
 
 ### Medium impact (markup / computed style)
 
-- [ ] **11.8** — `<select>` options grouped with `<optgroup>` when visually grouped
-- [ ] **7.5** (partial) — dynamic status messages: detect updates without `role="status"` / `aria-live`
-- [ ] **11.11** (partial) — error fields with `aria-invalid` but no correction hint nearby
-- [ ] **13.2** (extend) — popup-on-load patterns beyond `target="_blank"` warning
-- [ ] **10.14** (partial) — CSS-only interactive content keyboard reachability
-- [ ] **4.11** (partial) — media player control focusability (not full playback test)
-- [ ] **1.2** (deterministic partial) — decorative images with non-empty `alt` / missing `aria-hidden`
+- [x] **11.8** — `<select>` options grouped with `<optgroup>` when visually grouped
+- [x] **7.5** (partial) — dynamic status messages: detect updates without `role="status"` / `aria-live`
+- [x] **11.11** (partial) — error fields with `aria-invalid` but no correction hint nearby
+- [x] **13.2** (extend) — popup-on-load patterns beyond `target="_blank"` warning
+- [x] **10.14** (partial) — CSS-only interactive content keyboard reachability
+- [x] **4.11** (partial) — media player control focusability (not full playback test)
+- [x] **1.2** (deterministic partial) — decorative images with non-empty `alt` / missing `aria-hidden`
 
 ### axe tuning
 

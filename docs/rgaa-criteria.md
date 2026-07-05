@@ -30,11 +30,13 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 1.2 — Chaque image de décoration est-elle correctement ignorée par les technologies d’assistance ?
 
-**Couverture extension :** axe-core (certain) · AI deep scan (needs review)
+**Couverture extension :** axe-core (certain) · AI deep scan (needs review) · Deterministic rule (likely)
+
+**Règles :** rgaa-decorative-image-alt
 
 **Règles axe :** image-redundant-alt
 
-> Decorative intent partially AI-assessed.
+> Decorative images with non-empty alt; full intent may need manual review.
 
 **Tests :**
 
@@ -343,9 +345,11 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 4.11 — La consultation de chaque média temporel est-elle, si nécessaire, contrôlable par le clavier et tout dispositif de pointage ?
 
-**Couverture extension :** Manual audit
+**Couverture extension :** Deterministic rule (likely)
 
-> Keyboard control of media player — interaction test.
+**Règles :** rgaa-media-control-focus
+
+> Custom player control focusability; full keyboard playback manual.
 
 **Tests :**
 
@@ -540,9 +544,11 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 7.5 — Dans chaque page web, les messages de statut sont-ils correctement restitués par les technologies d’assistance ?
 
-**Couverture extension :** Manual audit
+**Couverture extension :** Deterministic rule (likely)
 
-> Status message AT restitution — needs live SR test.
+**Règles :** rgaa-status-messages
+
+> Toast/notification regions without aria-live; live SR test still manual.
 
 **Tests :**
 
@@ -836,9 +842,11 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 10.12 — Dans chaque page web, les propriétés d’espacement du texte peuvent-elles être redéfinies par l’utilisateur sans perte de contenu ou de fonctionnalité (hors cas particuliers) ?
 
-**Couverture extension :** Manual audit
+**Couverture extension :** Deterministic rule (likely)
 
-> Text spacing override — manual resize test.
+**Règles :** rgaa-text-spacing-override
+
+> CSS !important blocks text spacing override probe.
 
 **Tests :**
 
@@ -846,9 +854,11 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 10.13 — Dans chaque page web, les contenus additionnels apparaissant à la prise de focus ou au survol d’un composant d’interface sont-ils contrôlables par l’utilisateur (hors cas particuliers) ?
 
-**Couverture extension :** Manual audit
+**Couverture extension :** Deterministic rule (likely)
 
-> Hover/focus additional content — interaction test.
+**Règles :** rgaa-hover-focus-overlay
+
+> Expanded aria-haspopup overlays without dismiss; full hover test manual.
 
 **Tests :**
 
@@ -858,9 +868,11 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 10.14 — Dans chaque page web, les contenus additionnels apparaissant via les styles CSS uniquement peuvent-ils être rendus visibles au clavier et par tout dispositif de pointage ?
 
-**Couverture extension :** Manual audit
+**Couverture extension :** Deterministic rule (likely)
 
-> CSS-only content keyboard access — interaction test.
+**Règles :** rgaa-css-interactive
+
+> Pointer-styled scripted elements without keyboard access.
 
 **Tests :**
 
@@ -951,9 +963,11 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 11.8 — Dans chaque formulaire, les items de même nature d’une liste de choix sont-ils regroupés de manière pertinente ?
 
-**Couverture extension :** Manual audit
+**Couverture extension :** Deterministic rule (likely)
 
-> Optgroup grouping — partial manual.
+**Règles :** rgaa-select-optgroup
+
+> Long selects with prefix grouping but no optgroup.
 
 **Tests :**
 
@@ -992,9 +1006,11 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 11.11 — Dans chaque formulaire, le contrôle de saisie est-il accompagné, si nécessaire, de suggestions facilitant la correction des erreurs de saisie ?
 
-**Couverture extension :** Manual audit
+**Couverture extension :** Deterministic rule (likely)
 
-> Error correction suggestions — manual.
+**Règles :** rgaa-invalid-field-hint
+
+> aria-invalid fields without nearby correction hint.
 
 **Tests :**
 
@@ -1118,9 +1134,11 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 12.9 — Dans chaque page web, la navigation ne doit pas contenir de piège au clavier. Cette règle est-elle respectée ?
 
-**Couverture extension :** Manual audit
+**Couverture extension :** Deterministic rule (likely)
 
-> Keyboard trap — tab simulation planned.
+**Règles :** rgaa-keyboard-trap
+
+> Modal focus trap without dismiss control.
 
 **Tests :**
 
@@ -1165,9 +1183,9 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 **Couverture extension :** Deterministic rule (likely)
 
-**Règles :** rgaa-new-window-warning
+**Règles :** rgaa-new-window-warning, rgaa-popup-on-load
 
-> Popup-on-load not detected; target=_blank warning only.
+> target=_blank warning + popup-on-load script detection.
 
 **Tests :**
 
