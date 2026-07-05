@@ -1,5 +1,5 @@
 import type { ContentResponse, RuntimeMessage } from '@/lib/messaging';
-import type { KnownIssueRef, PageCandidates, ScanResult } from '@/lib/types';
+import type { ScanResult } from '@/lib/types';
 import { ensureContentScript } from '@/lib/content-script-inject';
 import {
   getSettings,
@@ -11,7 +11,8 @@ import { evaluateQuota } from '@/lib/scan-limits';
 
 type BgResponse =
   | { ok: true; result: ScanResult }
-  | { ok: true; candidates: PageCandidates }
+  | { ok: true; html: string }
+  | { ok: true; selectors: Record<string, boolean> }
   | { ok: true }
   | { ok: false; error: string; reason?: 'quota' | 'runtime' };
 
@@ -64,39 +65,36 @@ async function runScan(tabId: number): Promise<BgResponse> {
   }
 }
 
-async function collectCandidates(
-  tabId: number,
-  knownIssues: KnownIssueRef[] = [],
-): Promise<BgResponse> {
-  try {
-    const response = await messageTab<ContentResponse>(tabId, {
-      type: 'COLLECT_CANDIDATES',
-      knownIssues,
-    });
-
-    if (!response.ok || !('candidates' in response)) {
-      const error = 'error' in response ? response.error : 'Candidate collection failed.';
-      return { ok: false, reason: 'runtime', error };
-    }
-
-    return { ok: true, candidates: response.candidates };
-  } catch (error) {
-    return {
-      ok: false,
-      reason: 'runtime',
-      error: toError(error, 'Unable to read this page (it may be a protected browser page).'),
-    };
-  }
-}
-
 chrome.runtime.onMessage.addListener(
   (message: RuntimeMessage, _sender, sendResponse: (r: BgResponse) => void) => {
     switch (message.type) {
       case 'RUN_SCAN':
         runScan(message.tabId).then(sendResponse);
         return true;
-      case 'COLLECT_CANDIDATES':
-        collectCandidates(message.tabId, message.knownIssues).then(sendResponse);
+      case 'GET_PAGE_HTML':
+        messageTab<ContentResponse>(message.tabId, { type: 'GET_PAGE_HTML' })
+          .then((response) => sendResponse(response as BgResponse))
+          .catch((error: unknown) =>
+            sendResponse({
+              ok: false,
+              reason: 'runtime',
+              error: toError(error, 'Unable to read this page.'),
+            }),
+          );
+        return true;
+      case 'VERIFY_SELECTORS':
+        messageTab<ContentResponse>(message.tabId, {
+          type: 'VERIFY_SELECTORS',
+          selectors: message.selectors,
+        })
+          .then((response) => sendResponse(response as BgResponse))
+          .catch((error: unknown) =>
+            sendResponse({
+              ok: false,
+              reason: 'runtime',
+              error: toError(error, 'Selector verification failed.'),
+            }),
+          );
         return true;
       case 'HIGHLIGHT_NODE':
         messageTab<ContentResponse>(message.tabId, {

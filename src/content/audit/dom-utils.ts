@@ -1,10 +1,33 @@
 /** Shared DOM helpers for the audit modules (content-script only). */
 
 export function isVisible(el: Element): boolean {
-  if (!(el instanceof HTMLElement)) return true;
+  const inline = el.getAttribute('style') ?? '';
+  if (/display\s*:\s*none/i.test(inline) || /visibility\s*:\s*hidden/i.test(inline)) {
+    return false;
+  }
+
+  if (el instanceof HTMLElement && el.hidden) return false;
+
+  const tag = el.tagName.toLowerCase();
+  // Media elements may have no layout box but still play content.
+  if (tag === 'audio' || tag === 'video') {
+    if (el.getAttribute('aria-hidden') === 'true') return false;
+    const style = getComputedStyle(el);
+    return style.display !== 'none' && style.visibility !== 'hidden';
+  }
+
+  if (!(el instanceof HTMLElement)) {
+    const style = getComputedStyle(el);
+    if (style.display === 'none' || style.visibility === 'hidden') return false;
+    if (parseFloat(style.opacity) === 0) return false;
+    const rect = el.getBoundingClientRect();
+    return rect.width > 0 || rect.height > 0;
+  }
+
   const style = getComputedStyle(el);
   if (style.display === 'none' || style.visibility === 'hidden') return false;
   if (parseFloat(style.opacity) === 0) return false;
+
   const rect = el.getBoundingClientRect();
   return rect.width > 0 || rect.height > 0;
 }

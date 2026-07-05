@@ -21,7 +21,7 @@ export function computeAccessibleName(element: Element): string | undefined {
     if (alt !== null) return alt.trim();
   }
 
-  if (tag === 'input' || tag === 'select' || tag === 'textarea') {
+  if (tag === 'input' || tag === 'select' || tag === 'textarea' || tag === 'canvas') {
     const id = element.getAttribute('id');
     if (id) {
       const label = document.querySelector(`label[for="${CSS.escape(id)}"]`);

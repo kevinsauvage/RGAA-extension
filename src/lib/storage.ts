@@ -2,8 +2,9 @@ import type { AiFix, ScanResult } from './types';
 import { DEFAULT_OPENAI_MODEL } from './ai/models';
 
 /**
- * Thin typed wrapper over chrome.storage. Settings and usage counters live in
- * `sync` (small, portable); the API key and scan history live in `local`.
+ * Thin typed wrapper over chrome.storage. Settings (including the API key),
+ * scan history and the fix cache live in `local`; the monthly usage counter
+ * lives in `sync` so the free-tier quota follows the user across devices.
  */
 
 export interface Settings {

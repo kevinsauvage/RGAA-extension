@@ -1,8 +1,8 @@
 import type { ContentMessage, ContentResponse } from '@/lib/messaging';
 import type { ScanResult } from '@/lib/types';
 import { runAxeAudit, summarize } from './audit/axe-runner';
-import { runRgaaRules } from './audit/rgaa-rules';
-import { collectPageCandidates } from './audit/candidates';
+import { runRgaaRules } from './audit/rules';
+import { buildPageHtml, verifySelectors } from './audit/page-html';
 import { collectPerformance } from './audit/performance';
 import { clearHighlight, clearPinnedHighlight, highlightNode } from './highlight';
 
@@ -49,10 +49,9 @@ chrome.runtime.onMessage.addListener(
             }),
           );
         return true; // keep the message channel open for the async response
-      case 'COLLECT_CANDIDATES': {
+      case 'GET_PAGE_HTML': {
         try {
-          const candidates = collectPageCandidates(message.knownIssues ?? []);
-          sendResponse({ ok: true, candidates });
+          sendResponse({ ok: true, html: buildPageHtml() });
         } catch (error: unknown) {
           sendResponse({
             ok: false,
@@ -61,6 +60,9 @@ chrome.runtime.onMessage.addListener(
         }
         return false;
       }
+      case 'VERIFY_SELECTORS':
+        sendResponse({ ok: true, selectors: verifySelectors(message.selectors) });
+        return false;
       case 'HIGHLIGHT_NODE': {
         const found = highlightNode(message.target, {
           targets: message.targets,

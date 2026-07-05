@@ -6,15 +6,23 @@ import { summarizeIssues } from '@/lib/scan-summary';
 type ScanStatus = 'idle' | 'scanning' | 'done' | 'error';
 type AiAuditStatus = 'idle' | 'running' | 'done' | 'error';
 
+/** Completion summary for the last deep scan. */
+export interface AiAuditInfo {
+  criteriaChecked: number;
+  found: number;
+}
+
 interface PanelState {
   status: ScanStatus;
   result: ScanResult | null;
   error: string | null;
   quota: QuotaStatus | null;
+  /** UI language, mirrored from Settings. */
+  language: 'fr' | 'en';
   aiAuditStatus: AiAuditStatus;
   aiAuditProgress: AiAuditProgress | null;
   aiAuditError: string | null;
-  aiAuditInfo: { itemsChecked: number; found: number } | null;
+  aiAuditInfo: AiAuditInfo | null;
   fixes: Record<string, AiFix>;
   fixLoading: Record<string, boolean>;
   fixError: Record<string, string>;
@@ -22,10 +30,11 @@ interface PanelState {
   setResult: (result: ScanResult) => void;
   setError: (error: string | null) => void;
   setQuota: (quota: QuotaStatus) => void;
+  setLanguage: (language: 'fr' | 'en') => void;
   setAiAuditStatus: (status: AiAuditStatus) => void;
   setAiAuditProgress: (progress: AiAuditProgress | null) => void;
   setAiAuditError: (error: string | null) => void;
-  setAiAuditInfo: (info: { itemsChecked: number; found: number } | null) => void;
+  setAiAuditInfo: (info: AiAuditInfo | null) => void;
   mergeAiIssues: (issues: AccessibilityIssue[]) => void;
   setFix: (issueId: string, fix: AiFix) => void;
   setFixLoading: (issueId: string, loading: boolean) => void;
@@ -45,6 +54,7 @@ export const usePanelStore = create<PanelState>((set) => ({
   result: null,
   error: null,
   quota: null,
+  language: 'fr',
   aiAuditStatus: 'idle',
   aiAuditProgress: null,
   aiAuditError: null,
@@ -65,6 +75,7 @@ export const usePanelStore = create<PanelState>((set) => ({
     }),
   setError: (error) => set({ error, status: error ? 'error' : 'idle' }),
   setQuota: (quota) => set({ quota }),
+  setLanguage: (language) => set({ language }),
   setAiAuditStatus: (aiAuditStatus) => set({ aiAuditStatus }),
   setAiAuditProgress: (aiAuditProgress) => set({ aiAuditProgress }),
   setAiAuditError: (aiAuditError) => set({ aiAuditError }),

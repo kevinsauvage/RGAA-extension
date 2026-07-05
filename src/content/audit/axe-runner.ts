@@ -3,11 +3,7 @@ import type { AccessibilityIssue, AffectedNode } from '@/lib/types';
 import { summarizeIssues } from '@/lib/scan-summary';
 import { normalizeSeverity, rgaaForRule } from './rgaa-mapping';
 import { userImpactFor } from './user-impact';
-
-function truncateHtml(html: string, max = 240): string {
-  const clean = html.replace(/\s+/g, ' ').trim();
-  return clean.length > max ? `${clean.slice(0, max)}…` : clean;
-}
+import { truncate } from './dom-utils';
 
 function axeTargetToSelectors(target: axe.NodeResult['target']): string[] {
   if (!Array.isArray(target)) return [String(target)];
@@ -22,7 +18,7 @@ function toAffectedNodes(nodes: axe.NodeResult[]): AffectedNode[] {
     return {
       target: targets[0] ?? '',
       targets,
-      html: truncateHtml(node.html),
+      html: truncate(node.html, 240),
       failureSummary: node.failureSummary,
     };
   });

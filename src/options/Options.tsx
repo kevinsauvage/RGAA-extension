@@ -88,7 +88,7 @@ export function Options() {
           </div>
           <span className="mt-1 block text-[11px] text-slate-400">
             Stored locally in this browser only. Used to call OpenAI directly for
-            AI fixes and AI checks.
+            AI fixes and the deep scan.
           </span>
         </label>
 

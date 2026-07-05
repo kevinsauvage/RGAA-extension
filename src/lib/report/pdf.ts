@@ -1,11 +1,17 @@
 import { jsPDF } from 'jspdf';
-import type { ScanResult } from '@/lib/types';
+import type { IssueSource, ScanResult } from '@/lib/types';
 
 const SEVERITY_LABEL: Record<string, string> = {
   critical: 'Critical',
   serious: 'Serious',
   moderate: 'Moderate',
   minor: 'Minor',
+};
+
+const SOURCE_LABEL: Record<IssueSource, string> = {
+  axe: 'Automated (axe-core)',
+  rule: 'Automated (RGAA rule)',
+  ai: 'AI analysis',
 };
 
 /** Build a client-ready PDF audit report and trigger a download. */
@@ -50,18 +56,38 @@ export function exportReportPdf(result: ScanResult): void {
       `${result.summary.moderate} moderate, ${result.summary.minor} minor.`,
     11,
   );
+
+  const bySource = result.accessibilityIssues.reduce(
+    (acc, issue) => {
+      acc[issue.source] += 1;
+      return acc;
+    },
+    { axe: 0, rule: 0, ai: 0 } as Record<IssueSource, number>,
+  );
+  const needsReview = result.accessibilityIssues.filter(
+    (issue) => issue.confidence === 'needs-review',
+  ).length;
+  line(
+    `Sources: ${bySource.axe} axe-core, ${bySource.rule} RGAA rules, ${bySource.ai} AI` +
+      (needsReview > 0 ? ` (${needsReview} pending manual review).` : '.'),
+    10,
+  );
   y += 8;
 
   line('Accessibility findings (RGAA / WCAG)', 14, true);
   result.accessibilityIssues.forEach((issue, index) => {
     y += 4;
     const rgaa = issue.rgaa.map((r) => r.criterion).join(', ');
+    const reviewFlag = issue.confidence === 'needs-review' ? ' — NEEDS MANUAL REVIEW' : '';
     line(
       `${index + 1}. [${SEVERITY_LABEL[issue.severity]}] ${issue.title}`,
       11,
       true,
     );
-    line(`RGAA ${rgaa} — ${issue.nodes.length} element(s) affected`, 9);
+    line(
+      `RGAA ${rgaa} — ${issue.nodes.length} element(s) — ${SOURCE_LABEL[issue.source]}${reviewFlag}`,
+      9,
+    );
     line(`Impact: ${issue.userImpact}`, 9);
   });
 

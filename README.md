@@ -34,8 +34,13 @@ src/
 │   └── audit/
 │       ├── axe-runner.ts       # axe-core runner + scoring
 │       ├── rgaa-mapping.ts     # axe rule → RGAA/WCAG criteria
-│       ├── rgaa-rules.ts       # deterministic RGAA rules axe misses
-│       ├── candidates.ts       # extracts elements for AI verification
+│       ├── rgaa-rules.ts       # re-exports deterministic rules
+│       ├── rules/              # deterministic RGAA checks on live DOM
+│       │   ├── images.ts       # SVG, canvas alternatives
+│       │   ├── presentation.ts # text scaling, focus, hidden content
+│       │   ├── scripts.ts      # keyboard-accessible controls
+│       │   └── …
+│       ├── page-html.ts        # pruned HTML serializer for deep scan
 │       ├── accessible-name.ts  # lightweight AccName computation
 │       ├── dom-utils.ts        # selectors, visibility, context helpers
 │       ├── user-impact.ts      # human-readable impact strings
@@ -47,10 +52,14 @@ src/
 │   ├── scan-limits.ts          # free/pro quota logic
 │   ├── utils.ts                # tab/highlight helpers
 │   ├── ai/
-│   │   ├── checks.ts           # AI verification checks (question + few-shot)
-│   │   ├── audit-client.ts     # classification pipeline (OpenAI)
+│   │   ├── deep-scan.ts        # full-page AI scan (needs-review findings)
+│   │   ├── chat-completions.ts # OpenAI request helpers
+│   │   ├── models.ts           # curated model list for Settings
 │   │   └── client.ts           # AI fix generation
-│   ├── rgaa/criteria.ts        # RGAA themes + helper links
+│   ├── rgaa/
+│   │   ├── criteria.ts        # deep-scan criteria hints
+│   │   ├── coverage.ts        # per-criterion check method map
+│   │   └── referential.json   # parsed official RGAA tests
 │   └── report/pdf.ts           # PDF export
 ├── sidepanel/                  # main results UI (React)
 ├── popup/                      # toolbar popup
@@ -86,15 +95,23 @@ The audit has three layers, from most to least deterministic:
 
 1. **axe-core** — runs against the live DOM; every violation is mapped to its
    **RGAA criterion** via `rgaa-mapping.ts` and scored 0–100.
-2. **Deterministic RGAA rules** (`rgaa-rules.ts`) — checks axe misses: missing
-   skip link, `target="_blank"` without warning, document links without format
-   indication, ungrouped radio buttons. Run with the classic scan, no AI.
-3. **AI checks** (verification, not detection) — code extracts *candidates*
-   (images with alt, links, buttons, form fields, page title) and the AI only
-   answers one narrow question per check ("is this alt text relevant?") with a
-   pass / fail / uncertain verdict. Few-shot examples anchor each judgment;
-   only clear fails become issues. The AI never picks elements, criteria or
-   severities — this keeps hallucinations structurally impossible.
+2. **Deterministic RGAA rules** (`src/content/audit/rules/`) — 20+ checks on the
+   **rendered page** using computed styles, visibility and DOM structure: text
+   scaling, focus indicators, keyboard reachability, skip links, media captions,
+   fieldset legends, etc. Run with the classic scan, no AI.
+3. **AI deep scan** (`deep-scan.ts`) — sends pruned rendered HTML plus subjective
+   RGAA criteria (alt relevance, vague links, fake lists…) to the model.
+   Findings are **needs-review** only.
+
+See **[docs/coverage.md](docs/coverage.md)** for the live coverage tracker
+(currently **~46% deterministic**, **~56% with AI** on a single page) and
+**[docs/rgaa-criteria.md](docs/rgaa-criteria.md)** for the full official test list.
+
+Regenerate docs after changing `src/lib/rgaa/coverage.ts`:
+
+```bash
+npm run docs
+```
 
 Clicking **Generate AI fix** on any issue sends only the offending markup to
 OpenAI and returns a ready-to-paste fix, cached locally. Criteria link to the
@@ -108,7 +125,8 @@ No audit data is sent anywhere else.
 
 ## Notes
 
-- Automated tools catch ~30–40% of accessibility issues. A11yFix flags what it
-  can detect and always recommends manual RGAA verification for full compliance.
+- Automated tools cover **~46% of RGAA criteria deterministically** on a single
+  page; **~56%** with the AI deep scan (needs manual confirmation). See
+  [docs/coverage.md](docs/coverage.md). Full compliance always requires manual audit.
 - The `public/icons/*` PNGs are generated placeholders (`npm run icons`). Replace
   them with real branding before publishing.

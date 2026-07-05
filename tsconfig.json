@@ -21,5 +21,6 @@
     },
     "types": ["chrome", "node", "vite/client"]
   },
-  "include": ["src", "vite.config.ts", "scripts"]
+  "include": ["src", "vite.config.ts", "scripts"],
+  "exclude": ["src/**/*.test.ts"]
 }

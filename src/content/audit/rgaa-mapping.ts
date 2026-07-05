@@ -22,7 +22,7 @@ function ref(criterion: string, themeNumber: number, wcag: string[]): RgaaRefere
  * axe rule id -> RGAA references. Rules not present here still surface as
  * issues but are tagged with the generic "à vérifier" reference.
  */
-export const AXE_TO_RGAA: Record<string, MappingEntry> = {
+const AXE_TO_RGAA: Record<string, MappingEntry> = {
   'image-alt': { criteria: [ref('1.1', 1, ['1.1.1'])] },
   'input-image-alt': { criteria: [ref('1.1', 1, ['1.1.1'])] },
   'area-alt': { criteria: [ref('1.1', 1, ['1.1.1'])] },

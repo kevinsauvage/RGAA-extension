@@ -1,14 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { IssueSource, ScanResult, Severity } from '@/lib/types';
-import { collectCandidatesFromTab, getActiveTab, isScannable } from '@/lib/utils';
+import type { IssueSource, KnownIssueRef, ScanResult, Severity } from '@/lib/types';
+import {
+  getActiveTab,
+  getPageHtmlFromTab,
+  isScannable,
+  verifySelectorsOnTab,
+} from '@/lib/utils';
 import { getSettings, getUsage } from '@/lib/storage';
 import { evaluateQuota } from '@/lib/scan-limits';
 import { exportReportPdf } from '@/lib/report/pdf';
-import { runAiAudit } from '@/lib/ai/audit-client';
+import { runDeepScan } from '@/lib/ai/deep-scan';
 import { usePanelStore } from './store';
 import { SummaryCards } from './components/SummaryCards';
 import { IssueCard } from './components/IssueCard';
 import { PerformancePanel } from './components/PerformancePanel';
+import { SparkleIcon } from './components/icons';
 
 type Tab = 'accessibility' | 'performance';
 type SourceFilter = 'all' | 'auto' | 'ai';
@@ -50,6 +56,7 @@ export function App() {
     setResult,
     setError,
     setQuota,
+    setLanguage,
     setAiAuditStatus,
     setAiAuditProgress,
     setAiAuditError,
@@ -63,6 +70,7 @@ export function App() {
   const refreshQuota = async () => {
     const [settings, usage] = await Promise.all([getSettings(), getUsage()]);
     setQuota(evaluateQuota(settings, usage));
+    setLanguage(settings.language);
   };
 
   useEffect(() => {
@@ -94,11 +102,20 @@ export function App() {
     void refreshQuota();
   };
 
-  const runAiVerification = async () => {
+  const knownIssueRefs = (): KnownIssueRef[] =>
+    (result?.accessibilityIssues ?? []).flatMap((issue) =>
+      issue.nodes.map((node) => ({
+        ruleId: issue.ruleId,
+        selector: node.target,
+        title: issue.title,
+      })),
+    );
+
+  const runAiDeepScan = async () => {
     if (!result) return;
     const settings = await getSettings();
     if (!settings.openaiApiKey) {
-      setAiAuditError('Add an OpenAI API key in Settings to run the AI checks.');
+      setAiAuditError('Add an OpenAI API key in Settings to run the deep scan.');
       setAiAuditStatus('error');
       return;
     }
@@ -108,17 +125,16 @@ export function App() {
     setAiAuditInfo(null);
 
     try {
-      const knownIssues = result.accessibilityIssues.flatMap((issue) =>
-        issue.nodes.map((node) => ({
-          ruleId: issue.ruleId,
-          selector: node.target,
-          title: issue.title,
-        })),
+      const html = await getPageHtmlFromTab();
+      const scan = await runDeepScan(
+        html,
+        knownIssueRefs(),
+        settings,
+        verifySelectorsOnTab,
+        setAiAuditProgress,
       );
-      const candidates = await collectCandidatesFromTab(knownIssues);
-      const audit = await runAiAudit(candidates, settings, setAiAuditProgress);
-      mergeAiIssues(audit.issues);
-      setAiAuditInfo({ itemsChecked: audit.itemsChecked, found: audit.issues.length });
+      mergeAiIssues(scan.issues);
+      setAiAuditInfo({ criteriaChecked: scan.criteriaChecked, found: scan.issues.length });
       setAiAuditStatus('done');
     } catch (err) {
       setAiAuditError(err instanceof Error ? err.message : String(err));
@@ -193,19 +209,19 @@ export function App() {
             <button
               type="button"
               className="btn-ghost flex-1 border border-brand-200 text-brand-700 hover:bg-brand-50 dark:border-brand-900 dark:text-brand-300 dark:hover:bg-brand-950/40"
-              onClick={runAiVerification}
+              onClick={() => void runAiDeepScan()}
               disabled={aiAuditStatus === 'running'}
-              title="AI verifies alt texts, link labels, form labels and page title (RGAA semantic checks)"
+              title="Full-page AI analysis against the RGAA criteria list — findings need manual review"
             >
               {aiAuditStatus === 'running' ? (
                 <>
                   <Spinner />
-                  Checking…
+                  Scanning…
                 </>
               ) : (
                 <>
                   <SparkleIcon />
-                  AI checks
+                  Deep scan
                 </>
               )}
             </button>
@@ -232,9 +248,9 @@ export function App() {
         )}
         {aiAuditStatus === 'done' && aiAuditInfo && (
           <p className="text-[11px] text-lime-600 dark:text-lime-400">
-            AI checks complete — {aiAuditInfo.found} issue
-            {aiAuditInfo.found === 1 ? '' : 's'} found across {aiAuditInfo.itemsChecked}{' '}
-            verified elements.
+            Deep scan complete — {aiAuditInfo.found} finding
+            {aiAuditInfo.found === 1 ? '' : 's'} to review across {aiAuditInfo.criteriaChecked}{' '}
+            RGAA criteria.
           </p>
         )}
         {aiAuditError && (
@@ -285,7 +301,7 @@ export function App() {
 
             {tab === 'accessibility' ? (
               <>
-                {counts.ai > 0 && (
+                {counts.all > 0 && (
                   <div className="flex gap-1">
                     <FilterChip
                       active={sourceFilter === 'all'}
@@ -308,7 +324,7 @@ export function App() {
                 {visibleIssues.length === 0 ? (
                   <p className="rounded-lg bg-lime-50 px-3 py-4 text-center text-sm text-lime-700 dark:bg-lime-950/30 dark:text-lime-300">
                     {result.accessibilityIssues.length === 0
-                      ? 'No automated violations found. Run AI checks to verify alt texts, link labels and form labels.'
+                      ? 'No automated violations found. Run Deep scan for AI-assisted RGAA review.'
                       : 'No issues match this filter.'}
                   </p>
                 ) : (
@@ -386,22 +402,14 @@ function Spinner({ light = false }: { light?: boolean }) {
   );
 }
 
-function SparkleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
-      <path d="M12 2l1.9 4.6L18.5 8.5 13.9 10.4 12 15l-1.9-4.6L5.5 8.5l4.6-1.9L12 2zm7 11l.9 2.2 2.2.9-2.2.9-.9 2.2-.9-2.2-2.2-.9 2.2-.9.9-2.2z" />
-    </svg>
-  );
-}
-
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <Logo size={48} />
       <h2 className="mt-4 text-base font-semibold">Ready to audit</h2>
       <p className="mt-1 max-w-xs text-xs text-slate-500">
-        Run a real-time RGAA/WCAG accessibility and Core Web Vitals scan on the
-        current page, then let AI verify what automated rules cannot judge.
+        Run a real-time RGAA/WCAG accessibility and Core Web Vitals scan, then
+        use Deep scan for AI-assisted RGAA review.
       </p>
     </div>
   );

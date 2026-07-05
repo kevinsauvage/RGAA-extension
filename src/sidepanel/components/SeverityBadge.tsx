@@ -1,5 +1,6 @@
 import type { Severity } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { usePanelStore } from '../store';
 
 const STYLES: Record<Severity, string> = {
   critical: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
@@ -8,14 +9,23 @@ const STYLES: Record<Severity, string> = {
   minor: 'bg-lime-100 text-lime-700 dark:bg-lime-950 dark:text-lime-300',
 };
 
-const LABELS: Record<Severity, string> = {
-  critical: 'Critical',
-  serious: 'Serious',
-  moderate: 'Moderate',
-  minor: 'Minor',
+const LABELS: Record<'fr' | 'en', Record<Severity, string>> = {
+  en: {
+    critical: 'Critical',
+    serious: 'Serious',
+    moderate: 'Moderate',
+    minor: 'Minor',
+  },
+  fr: {
+    critical: 'Critique',
+    serious: 'Majeur',
+    moderate: 'Modéré',
+    minor: 'Mineur',
+  },
 };
 
 export function SeverityBadge({ severity }: { severity: Severity }) {
+  const language = usePanelStore((s) => s.language);
   return (
     <span
       className={cn(
@@ -23,7 +33,7 @@ export function SeverityBadge({ severity }: { severity: Severity }) {
         STYLES[severity],
       )}
     >
-      {LABELS[severity]}
+      {LABELS[language][severity]}
     </span>
   );
 }

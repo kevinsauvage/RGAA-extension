@@ -32,7 +32,10 @@ export function IssueCard({ issue }: { issue: AccessibilityIssue }) {
               </span>
             )}
             {issue.confidence === 'needs-review' && (
-              <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+              <span
+                className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+                title="AI finding from full-page analysis — verify manually before reporting"
+              >
                 Review
               </span>
             )}

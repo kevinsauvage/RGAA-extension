@@ -5,8 +5,6 @@
 
 export type Severity = 'critical' | 'serious' | 'moderate' | 'minor';
 
-export type IssueKind = 'accessibility' | 'performance';
-
 export type IssueSource = 'axe' | 'ai' | 'rule';
 export type IssueConfidence = 'certain' | 'likely' | 'needs-review';
 
@@ -66,8 +64,6 @@ export interface PerformanceIssue {
   threshold: number;
 }
 
-export type Issue = AccessibilityIssue | PerformanceIssue;
-
 export interface CoreWebVitals {
   lcp: number | null;
   cls: number | null;
@@ -115,56 +111,6 @@ export interface KnownIssueRef {
   ruleId: string;
   selector: string;
   title: string;
-}
-
-/**
- * Candidates for AI verification. Code extracts the elements and their
- * evidence; the AI only classifies each item against one narrow question.
- */
-export interface CandidateBase {
-  /** CSS selector usable for highlighting. */
-  selector: string;
-  /** Truncated outerHTML of the element. */
-  html: string;
-}
-
-export interface ImageCandidate extends CandidateBase {
-  alt: string;
-  src: string;
-  /** Nearby text (caption, heading, paragraph) to judge relevance. */
-  context?: string;
-}
-
-export interface LinkCandidate extends CandidateBase {
-  /** Visible text or accessible name of the link. */
-  text: string;
-  href: string;
-  /** Surrounding sentence or parent block text. */
-  context?: string;
-}
-
-export interface ButtonCandidate extends CandidateBase {
-  label: string;
-  context?: string;
-}
-
-export interface FieldCandidate extends CandidateBase {
-  label: string;
-  fieldType: string;
-  name?: string;
-  placeholder?: string;
-}
-
-/** Everything the AI checks need, collected in one pass by the content script. */
-export interface PageCandidates {
-  url: string;
-  title: string;
-  lang: string;
-  h1: string[];
-  images: ImageCandidate[];
-  links: LinkCandidate[];
-  buttons: ButtonCandidate[];
-  fields: FieldCandidate[];
 }
 
 export interface AiAuditProgress {

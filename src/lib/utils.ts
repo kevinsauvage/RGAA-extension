@@ -1,5 +1,4 @@
 import { clsx, type ClassValue } from 'clsx';
-import type { KnownIssueRef, PageCandidates } from '@/lib/types';
 
 export function cn(...inputs: ClassValue[]): string {
   return clsx(inputs);
@@ -10,23 +9,36 @@ export async function getActiveTab(): Promise<chrome.tabs.Tab | undefined> {
   return tab;
 }
 
-export async function collectCandidatesFromTab(
-  knownIssues: KnownIssueRef[] = [],
-): Promise<PageCandidates> {
+export async function getPageHtmlFromTab(): Promise<string> {
   const tab = await getActiveTab();
   if (!tab?.id) throw new Error('No active tab.');
   const response = (await chrome.runtime.sendMessage({
-    type: 'COLLECT_CANDIDATES',
+    type: 'GET_PAGE_HTML',
     tabId: tab.id,
-    knownIssues,
-  })) as
-    | { ok: true; candidates: PageCandidates }
-    | { ok: false; error: string };
+  })) as { ok: true; html: string } | { ok: false; error: string };
 
-  if (!response.ok || !('candidates' in response)) {
-    throw new Error('error' in response ? response.error : 'Failed to analyze the page.');
+  if (!response.ok || !('html' in response)) {
+    throw new Error('error' in response ? response.error : 'Failed to read the page HTML.');
   }
-  return response.candidates;
+  return response.html;
+}
+
+export async function verifySelectorsOnTab(
+  selectors: string[],
+): Promise<Record<string, boolean>> {
+  if (selectors.length === 0) return {};
+  const tab = await getActiveTab();
+  if (!tab?.id) throw new Error('No active tab.');
+  const response = (await chrome.runtime.sendMessage({
+    type: 'VERIFY_SELECTORS',
+    tabId: tab.id,
+    selectors,
+  })) as { ok: true; selectors: Record<string, boolean> } | { ok: false; error: string };
+
+  if (!response.ok || !('selectors' in response)) {
+    throw new Error('error' in response ? response.error : 'Selector verification failed.');
+  }
+  return response.selectors;
 }
 
 export function isScannable(url: string | undefined): boolean {
@@ -66,15 +78,4 @@ export async function clearHighlightOnPage(pinned = false): Promise<void> {
   } catch {
     // ignore
   }
-}
-
-export function formatRelativeTime(timestamp: number): string {
-  const diff = Date.now() - timestamp;
-  const seconds = Math.round(diff / 1000);
-  if (seconds < 60) return `${seconds}s ago`;
-  const minutes = Math.round(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return new Date(timestamp).toLocaleDateString();
 }
