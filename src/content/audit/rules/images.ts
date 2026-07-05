@@ -1,4 +1,4 @@
-import { auditDoc } from '../audit-context';
+import { auditGetElementById, auditQueryAll } from '../audit-context';
 import { computeAccessibleName } from '../accessible-name';
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
@@ -7,7 +7,7 @@ function svgHasTextAlternative(svg: SVGElement): boolean {
   if (svg.getAttribute('aria-label')?.trim()) return true;
   const labelledBy = svg.getAttribute('aria-labelledby');
   if (labelledBy) {
-    return labelledBy.split(/\s+/).some((id) => auditDoc().getElementById(id)?.textContent?.trim());
+    return labelledBy.split(/\s+/).some((id) => auditGetElementById(id)?.textContent?.trim());
   }
   const title = svg.querySelector(':scope > title');
   return Boolean(title?.textContent?.trim());
@@ -16,7 +16,7 @@ function svgHasTextAlternative(svg: SVGElement): boolean {
 /** RGAA 1.1 — informative SVG without text alternative. */
 export function checkSvgInformative(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const svg of auditDoc().querySelectorAll('svg')) {
+  for (const svg of auditQueryAll<SVGElement>('svg')) {
     if (!isVisible(svg)) continue;
     const role = svg.getAttribute('role');
     const ariaHidden = svg.getAttribute('aria-hidden') === 'true';
@@ -44,7 +44,7 @@ export function checkSvgInformative(): RuleFinding | null {
 /** RGAA 1.1 — canvas without accessible name. */
 export function checkCanvasAlt(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const canvas of auditDoc().querySelectorAll('canvas')) {
+  for (const canvas of auditQueryAll<HTMLCanvasElement>('canvas')) {
     if (!isVisible(canvas)) continue;
     const name = computeAccessibleName(canvas);
     const fallback = canvas.textContent?.trim();
@@ -70,7 +70,7 @@ const DECORATIVE_CLASS_PATTERN = /(?:^|\s)(?:icon|decorative|decoration|spacer|a
 export function checkDecorativeImageAlt(): RuleFinding | null {
   const offenders: Element[] = [];
 
-  for (const img of auditDoc().querySelectorAll<HTMLImageElement>('img')) {
+  for (const img of auditQueryAll<HTMLImageElement>('img')) {
     if (!isVisible(img)) continue;
 
     const alt = img.getAttribute('alt');

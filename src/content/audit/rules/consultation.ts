@@ -1,4 +1,4 @@
-import { auditDoc } from '../audit-context';
+import { auditQueryAll } from '../audit-context';
 import { computeAccessibleName } from '../accessible-name';
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
@@ -12,7 +12,7 @@ const POPUP_ON_LOAD_PATTERN = /window\.open\s*\(|showModalDialog\s*\(/;
 /** RGAA 13.2 — target=_blank without warning. */
 export function checkNewWindowLinks(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const link of auditDoc().querySelectorAll('a[target="_blank"]')) {
+  for (const link of auditQueryAll('a[target="_blank"]')) {
     if (!isVisible(link)) continue;
     const name = computeAccessibleName(link) ?? '';
     const title = link.getAttribute('title') ?? '';
@@ -32,7 +32,7 @@ export function checkNewWindowLinks(): RuleFinding | null {
 /** RGAA 13.3 — document download links without format in label. */
 export function checkDocumentLinks(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const link of auditDoc().querySelectorAll('a[href]')) {
+  for (const link of auditQueryAll('a[href]')) {
     if (!isVisible(link)) continue;
     const href = link.getAttribute('href') ?? '';
     if (!DOC_EXTENSIONS.test(href)) continue;
@@ -52,17 +52,16 @@ export function checkDocumentLinks(): RuleFinding | null {
 
 /** RGAA 13.2 (extend) — popup-on-load via inline scripts or handlers. */
 export function checkPopupOnLoad(): RuleFinding | null {
-  const doc = auditDoc();
   const offenders: Element[] = [];
 
-  for (const script of doc.querySelectorAll('script:not([src])')) {
+  for (const script of auditQueryAll('script:not([src])')) {
     const body = script.textContent ?? '';
     if (POPUP_ON_LOAD_PATTERN.test(body) && /load|DOMContentLoaded|ready/i.test(body)) {
       offenders.push(script);
     }
   }
 
-  for (const el of doc.querySelectorAll<HTMLElement>('[onload], body[onload]')) {
+  for (const el of auditQueryAll<HTMLElement>('[onload], body[onload]')) {
     const handler = el.getAttribute('onload') ?? '';
     if (POPUP_ON_LOAD_PATTERN.test(handler)) offenders.push(el);
   }

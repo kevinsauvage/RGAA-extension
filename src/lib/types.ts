@@ -81,6 +81,12 @@ export interface ScanSummary {
   score: number;
 }
 
+export interface ScanWarning {
+  code: 'cross_origin_frames';
+  message: string;
+  count: number;
+}
+
 export interface ScanResult {
   id: string;
   url: string;
@@ -91,6 +97,8 @@ export interface ScanResult {
   accessibilityIssues: AccessibilityIssue[];
   performanceIssues: PerformanceIssue[];
   webVitals: CoreWebVitals;
+  /** Non-blocking limitations encountered during the scan. */
+  warnings?: ScanWarning[];
 }
 
 /** AI-generated remediation for a specific issue node. */

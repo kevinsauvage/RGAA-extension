@@ -1,11 +1,11 @@
-import { auditDoc } from '../audit-context';
+import { auditQueryAll } from '../audit-context';
 import { isAuditableMedia, isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
 /** RGAA 4.3 — video without caption/subtitle track. */
 export function checkVideoCaptions(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const video of auditDoc().querySelectorAll('video')) {
+  for (const video of auditQueryAll('video')) {
     if (!isAuditableMedia(video)) continue;
     const hasCaptions = [...video.querySelectorAll('track')].some((track) => {
       const kind = track.getAttribute('kind') ?? '';
@@ -28,7 +28,7 @@ export function checkVideoCaptions(): RuleFinding | null {
 /** RGAA 4.10 / 13.8 — autoplay media without controls. */
 export function checkAutoplayMedia(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const media of auditDoc().querySelectorAll('video, audio')) {
+  for (const media of auditQueryAll('video, audio')) {
     if (!isAuditableMedia(media)) continue;
     if (
       media.hasAttribute('autoplay') &&
@@ -52,10 +52,10 @@ export function checkAutoplayMedia(): RuleFinding | null {
 /** RGAA 13.8 — uncontrollable moving content. */
 export function checkMovingContent(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const el of auditDoc().querySelectorAll('marquee, blink')) {
+  for (const el of auditQueryAll('marquee, blink')) {
     if (isVisible(el)) offenders.push(el);
   }
-  for (const video of auditDoc().querySelectorAll('video[autoplay]')) {
+  for (const video of auditQueryAll('video[autoplay]')) {
     if (isAuditableMedia(video) && !video.hasAttribute('controls')) offenders.push(video);
   }
   return multiNodeFinding(offenders, {
@@ -75,7 +75,7 @@ const CUSTOM_PLAYER_HINT = /player|media|video-js|plyr|vjs/i;
 export function checkMediaControlFocus(): RuleFinding | null {
   const offenders: Element[] = [];
 
-  for (const media of auditDoc().querySelectorAll<HTMLMediaElement>('video, audio')) {
+  for (const media of auditQueryAll<HTMLMediaElement>('video, audio')) {
     if (!isAuditableMedia(media)) continue;
     if (media.hasAttribute('controls')) continue;
 

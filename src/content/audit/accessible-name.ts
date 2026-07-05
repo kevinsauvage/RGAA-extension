@@ -2,7 +2,8 @@
  * Lightweight accessible name computation (subset of AccName 1.1).
  * Good enough for AI audit context, not a full implementation.
  */
-import { auditDoc } from './audit-context';
+import { auditGetElementById, auditQuerySelector } from './audit-context';
+
 export function computeAccessibleName(element: Element): string | undefined {
   const ariaLabel = element.getAttribute('aria-label')?.trim();
   if (ariaLabel) return ariaLabel;
@@ -11,7 +12,7 @@ export function computeAccessibleName(element: Element): string | undefined {
   if (labelledBy) {
     const parts = labelledBy
       .split(/\s+/)
-      .map((id) => auditDoc().getElementById(id)?.textContent?.trim())
+      .map((id) => auditGetElementById(id)?.textContent?.trim())
       .filter(Boolean);
     if (parts.length) return parts.join(' ');
   }
@@ -25,7 +26,7 @@ export function computeAccessibleName(element: Element): string | undefined {
   if (tag === 'input' || tag === 'select' || tag === 'textarea' || tag === 'canvas') {
     const id = element.getAttribute('id');
     if (id) {
-      const label = auditDoc().querySelector(`label[for="${CSS.escape(id)}"]`);
+      const label = auditQuerySelector(`label[for="${CSS.escape(id)}"]`);
       if (label?.textContent?.trim()) return label.textContent.trim();
     }
     const title = element.getAttribute('title')?.trim();

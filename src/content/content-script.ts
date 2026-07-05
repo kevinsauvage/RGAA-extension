@@ -1,7 +1,9 @@
 import type { ContentMessage, ContentResponse } from '@/lib/messaging';
 import type { ScanResult } from '@/lib/types';
+import { getIframeAuditSummary } from './audit/audit-context';
 import { runAxeAudit, summarize } from './audit/axe-runner';
 import { runRgaaRules } from './audit/rules';
+import type { ScanWarning } from '@/lib/types';
 import { buildPageHtml, verifySelectors } from './audit/page-html';
 import { buildStyleSnippets } from './audit/style-snippets';
 import { collectPerformance } from './audit/performance';
@@ -9,6 +11,19 @@ import { clearHighlight, clearPinnedHighlight, highlightNode } from './highlight
 
 function uid(): string {
   return `scan-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function buildScanWarnings(): ScanWarning[] {
+  const { skippedFrames } = getIframeAuditSummary();
+  if (skippedFrames.length === 0) return [];
+
+  return [
+    {
+      code: 'cross_origin_frames',
+      count: skippedFrames.length,
+      message: `${skippedFrames.length} cross-origin frame(s) could not be audited (RGAA theme 2 — Cadres). Content inside these frames was skipped.`,
+    },
+  ];
 }
 
 async function runScan(): Promise<ScanResult> {
@@ -31,6 +46,7 @@ async function runScan(): Promise<ScanResult> {
     accessibilityIssues,
     performanceIssues: perf.issues,
     webVitals: perf.webVitals,
+    warnings: buildScanWarnings(),
   };
 }
 

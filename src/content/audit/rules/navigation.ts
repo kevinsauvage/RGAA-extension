@@ -1,4 +1,4 @@
-import { auditDoc } from '../audit-context';
+import { auditDoc, auditGetElementById, auditQueryAll, auditQuerySelector } from '../audit-context';
 import { computeAccessibleName } from '../accessible-name';
 import { getTabbableElements, hasFocusTrap } from '../focus-utils';
 import { isVisible } from '../dom-utils';
@@ -11,15 +11,14 @@ const SKIP_LINK_HINTS = /contenu|content|main|principal/i;
 
 /** RGAA 12.7 — skip link to main content. */
 export function checkSkipLink(): RuleFinding | null {
-  const doc = auditDoc();
-  const main = doc.querySelector('main, [role="main"]');
+  const main = auditQuerySelector('main, [role="main"]');
   if (!main) return null;
-  const firstLinks = [...doc.querySelectorAll('a[href^="#"]')].slice(0, 8);
+  const firstLinks = [...auditQueryAll<HTMLAnchorElement>('a[href^="#"]')].slice(0, 8);
   const hasSkipLink = firstLinks.some((link) => {
     const name = computeAccessibleName(link) ?? '';
     const targetId = link.getAttribute('href')?.slice(1) ?? '';
     if (!targetId) return false;
-    const target = doc.getElementById(targetId);
+    const target = auditGetElementById(targetId);
     return (
       SKIP_LINK_HINTS.test(name) &&
       (target === main || main.contains(target) || target?.contains(main) === true)
@@ -45,7 +44,7 @@ export function checkKeyboardTrap(): RuleFinding | null {
   const outsideTabbables = (container: Element) =>
     allTabbables.filter((el) => !container.contains(el));
 
-  for (const modal of doc.querySelectorAll('[aria-modal="true"], [role="dialog"]')) {
+  for (const modal of auditQueryAll('[aria-modal="true"], [role="dialog"]')) {
     if (!isVisible(modal)) continue;
     if (outsideTabbables(modal).length === 0) continue;
 

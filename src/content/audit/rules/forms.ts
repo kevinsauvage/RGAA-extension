@@ -1,4 +1,4 @@
-import { auditDoc } from '../audit-context';
+import { auditGetElementById, auditQueryAll, auditQuerySelector } from '../audit-context';
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
@@ -8,7 +8,7 @@ const ERROR_HINT_PATTERN = /erreur|error|correction|invalid|aide|suggestion|exem
 /** RGAA 11.5 — radio groups not in fieldset. */
 export function checkRadioGroups(): RuleFinding | null {
   const byName = new Map<string, HTMLInputElement[]>();
-  for (const radio of auditDoc().querySelectorAll<HTMLInputElement>('input[type="radio"][name]')) {
+  for (const radio of auditQueryAll<HTMLInputElement>('input[type="radio"][name]')) {
     if (!isVisible(radio)) continue;
     const group = byName.get(radio.name) ?? [];
     group.push(radio);
@@ -33,7 +33,7 @@ export function checkRadioGroups(): RuleFinding | null {
 /** RGAA 11.6 — fieldset without legend for grouped fields. */
 export function checkFieldsetLegend(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const fieldset of auditDoc().querySelectorAll('fieldset')) {
+  for (const fieldset of auditQueryAll('fieldset')) {
     if (!isVisible(fieldset)) continue;
     const legend = fieldset.querySelector('legend');
     if (!legend?.textContent?.trim()) offenders.push(fieldset);
@@ -51,15 +51,14 @@ export function checkFieldsetLegend(): RuleFinding | null {
 /** RGAA 11.10 — required fields without visible indication. */
 export function checkRequiredIndication(): RuleFinding | null {
   const offenders: Element[] = [];
-  const doc = auditDoc();
-  for (const input of doc.querySelectorAll<HTMLInputElement>(
+  for (const input of auditQueryAll<HTMLInputElement>(
     'input[required], select[required], textarea[required], [aria-required="true"]',
   )) {
     if (!isVisible(input)) continue;
     const labelText =
       input.labels?.[0]?.textContent ??
       (input.id
-        ? doc.querySelector(`label[for="${CSS.escape(input.id)}"]`)?.textContent
+        ? auditQuerySelector(`label[for="${CSS.escape(input.id)}"]`)?.textContent
         : null) ??
       input.getAttribute('aria-label') ??
       '';
@@ -81,7 +80,7 @@ export function checkRequiredIndication(): RuleFinding | null {
 export function checkSelectOptgroup(): RuleFinding | null {
   const offenders: Element[] = [];
 
-  for (const select of auditDoc().querySelectorAll<HTMLSelectElement>('select')) {
+  for (const select of auditQueryAll<HTMLSelectElement>('select')) {
     if (!isVisible(select)) continue;
     if (select.querySelector('optgroup')) continue;
 
@@ -112,17 +111,16 @@ export function checkSelectOptgroup(): RuleFinding | null {
 
 /** RGAA 11.11 (partial) — invalid fields without a nearby correction hint. */
 export function checkInvalidFieldHint(): RuleFinding | null {
-  const doc = auditDoc();
   const offenders: Element[] = [];
 
-  for (const input of doc.querySelectorAll<HTMLElement>('[aria-invalid="true"]')) {
+  for (const input of auditQueryAll<HTMLElement>('[aria-invalid="true"]')) {
     if (!isVisible(input)) continue;
 
     let hasHint = false;
     const describedBy = input.getAttribute('aria-describedby');
     if (describedBy) {
       hasHint = describedBy.split(/\s+/).some((id) => {
-        const hint = doc.getElementById(id);
+        const hint = auditGetElementById(id);
         return Boolean(hint?.textContent?.trim() && ERROR_HINT_PATTERN.test(hint.textContent));
       });
     }

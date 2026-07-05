@@ -1,4 +1,4 @@
-import { auditDoc } from '../audit-context';
+import { auditDoc, auditQueryAll } from '../audit-context';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
 /** RGAA 8.1 — valid doctype present. */
@@ -28,7 +28,7 @@ export function checkTextDirection(): RuleFinding | null {
   const doc = auditDoc();
   const rtlChars = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
   const pageDir = doc.documentElement.getAttribute('dir') ?? 'ltr';
-  for (const el of doc.querySelectorAll('p, li, td, th, span, div, blockquote')) {
+  for (const el of auditQueryAll('p, li, td, th, span, div, blockquote')) {
     const text = el.textContent?.trim() ?? '';
     if (text.length < 8) continue;
     const elDir = el.getAttribute('dir') ?? el.closest('[dir]')?.getAttribute('dir') ?? pageDir;

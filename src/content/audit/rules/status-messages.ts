@@ -1,4 +1,4 @@
-import { auditDoc } from '../audit-context';
+import { auditQueryAll } from '../audit-context';
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
@@ -7,10 +7,9 @@ const STATUS_CLASS_HINT =
 
 /** RGAA 7.5 (partial) — status regions that look dynamic but lack live-region semantics. */
 export function checkStatusMessages(): RuleFinding | null {
-  const doc = auditDoc();
   const offenders: Element[] = [];
 
-  for (const el of doc.querySelectorAll<HTMLElement>('[class], [role="status"], [role="alert"]')) {
+  for (const el of auditQueryAll<HTMLElement>('[class], [role="status"], [role="alert"]')) {
     if (!isVisible(el)) continue;
 
     const role = el.getAttribute('role');

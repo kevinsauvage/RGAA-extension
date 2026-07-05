@@ -51,6 +51,18 @@ describe('runRgaaRules integration', () => {
     const issues = runRgaaRules();
     expect(issues.some((issue) => issue.ruleId === 'rgaa-presentational-html')).toBe(true);
   });
+
+  it('audits nested same-origin iframe documents', () => {
+    setBodyHtml('<main></main>');
+    const outer = document.createElement('iframe');
+    document.body.appendChild(outer);
+    const inner = outer.contentDocument!.createElement('iframe');
+    outer.contentDocument!.body.appendChild(inner);
+    inner.contentDocument!.body.innerHTML = '<font>Nested legacy</font>';
+
+    const issues = runRgaaRules();
+    expect(issues.some((issue) => issue.ruleId === 'rgaa-presentational-html')).toBe(true);
+  });
 });
 
 describe('shared rule finding shape', () => {

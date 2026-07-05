@@ -1,11 +1,11 @@
-import { auditDoc } from '../audit-context';
+import { auditQueryAll } from '../audit-context';
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
 /** RGAA 5.8 — layout tables using data-table semantics. */
 export function checkLayoutTableSemantics(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const table of auditDoc().querySelectorAll('table')) {
+  for (const table of auditQueryAll('table')) {
     if (!isVisible(table)) continue;
     const role = table.getAttribute('role');
     if (role === 'presentation' || role === 'none') continue;

@@ -16,8 +16,8 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 
 ### How to read this
 
-- **axe-core** runs on the live DOM with computed styles (contrast, viewport, ARIA…). Findings are **certain**.
-- **Deterministic rules** (`src/content/audit/rules/`) use the rendered page — visibility, computed CSS, keyboard reachability. Findings are **likely**.
+- **axe-core** runs on the live DOM with computed styles (contrast, viewport, ARIA…). Findings are **certain**. Same-origin iframes are included.
+- **Deterministic rules** (`src/content/audit/rules/`) use the rendered page — visibility, computed CSS, keyboard reachability, open shadow roots, same-origin iframes. Findings are **likely**.
 - **AI deep scan** sends pruned HTML + criterion hints to the model. Findings are **needs-review** and require human confirmation.
 - **Manual** criteria need a human auditor, multi-page review, media playback, or interaction tests we do not automate yet.
 
@@ -154,18 +154,17 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 
 ```
 Classic scan (automatic)
-├── axe-core          → WCAG/RGAA mapped violations
-└── rules/            → deterministic RGAA checks on live DOM
+├── axe-core          → WCAG/RGAA mapped violations (top doc + same-origin frames)
+└── rules/            → deterministic RGAA checks (open shadow roots + same-origin frames)
 
 Deep scan (on demand)
 └── AI + pruned HTML  → subjective / markup criteria
 ```
 
-## Roadmap (deterministic)
+## Engine capabilities
 
-Planned next checks on the rendered page:
+- **Same-origin iframes** — axe and custom rules recurse into nested frames.
+- **Open shadow DOM** — custom rules query through open shadow roots (Web Components).
+- **Cross-origin frames** — skipped with a scan warning in the side panel (RGAA theme 2).
 
-- **12.9** keyboard trap detection (tab simulation)
-- **10.12** text spacing override resistance
-- **10.13** hover/focus overlay dismissibility
-- **iframe** recursive audit for same-origin frames
+See **[todo.md](../todo.md)** for the full backlog.

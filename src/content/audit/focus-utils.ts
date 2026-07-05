@@ -1,8 +1,33 @@
-import { auditDoc } from './audit-context';
+import {
+  auditDoc,
+  auditQueryAll,
+  collectOpenShadowRoots,
+} from './audit-context';
 import { isVisible } from './dom-utils';
 
 const TABBABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]), [contenteditable="true"], audio[controls], video[controls], summary';
+
+function queryTabbableInRoot(root: ParentNode): HTMLElement[] {
+  if (root instanceof Document) {
+    return auditQueryAll<HTMLElement>(TABBABLE_SELECTOR);
+  }
+
+  const seen = new Set<HTMLElement>();
+  const nodes: HTMLElement[] = [];
+  const scopes: ParentNode[] = [root, ...collectOpenShadowRoots(root)];
+
+  for (const scope of scopes) {
+    for (const el of scope.querySelectorAll<HTMLElement>(TABBABLE_SELECTOR)) {
+      if (!seen.has(el)) {
+        seen.add(el);
+        nodes.push(el);
+      }
+    }
+  }
+
+  return nodes;
+}
 
 function isTabbable(el: HTMLElement): boolean {
   if (!isVisible(el)) return false;
@@ -16,7 +41,7 @@ function isTabbable(el: HTMLElement): boolean {
 
 /** Focusable elements in approximate tab order within a root. */
 export function getTabbableElements(root: ParentNode = auditDoc()): HTMLElement[] {
-  const nodes = [...root.querySelectorAll<HTMLElement>(TABBABLE_SELECTOR)].filter(isTabbable);
+  const nodes = queryTabbableInRoot(root).filter(isTabbable);
 
   return nodes.sort((a, b) => {
     const aIdx = a.tabIndex > 0 ? a.tabIndex : 0;

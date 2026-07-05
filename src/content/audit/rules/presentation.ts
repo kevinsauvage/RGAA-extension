@@ -1,4 +1,4 @@
-import { auditDoc } from '../audit-context';
+import { auditDoc, auditGetElementById, auditQueryAll } from '../audit-context';
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
@@ -13,7 +13,7 @@ const DISMISS_SELECTOR =
 /** RGAA 10.7 — focus indicator likely removed on focusable elements. */
 export function checkFocusVisible(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const el of auditDoc().querySelectorAll<HTMLElement>(FOCUSABLE)) {
+  for (const el of auditQueryAll<HTMLElement>(FOCUSABLE)) {
     if (!isVisible(el)) continue;
     if (el.getAttribute('tabindex') === '-1') continue;
     const style = getComputedStyle(el);
@@ -48,7 +48,7 @@ const OFFSCREEN_SELECTORS = [
 /** RGAA 10.8 — off-screen / visually-hidden content still exposed to AT. */
 export function checkHiddenContent(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const el of auditDoc().querySelectorAll<HTMLElement>(OFFSCREEN_SELECTORS)) {
+  for (const el of auditQueryAll<HTMLElement>(OFFSCREEN_SELECTORS)) {
     if (!el.textContent?.trim()) continue;
     if (el.getAttribute('aria-hidden') === 'true') continue;
     if (el.closest('[aria-hidden="true"]')) continue;
@@ -93,7 +93,7 @@ function blocksTextSizeAdjust(el: HTMLElement): boolean {
 /** RGAA 10.4 — viewport or CSS blocks text scaling beyond 200%. */
 export function checkTextScaling(): RuleFinding | null {
   const offenders: Element[] = [];
-  for (const meta of auditDoc().querySelectorAll('meta[name="viewport"]')) {
+  for (const meta of auditQueryAll('meta[name="viewport"]')) {
     const content = meta.getAttribute('content') ?? '';
     const blocksScale =
       /user-scalable\s*=\s*no/i.test(content) || /maximum-scale\s*=\s*([0-9.]+)/i.test(content);
@@ -133,7 +133,7 @@ const LEGACY_PRESENTATIONAL = new Set([
 export function checkPresentationalHtml(): RuleFinding | null {
   const offenders: Element[] = [];
   for (const tag of LEGACY_PRESENTATIONAL) {
-    for (const el of auditDoc().querySelectorAll(tag)) {
+    for (const el of auditQueryAll(tag)) {
       if (isVisible(el)) offenders.push(el);
     }
   }
@@ -199,14 +199,13 @@ const EXPANDED_POPUP_SELECTOR = '[aria-expanded="true"][aria-haspopup], [aria-ex
 
 /** RGAA 10.13 (partial) — expanded hover/focus popups without dismiss control. */
 export function checkHoverFocusOverlay(): RuleFinding | null {
-  const doc = auditDoc();
   const offenders: Element[] = [];
 
-  for (const trigger of doc.querySelectorAll<HTMLElement>(EXPANDED_POPUP_SELECTOR)) {
+  for (const trigger of auditQueryAll<HTMLElement>(EXPANDED_POPUP_SELECTOR)) {
     if (!isVisible(trigger)) continue;
 
     const popupId = trigger.getAttribute('aria-controls');
-    const popup = popupId ? doc.getElementById(popupId) : null;
+    const popup = popupId ? auditGetElementById(popupId) : null;
     if (!popup) continue;
 
     const popupHasDismiss = popup.querySelector(DISMISS_SELECTOR) !== null;
@@ -235,7 +234,7 @@ export function checkHoverFocusOverlay(): RuleFinding | null {
 export function checkCssInteractiveReachability(): RuleFinding | null {
   const offenders: Element[] = [];
 
-  for (const el of auditDoc().querySelectorAll<HTMLElement>('*')) {
+  for (const el of auditQueryAll<HTMLElement>('*')) {
     if (!isVisible(el)) continue;
     if (el.matches('a[href], button, input, select, textarea, summary, [role="button"], [role="link"]')) {
       continue;
