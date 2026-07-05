@@ -87,5 +87,15 @@ export async function clearHighlightOnPage(pinned = false): Promise<void> {
 export async function runScanOnActiveTab(): Promise<ContentResponse> {
   const tab = await getActiveTab();
   if (!tab?.id) throw new Error('No active tab.');
-  return sendRuntimeMessage<ContentResponse>({ type: 'RUN_SCAN', tabId: tab.id });
+  try {
+    return await sendRuntimeMessage<ContentResponse>({ type: 'RUN_SCAN', tabId: tab.id });
+  } catch (error) {
+    return {
+      ok: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Unable to reach the extension background worker. Reload the extension and try again.',
+    };
+  }
 }

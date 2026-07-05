@@ -1,11 +1,33 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { crx } from '@crxjs/vite-plugin';
+import { crx, type CrxPlugin } from '@crxjs/vite-plugin';
 import { resolve } from 'node:path';
 import manifest from './src/manifest.config';
 
+/** On-demand injection loads chunks from the page; WAR must allow real origins, not the dummy CS match. */
+function contentScriptWebAccessibleResources(): CrxPlugin {
+  return {
+    name: 'a11yfix:content-script-war',
+    enforce: 'post',
+    renderCrxManifest(manifest) {
+      for (const entry of manifest.web_accessible_resources ?? []) {
+        if (
+          'matches' in entry &&
+          entry.resources.some((resource: string) => resource.includes('content-script'))
+        ) {
+          entry.matches = ['<all_urls>'];
+        }
+      }
+      return manifest;
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => ({
-  plugins: mode === 'test' ? [] : [react(), crx({ manifest })],
+  plugins:
+    mode === 'test'
+      ? []
+      : [react(), crx({ manifest }), contentScriptWebAccessibleResources()],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),

@@ -34,6 +34,7 @@ export default defineManifest({
   content_scripts: [
     {
       // Built by CRXJS but never auto-injected — injected on demand via scripting API.
+      // WAR for chunks is patched to <all_urls> in vite.config.ts (dummy match alone breaks loader imports).
       matches: ['http://127.0.0.1:65535/*'],
       js: ['src/content/content-script.ts'],
       run_at: 'document_idle',
