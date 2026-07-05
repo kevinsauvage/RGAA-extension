@@ -1,0 +1,25 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      vite-ecosystem:
+        patterns:
+          - vite
+          - '@vitejs/*'
+          - '@crxjs/*'
+          - vitest
+          - '@vitest/*'
+      react-ecosystem:
+        patterns:
+          - react
+          - react-dom
+          - '@types/react*'
+      axe-core:
+        patterns:
+          - axe-core
+      openai-related:
+        patterns:
+          - jspdf

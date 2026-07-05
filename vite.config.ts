@@ -57,11 +57,17 @@ export default defineConfig(({ mode }) => ({
   test: {
     environment: 'happy-dom',
     setupFiles: ['src/content/audit/rules/__tests__/setup.ts'],
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'e2e/**/*.test.ts'],
     coverage: {
       provider: 'v8',
       include: ['src/content/audit/rules/**/*.ts'],
       exclude: ['src/content/audit/rules/__tests__/**'],
+      thresholds: {
+        statements: 80,
+        branches: 65,
+        functions: 95,
+        lines: 90,
+      },
     },
   },
 }));

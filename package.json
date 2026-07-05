@@ -13,6 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
     "docs": "node scripts/parse-rgaa-referential.mjs && tsx scripts/generate-rgaa-docs.ts",
     "preview": "vite preview",
     "lint": "eslint .",
@@ -40,6 +41,7 @@
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.7.1",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.61.1",
     "@types/chrome": "^0.2.2",
     "@types/node": "^26.1.0",
     "@types/react": "^19.2.17",

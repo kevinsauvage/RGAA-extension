@@ -1,8 +1,7 @@
 import type { ContentResponse, RuntimeMessage } from '@/lib/messaging';
 import type { ScanResult } from '@/lib/types';
 import { sendToTab, toError } from '@/lib/tab-messaging';
-import { getSettings, getUsage, incrementUsage } from '@/lib/storage';
-import { evaluateQuota } from '@/lib/scan-limits';
+import { runScanForTab } from './run-scan';
 
 type BgResponse =
   | { ok: true; result: ScanResult }
@@ -16,33 +15,7 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 async function runScan(tabId: number): Promise<BgResponse> {
-  const [settings, usage] = await Promise.all([getSettings(), getUsage()]);
-  const quota = evaluateQuota(settings, usage);
-  if (!quota.allowed) {
-    return {
-      ok: false,
-      reason: 'quota',
-      error: `Free tier limit reached (${quota.limit} scans this month). Upgrade to Pro for unlimited scans.`,
-    };
-  }
-
-  try {
-    const response = await sendToTab<ContentResponse>(tabId, { type: 'RUN_SCAN' });
-
-    if (!response.ok || !('result' in response)) {
-      const error = 'error' in response ? response.error : 'Scan failed.';
-      return { ok: false, reason: 'runtime', error };
-    }
-
-    await incrementUsage();
-    return { ok: true, result: response.result };
-  } catch (error) {
-    return {
-      ok: false,
-      reason: 'runtime',
-      error: toError(error, 'Unable to scan this page (it may be a protected browser page).'),
-    };
-  }
+  return runScanForTab(tabId);
 }
 
 function relayTabMessage(

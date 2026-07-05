@@ -13,7 +13,7 @@ Living task list for the RGAA/WCAG Chrome extension. Regenerate coverage stats w
 | Deterministic coverage | **64 / 106** (~60%) — axe-core + 37 custom rules |
 | + AI deep scan | **74 / 106** (~70%) — needs-review findings |
 | Manual only | **32 / 106** (~30%) |
-| Unit tests | 158 passing (19 files, Vitest + happy-dom) |
+| Unit tests | 168+ passing (Vitest + happy-dom); coverage gate on rules |
 | CI | typecheck, test, lint, format, build, docs drift, 400 KB gzip content-script budget |
 | Pro tier | Preview toggle in Settings — **no billing wired up** |
 | Browsers | Chrome MV3 only |
@@ -118,22 +118,22 @@ Multi-page / interaction criteria (12.1–12.5, 11.3, 11.12) require a **site cr
 
 ### Missing test coverage
 
-- [ ] `src/lib/ai/deep-scan.ts` — batch parsing, evidence validation, selector verification
-- [ ] `src/lib/ai/client.ts` — fix generation and error handling
-- [ ] `src/lib/report/pdf.ts` — smoke test PDF generation (no throw, expected sections)
-- [ ] `src/background/service-worker.ts` — quota gate, message relay (mock `chrome.*`)
-- [ ] `src/lib/storage.ts` — month rollover resets usage counter
-- [ ] axe + iframe integration test — axe findings from framed content once implemented
+- [x] `src/lib/ai/deep-scan.ts` — batch parsing, evidence validation, selector verification
+- [x] `src/lib/ai/client.ts` — fix generation and error handling
+- [x] `src/lib/report/pdf.ts` — smoke test PDF generation (no throw, expected sections)
+- [x] `src/background/service-worker.ts` — quota gate, message relay (via `run-scan.ts` tests)
+- [x] `src/lib/storage.ts` — month rollover resets usage counter
+- [x] axe + iframe integration test — axe findings from framed content once implemented
 
 ### E2E
 
-- [ ] **Playwright extension harness** — load unpacked `dist/`, open side panel, run scan on fixture HTML pages
-- [ ] **Fixture page suite** — static HTML files covering each custom rule (pass + fail cases) for regression
+- [x] **Playwright extension harness** — load unpacked `dist/`, open side panel, run scan on fixture HTML pages
+- [x] **Fixture page suite** — static HTML files covering each custom rule (pass + fail cases) for regression
 
 ### CI enhancements
 
-- [ ] **`npm run test:coverage` gate** — enforce minimum coverage on `src/content/audit/rules/`
-- [ ] **Dependabot / Renovate** — automated dependency PRs (axe-core, OpenAI-related deps)
+- [x] **`npm run test:coverage` gate** — enforce minimum coverage on `src/content/audit/rules/`
+- [x] **Dependabot / Renovate** — automated dependency PRs (axe-core, OpenAI-related deps)
 
 ---
 
@@ -175,7 +175,7 @@ Multi-page / interaction criteria (12.1–12.5, 11.3, 11.12) require a **site cr
 - [x] Free tier quota (10 scans/month) + Pro preview toggle
 - [x] CI pipeline (typecheck, test, lint, format, build, docs drift, bundle budget)
 - [x] RGAA referential parsing + auto-generated coverage docs
-- [x] 133 unit tests for rules and coverage map
+- [x] 196 unit tests + Playwright e2e harness
 
 ---
 
