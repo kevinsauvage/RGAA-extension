@@ -163,7 +163,3 @@ export const DEEP_SCAN_CRITERIA: RgaaCriterion[] = [
   // Theme 13 — Consultation
   // 13.8 covered by rules rgaa-moving-content + axe blink/marquee
 ];
-
-export function getDeepScanCriterion(id: string): RgaaCriterion | undefined {
-  return DEEP_SCAN_CRITERIA.find((criterion) => criterion.id === id);
-}

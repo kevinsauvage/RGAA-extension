@@ -75,7 +75,7 @@ export const OPENAI_MODELS: OpenAiModel[] = [
 
 export const DEFAULT_OPENAI_MODEL = 'gpt-5.4-mini';
 
-export function getOpenAiModel(id: string): OpenAiModel | undefined {
+function getOpenAiModel(id: string): OpenAiModel | undefined {
   return OPENAI_MODELS.find((model) => model.id === id);
 }
 

@@ -5,10 +5,6 @@
 
 import { beforeEach, expect, vi } from 'vitest';
 
-export function setPageHtml(html: string): void {
-  document.documentElement.innerHTML = html;
-}
-
 /** Parse a fragment into body (preserves structure without replacing html/body). */
 export function setBodyHtml(html: string): void {
   document.body.innerHTML = html;

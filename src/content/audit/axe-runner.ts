@@ -69,8 +69,3 @@ export async function runAxeAudit(): Promise<AccessibilityIssue[]> {
 }
 
 export { summarizeIssues as summarize };
-
-/** @internal Test hook to reset lazy-loaded axe between runs. */
-export function resetAxeModuleForTests(): void {
-  axeModule = null;
-}

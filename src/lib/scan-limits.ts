@@ -20,7 +20,7 @@ const PRO_FEATURE_MESSAGES: Record<ProFeature, string> = {
     'PDF export is a Pro feature. Enable Pro (preview) in Settings — billing will be added before public launch.',
 };
 
-export function isPro(settings: Settings): boolean {
+function isPro(settings: Settings): boolean {
   return settings.plan === 'pro';
 }
 

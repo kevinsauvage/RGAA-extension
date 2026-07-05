@@ -58,7 +58,7 @@ const KEPT_ATTRS = new Set([
 
 const MAX_ATTR_LENGTH = 120;
 const MAX_TEXT_LENGTH = 240;
-export const MAX_HTML_LENGTH = 150_000;
+const MAX_HTML_LENGTH = 150_000;
 const TRUNCATION_MARKER = '\n<!-- [truncated: page exceeds deep-scan size limit] -->';
 
 function pruneElement(el: Element): void {

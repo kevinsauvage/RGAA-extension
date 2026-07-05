@@ -19,12 +19,4 @@ export async function sendRuntimeMessage<T>(message: RuntimeMessage): Promise<T>
   return (await chrome.runtime.sendMessage(message)) as T;
 }
 
-export async function sendToActiveTab<T extends ContentResponse>(
-  message: ContentMessage,
-): Promise<T> {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.id) throw new Error('No active tab.');
-  return sendToTab<T>(tab.id, message);
-}
-
 export { toError };

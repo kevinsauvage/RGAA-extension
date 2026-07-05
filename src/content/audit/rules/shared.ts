@@ -40,13 +40,6 @@ export function toIssue(finding: RuleFinding): AccessibilityIssue {
   };
 }
 
-export function nodeFinding(el: Element, partial: Omit<RuleFinding, 'nodes'>): RuleFinding {
-  return {
-    ...partial,
-    nodes: [{ selector: buildSelector(el), html: truncate(el.outerHTML, 220) }],
-  };
-}
-
 export function multiNodeFinding(
   elements: Element[],
   partial: Omit<RuleFinding, 'nodes'>,

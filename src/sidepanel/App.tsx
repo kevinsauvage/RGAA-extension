@@ -21,7 +21,6 @@ import {
   DeepScanProgress,
   IssueFilters,
   ScanToolbar,
-  Spinner,
 } from './components/ScanToolbar';
 
 type Tab = 'accessibility' | 'performance';
@@ -323,5 +322,3 @@ function EmptyState() {
     </div>
   );
 }
-
-export { Spinner };

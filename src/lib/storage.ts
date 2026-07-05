@@ -1,10 +1,9 @@
-import type { AiFix, ScanResult } from './types';
+import type { AiFix } from './types';
 import { DEFAULT_OPENAI_MODEL } from './ai/models';
 
 /**
  * Thin typed wrapper over chrome.storage. Settings (including the API key),
- * scan history and the fix cache live in `local`; the monthly usage counter
- * lives in `sync` so the free-tier quota follows the user across devices.
+ * and the fix cache live in `local`; the monthly usage counter lives in `sync`.
  */
 
 export interface Settings {
@@ -29,7 +28,6 @@ export const DEFAULT_SETTINGS: Settings = {
 
 const SETTINGS_KEY = 'settings';
 const USAGE_KEY = 'usage';
-const HISTORY_KEY = 'history';
 const FIX_CACHE_KEY = 'aiFixes';
 
 export async function getSettings(): Promise<Settings> {
@@ -62,16 +60,6 @@ export async function incrementUsage(): Promise<UsageState> {
   const next: UsageState = { ...usage, scans: usage.scans + 1 };
   await chrome.storage.sync.set({ [USAGE_KEY]: next });
   return next;
-}
-
-export async function getHistory(): Promise<ScanResult[]> {
-  const stored = await chrome.storage.local.get(HISTORY_KEY);
-  return (stored[HISTORY_KEY] as ScanResult[] | undefined) ?? [];
-}
-
-/** Reserved for P2 scan history UI — not written until the panel exists. */
-export async function pushHistory(_result: ScanResult, _limit = 20): Promise<void> {
-  // intentionally no-op
 }
 
 export async function getCachedFix(issueId: string): Promise<AiFix | undefined> {

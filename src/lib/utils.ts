@@ -84,6 +84,10 @@ export async function clearHighlightOnPage(pinned = false): Promise<void> {
   }
 }
 
+export async function openSidePanelForTab(tabId: number): Promise<void> {
+  await sendRuntimeMessage({ type: 'OPEN_SIDE_PANEL', tabId });
+}
+
 export async function runScanOnActiveTab(): Promise<ContentResponse> {
   const tab = await getActiveTab();
   if (!tab?.id) throw new Error('No active tab.');

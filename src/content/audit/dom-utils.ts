@@ -78,11 +78,3 @@ export function truncate(text: string, max = 200): string {
   const clean = text.replace(/\s+/g, ' ').trim();
   return clean.length > max ? `${clean.slice(0, max)}…` : clean;
 }
-
-/** Text of the closest block ancestor, for judging an element in context. */
-export function surroundingText(element: Element, max = 160): string | undefined {
-  const block = element.closest('p, li, td, figcaption, article, section, div');
-  const text = block?.textContent;
-  if (!text?.trim()) return undefined;
-  return truncate(text, max);
-}

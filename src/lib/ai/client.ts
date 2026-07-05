@@ -1,7 +1,7 @@
 import type { AccessibilityIssue, AiFix } from '@/lib/types';
 import type { Settings } from '@/lib/storage';
 import { buildUserPrompt, SYSTEM_PROMPT } from './prompts';
-import { openaiChatCompletion, stripJsonFences } from './openai-fetch';
+import { openaiChatCompletion, stripJsonFences } from './openai';
 
 interface RawFix {
   explanation: string;

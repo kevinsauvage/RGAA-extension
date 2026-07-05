@@ -155,7 +155,7 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 ```
 Classic scan (automatic)
 ├── axe-core          → WCAG/RGAA mapped violations
-└── rgaa-rules        → deterministic RGAA checks on live DOM
+└── rules/            → deterministic RGAA checks on live DOM
 
 Deep scan (on demand)
 └── AI + pruned HTML  → subjective / markup criteria

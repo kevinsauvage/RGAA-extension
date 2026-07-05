@@ -7,7 +7,7 @@ import {
   type RgaaCriterion,
 } from '@/lib/rgaa/criteria';
 import { enrichDeepScanHint } from '@/lib/rgaa/referential-hints';
-import { openaiChatCompletion, stripJsonFences } from './openai-fetch';
+import { openaiChatCompletion, stripJsonFences } from './openai';
 
 /**
  * AI deep scan: sends the pruned rendered HTML plus a batch of RGAA criteria
@@ -58,7 +58,7 @@ interface RawFinding {
   description: string;
 }
 
-export interface DeepScanResult {
+interface DeepScanResult {
   issues: AccessibilityIssue[];
   criteriaChecked: number;
   /** Findings dropped because evidence or selector could not be verified. */

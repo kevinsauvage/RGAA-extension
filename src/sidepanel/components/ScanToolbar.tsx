@@ -1,18 +1,9 @@
 import type { AiAuditProgress } from '@/lib/types';
+import { Spinner } from '@/components/Spinner';
 import type { AiAuditInfo } from '../store';
 import { SparkleIcon } from './icons';
 
-function Spinner({ light = false }: { light?: boolean }) {
-  return (
-    <span
-      className={`h-4 w-4 animate-spin rounded-full border-2 border-t-transparent ${
-        light ? 'border-white/60' : 'border-brand-400'
-      }`}
-    />
-  );
-}
-
-export interface ScanToolbarProps {
+interface ScanToolbarProps {
   pageUrl?: string;
   status: 'idle' | 'scanning' | 'done' | 'error';
   quotaAllowed: boolean;
@@ -200,4 +191,3 @@ function FilterChip({
   );
 }
 
-export { Spinner };

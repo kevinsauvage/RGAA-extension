@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Logo } from '@/components/Logo';
 import { useQuota } from '@/hooks/useQuota';
-import { getActiveTab, isScannable } from '@/lib/utils';
-import { sendRuntimeMessage } from '@/lib/tab-messaging';
+import { getActiveTab, isScannable, openSidePanelForTab } from '@/lib/utils';
 
 export function Popup() {
   const { quota, hasApiKey } = useQuota();
@@ -14,7 +13,7 @@ export function Popup() {
 
   const openPanel = async () => {
     if (!tab?.id) return;
-    await sendRuntimeMessage({ type: 'OPEN_SIDE_PANEL', tabId: tab.id });
+    await openSidePanelForTab(tab.id);
     window.close();
   };
 

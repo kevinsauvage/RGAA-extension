@@ -1,7 +1,7 @@
 import type { ContentResponse } from '@/lib/messaging';
 
 /** Built JS paths from the manifest (works in dev and production builds). */
-export function getContentScriptFiles(): string[] {
+function getContentScriptFiles(): string[] {
   const entries = chrome.runtime.getManifest().content_scripts ?? [];
   return entries.flatMap((entry) => entry.js ?? []);
 }

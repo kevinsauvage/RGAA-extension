@@ -40,8 +40,7 @@ export interface RegisteredRule {
   check: () => RuleFinding | null;
 }
 
-/** Deterministic RGAA rules — single registry for runtime and coverage validation. */
-export const RGAA_RULE_REGISTRY: RegisteredRule[] = [
+const RGAA_RULE_REGISTRY: RegisteredRule[] = [
   { id: 'rgaa-doctype', check: checkDoctype },
   { id: 'rgaa-text-direction', check: checkTextDirection },
   { id: 'rgaa-svg-informative', check: checkSvgInformative },
@@ -94,5 +93,3 @@ export function runRgaaRules(): ReturnType<typeof toIssue>[] {
 
   return findings.map(toIssue);
 }
-
-export { toIssue, type RuleFinding };
