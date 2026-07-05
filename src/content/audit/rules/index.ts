@@ -10,8 +10,9 @@ import {
   checkTextSpacingOverride,
   checkHoverFocusOverlay,
   checkCssInteractiveReachability,
+  checkBackgroundImageContrast,
 } from './presentation';
-import { checkKeyboardAccessible } from './scripts';
+import { checkKeyboardAccessible, checkScriptWidgetAlternative } from './scripts';
 import { checkLayoutTableSemantics } from './tables';
 import { checkDoctype, checkTextDirection } from './mandatory';
 import {
@@ -20,18 +21,22 @@ import {
   checkRequiredIndication,
   checkSelectOptgroup,
   checkInvalidFieldHint,
+  checkLabelProximity,
 } from './forms';
-import { checkSkipLink, checkKeyboardTrap } from './navigation';
+import { checkSkipLink, checkKeyboardTrap, checkTooltipKeyboardAccess } from './navigation';
 import {
   checkNewWindowLinks,
   checkDocumentLinks,
   checkPopupOnLoad,
+  checkFlashContent,
 } from './consultation';
 import {
   checkAutoplayMedia,
   checkMovingContent,
   checkVideoCaptions,
   checkMediaControlFocus,
+  checkMediaIdentification,
+  checkMediaAlternative,
 } from './multimedia';
 import { checkStatusMessages } from './status-messages';
 
@@ -46,7 +51,10 @@ const RGAA_RULE_REGISTRY: RegisteredRule[] = [
   { id: 'rgaa-svg-informative', check: checkSvgInformative },
   { id: 'rgaa-canvas-alt', check: checkCanvasAlt },
   { id: 'rgaa-decorative-image-alt', check: checkDecorativeImageAlt },
+  { id: 'rgaa-media-identification', check: checkMediaIdentification },
+  { id: 'rgaa-media-alternative', check: checkMediaAlternative },
   { id: 'rgaa-color-only-required', check: checkColorOnlyRequired },
+  { id: 'rgaa-bg-image-contrast', check: checkBackgroundImageContrast },
   { id: 'rgaa-text-scaling', check: checkTextScaling },
   { id: 'rgaa-text-spacing-override', check: checkTextSpacingOverride },
   { id: 'rgaa-focus-visible', check: checkFocusVisible },
@@ -56,16 +64,20 @@ const RGAA_RULE_REGISTRY: RegisteredRule[] = [
   { id: 'rgaa-css-interactive', check: checkCssInteractiveReachability },
   { id: 'rgaa-layout-table-semantics', check: checkLayoutTableSemantics },
   { id: 'rgaa-keyboard-accessible', check: checkKeyboardAccessible },
+  { id: 'rgaa-script-widget-alt', check: checkScriptWidgetAlternative },
   { id: 'rgaa-status-messages', check: checkStatusMessages },
   { id: 'rgaa-radio-grouping', check: checkRadioGroups },
   { id: 'rgaa-fieldset-legend', check: checkFieldsetLegend },
   { id: 'rgaa-select-optgroup', check: checkSelectOptgroup },
   { id: 'rgaa-required-indication', check: checkRequiredIndication },
   { id: 'rgaa-invalid-field-hint', check: checkInvalidFieldHint },
+  { id: 'rgaa-label-proximity', check: checkLabelProximity },
   { id: 'rgaa-skip-link', check: checkSkipLink },
   { id: 'rgaa-keyboard-trap', check: checkKeyboardTrap },
+  { id: 'rgaa-tooltip-keyboard', check: checkTooltipKeyboardAccess },
   { id: 'rgaa-new-window-warning', check: checkNewWindowLinks },
   { id: 'rgaa-popup-on-load', check: checkPopupOnLoad },
+  { id: 'rgaa-flash-content', check: checkFlashContent },
   { id: 'rgaa-doc-link-format', check: checkDocumentLinks },
   { id: 'rgaa-video-captions', check: checkVideoCaptions },
   { id: 'rgaa-autoplay-media', check: checkAutoplayMedia },

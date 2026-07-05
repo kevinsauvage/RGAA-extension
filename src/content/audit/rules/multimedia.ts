@@ -1,6 +1,95 @@
-import { auditQueryAll } from '../audit-context';
+import { auditGetElementById, auditQueryAll } from '../audit-context';
+import { computeAccessibleName } from '../accessible-name';
 import { isAuditableMedia, isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
+
+function embedHasIdentification(el: Element): boolean {
+  return Boolean(
+    el.getAttribute('title')?.trim() ||
+      el.getAttribute('aria-label')?.trim() ||
+      computeAccessibleName(el),
+  );
+}
+
+function hasTextAlternative(el: Element): boolean {
+  const figcaption = el.closest('figure')?.querySelector('figcaption');
+  if (figcaption?.textContent?.trim()) return true;
+
+  const describedBy = el.getAttribute('aria-describedby');
+  if (describedBy) {
+    const hasDesc = describedBy
+      .split(/\s+/)
+      .some((id) => auditGetElementById(id)?.textContent?.trim());
+    if (hasDesc) return true;
+  }
+
+  const fallback = el.textContent?.replace(/\s+/g, ' ').trim();
+  if (fallback && fallback.length > 0) return true;
+
+  return false;
+}
+
+function svgIsAnimated(svg: SVGElement): boolean {
+  return svg.querySelector('animate, animateTransform, animateMotion, set') !== null;
+}
+
+/** RGAA 4.7 — non-temporal media (object/embed/animated SVG) without identification. */
+export function checkMediaIdentification(): RuleFinding | null {
+  const offenders: Element[] = [];
+
+  for (const el of auditQueryAll('object, embed')) {
+    if (!isVisible(el)) continue;
+    if (!embedHasIdentification(el)) offenders.push(el);
+  }
+
+  for (const svg of auditQueryAll<SVGElement>('svg')) {
+    if (!isVisible(svg) || svg.getAttribute('aria-hidden') === 'true') continue;
+    if (svgIsAnimated(svg) && !embedHasIdentification(svg)) offenders.push(svg);
+  }
+
+  return multiNodeFinding(offenders, {
+    criterion: '4.7',
+    ruleId: 'rgaa-media-identification',
+    severity: 'moderate',
+    title: 'Média non temporel non identifié',
+    description:
+      'Des contenus object, embed ou SVG animé n’ont pas d’intitulé (title, aria-label ou alternative textuelle).',
+    userImpact:
+      'Les utilisateurs ne savent pas quel type de contenu non temporel ils rencontrent.',
+  });
+}
+
+/** RGAA 4.8 — non-temporal media without an accessible alternative. */
+export function checkMediaAlternative(): RuleFinding | null {
+  const offenders: Element[] = [];
+
+  for (const el of auditQueryAll('object, embed')) {
+    if (!isVisible(el)) continue;
+    if (embedHasIdentification(el) || hasTextAlternative(el)) continue;
+    offenders.push(el);
+  }
+
+  for (const svg of auditQueryAll<SVGElement>('svg')) {
+    if (!isVisible(svg) || svg.getAttribute('aria-hidden') === 'true') continue;
+    if (!svgIsAnimated(svg)) continue;
+    const hasDesc =
+      svg.querySelector('desc')?.textContent?.trim() ||
+      svg.getAttribute('aria-describedby') ||
+      embedHasIdentification(svg);
+    if (!hasDesc && !hasTextAlternative(svg)) offenders.push(svg);
+  }
+
+  return multiNodeFinding(offenders, {
+    criterion: '4.8',
+    ruleId: 'rgaa-media-alternative',
+    severity: 'serious',
+    title: 'Média non temporel sans alternative accessible',
+    description:
+      'Des contenus object, embed ou SVG animé n’ont pas d’alternative textuelle ou descriptive associée.',
+    userImpact:
+      'Les utilisateurs de technologies d’assistance ne peuvent pas accéder au contenu du média non temporel.',
+  });
+}
 
 /** RGAA 4.3 — video without caption/subtitle track. */
 export function checkVideoCaptions(): RuleFinding | null {

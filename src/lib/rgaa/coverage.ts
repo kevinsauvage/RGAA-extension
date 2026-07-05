@@ -85,8 +85,16 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
   '4.4': { methods: ['manual'], note: 'Caption relevance — manual.' },
   '4.5': { methods: ['manual'], note: 'Audio description — manual playback.' },
   '4.6': { methods: ['manual'], note: 'AD relevance — manual.' },
-  '4.7': { methods: ['manual'], note: 'Media identification — partial manual.' },
-  '4.8': { methods: ['manual'], note: 'Non-temporal media alternatives — manual.' },
+  '4.7': {
+    methods: ['rule'],
+    rules: ['rgaa-media-identification'],
+    note: 'object/embed/animated SVG without title or aria-label; relevance manual.',
+  },
+  '4.8': {
+    methods: ['rule'],
+    rules: ['rgaa-media-alternative'],
+    note: 'Non-temporal media without text alternative; quality manual.',
+  },
   '4.9': { methods: ['manual'], note: 'Alternative relevance — manual.' },
   '4.10': {
     methods: ['axe', 'rule'],
@@ -138,7 +146,11 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
       'aria-hidden-focus',
     ],
   },
-  '7.2': { methods: ['manual'], note: 'Script alternative relevance — manual.' },
+  '7.2': {
+    methods: ['rule'],
+    rules: ['rgaa-script-widget-alt'],
+    note: 'ARIA widgets without accessible name; alternative relevance manual.',
+  },
   '7.3': { methods: ['rule'], rules: ['rgaa-keyboard-accessible'] },
   '7.4': { methods: ['axe'], axeRules: ['blink', 'marquee'] },
   '7.5': {
@@ -186,7 +198,11 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
     axeRules: ['meta-viewport', 'meta-viewport-large'],
     rules: ['rgaa-text-scaling'],
   },
-  '10.5': { methods: ['manual'], note: 'Background/font color CSS pairing — manual.' },
+  '10.5': {
+    methods: ['rule'],
+    rules: ['rgaa-bg-image-contrast'],
+    note: 'Text on background-image with insufficient solid-bg contrast heuristic.',
+  },
   '10.6': { methods: ['axe'], axeRules: ['link-in-text-block'] },
   '10.7': { methods: ['rule'], rules: ['rgaa-focus-visible'] },
   '10.8': { methods: ['rule'], rules: ['rgaa-hidden-content'] },
@@ -222,7 +238,11 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
   },
   '11.2': { methods: ['ai'], note: 'Label relevance — AI judgment.' },
   '11.3': { methods: ['manual'], note: 'Cross-page label consistency — multi-page.' },
-  '11.4': { methods: ['manual'], note: 'Label proximity — visual layout manual.' },
+  '11.4': {
+    methods: ['rule'],
+    rules: ['rgaa-label-proximity'],
+    note: 'Visual label near field without programmatic association.',
+  },
   '11.5': { methods: ['rule'], rules: ['rgaa-radio-grouping'] },
   '11.6': { methods: ['rule'], rules: ['rgaa-fieldset-legend'] },
   '11.7': { methods: ['manual'], note: 'Legend relevance — manual.' },
@@ -268,7 +288,11 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
     note: 'Modal focus trap without dismiss control.',
   },
   '12.10': { methods: ['axe'], axeRules: ['accesskeys'] },
-  '12.11': { methods: ['manual'], note: 'Keyboard reachability of tooltips — interaction test.' },
+  '12.11': {
+    methods: ['rule'],
+    rules: ['rgaa-tooltip-keyboard'],
+    note: 'title/aria-describedby tooltip on non-focusable element.',
+  },
 
   // ── Theme 13 — Consultation ─────────────────────────────────────────────────
   '13.1': { methods: ['axe'], axeRules: ['meta-refresh', 'meta-refresh-no-exceptions'] },
@@ -285,7 +309,11 @@ export const CRITERION_COVERAGE: Record<string, CriterionCoverage> = {
   '13.4': { methods: ['manual'], note: 'Accessible doc equivalence — manual.' },
   '13.5': { methods: ['manual'], note: 'Cryptic content alternatives — manual.' },
   '13.6': { methods: ['manual'], note: 'Cryptic alternative relevance — manual.' },
-  '13.7': { methods: ['manual'], note: 'Flash/luminance changes — manual.' },
+  '13.7': {
+    methods: ['rule'],
+    rules: ['rgaa-flash-content'],
+    note: 'CSS animation flash heuristic (≥3 cycles/s on large visible area).',
+  },
   '13.8': {
     methods: ['axe', 'rule'],
     axeRules: ['blink', 'marquee'],

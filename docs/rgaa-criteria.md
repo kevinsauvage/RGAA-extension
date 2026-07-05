@@ -302,9 +302,11 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 4.7 — Chaque média temporel est-il clairement identifiable (hors cas particuliers) ?
 
-**Couverture extension :** Manual audit
+**Couverture extension :** Deterministic rule (likely)
 
-> Media identification — partial manual.
+**Règles :** rgaa-media-identification
+
+> object/embed/animated SVG without title or aria-label; relevance manual.
 
 **Tests :**
 
@@ -312,9 +314,11 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 4.8 — Chaque média non temporel a-t-il, si nécessaire, une alternative (hors cas particuliers) ?
 
-**Couverture extension :** Manual audit
+**Couverture extension :** Deterministic rule (likely)
 
-> Non-temporal media alternatives — manual.
+**Règles :** rgaa-media-alternative
+
+> Non-temporal media without text alternative; quality manual.
 
 **Tests :**
 
@@ -512,9 +516,11 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 7.2 — Pour chaque script ayant une alternative, cette alternative est-elle pertinente ?
 
-**Couverture extension :** Manual audit
+**Couverture extension :** Deterministic rule (likely)
 
-> Script alternative relevance — manual.
+**Règles :** rgaa-script-widget-alt
+
+> ARIA widgets without accessible name; alternative relevance manual.
 
 **Tests :**
 
@@ -763,9 +769,11 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 10.5 — Dans chaque page web, les déclarations CSS de couleurs de fond d’élément et de police sont-elles correctement utilisées ?
 
-**Couverture extension :** Manual audit
+**Couverture extension :** Deterministic rule (likely)
 
-> Background/font color CSS pairing — manual.
+**Règles :** rgaa-bg-image-contrast
+
+> Text on background-image with insufficient solid-bg contrast heuristic.
 
 **Tests :**
 
@@ -921,9 +929,11 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 11.4 — Dans chaque formulaire, chaque étiquette de champ et son champ associé sont-ils accolés (hors cas particuliers) ?
 
-**Couverture extension :** Manual audit
+**Couverture extension :** Deterministic rule (likely)
 
-> Label proximity — visual layout manual.
+**Règles :** rgaa-label-proximity
+
+> Visual label near field without programmatic association.
 
 **Tests :**
 
@@ -1156,9 +1166,11 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 12.11 — Dans chaque page web, les contenus additionnels apparaissant au survol, à la prise de focus ou à l’activation d’un composant d’interface sont-ils si nécessaire atteignables au clavier ?
 
-**Couverture extension :** Manual audit
+**Couverture extension :** Deterministic rule (likely)
 
-> Keyboard reachability of tooltips — interaction test.
+**Règles :** rgaa-tooltip-keyboard
+
+> title/aria-describedby tooltip on non-focusable element.
 
 **Tests :**
 
@@ -1235,9 +1247,11 @@ Source officielle : [Critères et tests](https://accessibilite.numerique.gouv.fr
 
 ### 13.7 — Dans chaque page web, les changements brusques de luminosité ou les effets de flash sont-ils correctement utilisés ?
 
-**Couverture extension :** Manual audit
+**Couverture extension :** Deterministic rule (likely)
 
-> Flash/luminance changes — manual.
+**Règles :** rgaa-flash-content
+
+> CSS animation flash heuristic (≥3 cycles/s on large visible area).
 
 **Tests :**
 

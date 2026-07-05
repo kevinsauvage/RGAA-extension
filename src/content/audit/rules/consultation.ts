@@ -3,6 +3,76 @@ import { computeAccessibleName } from '../accessible-name';
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
+/** Three flashes per second threshold (WCAG 2.3.1) ≈ 334 ms per cycle. */
+const FLASH_DURATION_MS = 334;
+
+function parseDurationMs(duration: string): number | null {
+  const parts = duration.split(',').map((part) => part.trim());
+  let min: number | null = null;
+  for (const part of parts) {
+    if (part.endsWith('ms')) {
+      const ms = parseFloat(part);
+      if (!Number.isNaN(ms)) min = min === null ? ms : Math.min(min, ms);
+    } else if (part.endsWith('s')) {
+      const ms = parseFloat(part) * 1000;
+      if (!Number.isNaN(ms)) min = min === null ? ms : Math.min(min, ms);
+    }
+  }
+  return min;
+}
+
+function mayFlashRapidly(el: HTMLElement): boolean {
+  const style = getComputedStyle(el);
+  let duration = parseDurationMs(style.animationDuration);
+  let animationName = style.animationName;
+  let iterations = style.animationIterationCount;
+
+  if (animationName === 'none' || !animationName) {
+    const inline = el.getAttribute('style') ?? '';
+    const animMatch = inline.match(/animation\s*:\s*([^;]+)/i);
+    if (animMatch) {
+      const parts = animMatch[1];
+      animationName = 'inline';
+      const durMatch = parts.match(/([\d.]+)\s*(ms|s)/i);
+      if (durMatch) {
+        duration = durMatch[2].toLowerCase() === 's' ? parseFloat(durMatch[1]) * 1000 : parseFloat(durMatch[1]);
+      }
+      if (/infinite/i.test(parts)) iterations = 'infinite';
+    }
+  }
+
+  if (animationName === 'none' || !animationName) return false;
+  if (duration === null || duration > FLASH_DURATION_MS) return false;
+
+  if (iterations === 'infinite') return true;
+  const count = Number.parseFloat(iterations);
+  return !Number.isNaN(count) && count >= 3;
+}
+
+/** RGAA 13.7 — rapid luminance/flash animation (CSS heuristic). */
+export function checkFlashContent(): RuleFinding | null {
+  const offenders: Element[] = [];
+
+  for (const el of auditQueryAll<HTMLElement>('*')) {
+    if (!isVisible(el)) continue;
+    if (!mayFlashRapidly(el)) continue;
+    const rect = el.getBoundingClientRect();
+    if (rect.width * rect.height < 4000) continue;
+    offenders.push(el);
+  }
+
+  return multiNodeFinding(offenders, {
+    criterion: '13.7',
+    ruleId: 'rgaa-flash-content',
+    severity: 'serious',
+    title: 'Contenu clignotant ou flash rapide',
+    description:
+      'Un élément visible utilise une animation CSS rapide (≤ 3 cycles/seconde) susceptible de provoquer des flashs.',
+    userImpact:
+      'Les personnes photosensibles peuvent être affectées ; les flashs rapides peuvent aussi gêner la lecture.',
+  });
+}
+
 const NEW_WINDOW_HINTS = /nouvelle\s+fen[eê]tre|new\s+(window|tab)|ouvre\s+dans/i;
 const DOC_EXTENSIONS = /\.(pdf|docx?|xlsx?|pptx?|odt|ods|odp)([?#]|$)/i;
 const FORMAT_HINTS =

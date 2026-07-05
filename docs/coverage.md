@@ -9,10 +9,10 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 | Metric | Count | % |
 |--------|------:|--:|
 | Total criteria | 106 | 100% |
-| Deterministic (axe + rules) | 57 | 53.8% |
+| Deterministic (axe + rules) | 64 | 60.4% |
 | + AI deep scan (needs review) | 20 criteria also | — |
-| Automated + AI reachable | 63 criteria | 63.2% |
-| Manual only | 39 | 36.8% |
+| Automated + AI reachable | 70 criteria | 69.8% |
+| Manual only | 32 | 30.2% |
 
 ### How to read this
 
@@ -28,16 +28,16 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 | 1. Images | 9 | 2 | 4 | 4 |
 | 2. Cadres | 2 | 2 | 1 | 0 |
 | 3. Couleurs | 3 | 3 | 0 | 0 |
-| 4. Multimédia | 13 | 4 | 1 | 9 |
+| 4. Multimédia | 13 | 6 | 1 | 7 |
 | 5. Tableaux | 8 | 3 | 2 | 3 |
 | 6. Liens | 2 | 2 | 1 | 0 |
-| 7. Scripts | 5 | 4 | 0 | 1 |
+| 7. Scripts | 5 | 5 | 0 | 0 |
 | 8. Éléments obligatoires | 10 | 8 | 3 | 0 |
 | 9. Structuration de l’information | 4 | 3 | 3 | 0 |
-| 10. Présentation de l’information | 14 | 9 | 1 | 5 |
-| 11. Formulaires | 13 | 7 | 3 | 4 |
-| 12. Navigation | 11 | 5 | 1 | 6 |
-| 13. Consultation | 12 | 5 | 0 | 7 |
+| 10. Présentation de l’information | 14 | 10 | 1 | 4 |
+| 11. Formulaires | 13 | 8 | 3 | 3 |
+| 12. Navigation | 11 | 6 | 1 | 5 |
+| 13. Consultation | 12 | 6 | 0 | 6 |
 
 ## Per-criterion matrix
 
@@ -63,8 +63,8 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 | 4.4 | Multimédia | manual |  | Caption relevance — manual. |
 | 4.5 | Multimédia | manual |  | Audio description — manual playback. |
 | 4.6 | Multimédia | manual |  | AD relevance — manual. |
-| 4.7 | Multimédia | manual |  | Media identification — partial manual. |
-| 4.8 | Multimédia | manual |  | Non-temporal media alternatives — manual. |
+| 4.7 | Multimédia | rule | rgaa-media-identification | object/embed/animated SVG without title or aria-label; relev |
+| 4.8 | Multimédia | rule | rgaa-media-alternative | Non-temporal media without text alternative; quality manual. |
 | 4.9 | Multimédia | manual |  | Alternative relevance — manual. |
 | 4.10 | Multimédia | axe, rule | rgaa-autoplay-media, no-autoplay-audio |  |
 | 4.11 | Multimédia | rule | rgaa-media-control-focus | Custom player control focusability; full keyboard playback m |
@@ -81,7 +81,7 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 | 6.1 | Liens | axe, ai | link-name, identical-links-same-purpose | Vague link text AI-assessed. |
 | 6.2 | Liens | axe | link-name |  |
 | 7.1 | Scripts | axe | aria-required-attr, aria-required-children |  |
-| 7.2 | Scripts | manual |  | Script alternative relevance — manual. |
+| 7.2 | Scripts | rule | rgaa-script-widget-alt | ARIA widgets without accessible name; alternative relevance  |
 | 7.3 | Scripts | rule | rgaa-keyboard-accessible |  |
 | 7.4 | Scripts | axe | blink, marquee |  |
 | 7.5 | Scripts | rule | rgaa-status-messages | Toast/notification regions without aria-live; live SR test s |
@@ -103,7 +103,7 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 | 10.2 | Présentation de l’information | manual |  | CSS disabled test — manual. |
 | 10.3 | Présentation de l’information | manual |  | Comprehension without CSS — manual. |
 | 10.4 | Présentation de l’information | axe, rule | rgaa-text-scaling, meta-viewport, meta-viewport-large |  |
-| 10.5 | Présentation de l’information | manual |  | Background/font color CSS pairing — manual. |
+| 10.5 | Présentation de l’information | rule | rgaa-bg-image-contrast | Text on background-image with insufficient solid-bg contrast |
 | 10.6 | Présentation de l’information | axe | link-in-text-block |  |
 | 10.7 | Présentation de l’information | rule | rgaa-focus-visible |  |
 | 10.8 | Présentation de l’information | rule | rgaa-hidden-content |  |
@@ -116,7 +116,7 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 | 11.1 | Formulaires | axe | label, label-title-only |  |
 | 11.2 | Formulaires | ai |  | Label relevance — AI judgment. |
 | 11.3 | Formulaires | manual |  | Cross-page label consistency — multi-page. |
-| 11.4 | Formulaires | manual |  | Label proximity — visual layout manual. |
+| 11.4 | Formulaires | rule | rgaa-label-proximity | Visual label near field without programmatic association. |
 | 11.5 | Formulaires | rule | rgaa-radio-grouping |  |
 | 11.6 | Formulaires | rule | rgaa-fieldset-legend |  |
 | 11.7 | Formulaires | manual |  | Legend relevance — manual. |
@@ -136,14 +136,14 @@ How A11yFix AI checks each RGAA 4.1.2 criterion on a **single rendered page**.
 | 12.8 | Navigation | axe | tabindex |  |
 | 12.9 | Navigation | rule | rgaa-keyboard-trap | Modal focus trap without dismiss control. |
 | 12.10 | Navigation | axe | accesskeys |  |
-| 12.11 | Navigation | manual |  | Keyboard reachability of tooltips — interaction test. |
+| 12.11 | Navigation | rule | rgaa-tooltip-keyboard | title/aria-describedby tooltip on non-focusable element. |
 | 13.1 | Consultation | axe | meta-refresh, meta-refresh-no-exceptions |  |
 | 13.2 | Consultation | rule | rgaa-new-window-warning, rgaa-popup-on-load | target=_blank warning + popup-on-load script detection. |
 | 13.3 | Consultation | rule | rgaa-doc-link-format | Accessible document version not verified. |
 | 13.4 | Consultation | manual |  | Accessible doc equivalence — manual. |
 | 13.5 | Consultation | manual |  | Cryptic content alternatives — manual. |
 | 13.6 | Consultation | manual |  | Cryptic alternative relevance — manual. |
-| 13.7 | Consultation | manual |  | Flash/luminance changes — manual. |
+| 13.7 | Consultation | rule | rgaa-flash-content | CSS animation flash heuristic (≥3 cycles/s on large visible  |
 | 13.8 | Consultation | axe, rule | rgaa-moving-content, blink, marquee |  |
 | 13.9 | Consultation | axe | css-orientation-lock |  |
 | 13.10 | Consultation | manual |  | Complex gestures — manual/device test. |

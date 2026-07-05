@@ -10,10 +10,10 @@ Living task list for the RGAA/WCAG Chrome extension. Regenerate coverage stats w
 |------|--------|
 | Version | `0.1.0` |
 | RGAA criteria | 106 (RGAA 4.1.2) |
-| Deterministic coverage | **57 / 106** (~54%) — axe-core + 30 custom rules |
-| + AI deep scan | **63 / 106** (~63%) — needs-review findings |
-| Manual only | **39 / 106** (~37%) |
-| Unit tests | 133 passing (16 files, Vitest + happy-dom) |
+| Deterministic coverage | **64 / 106** (~60%) — axe-core + 37 custom rules |
+| + AI deep scan | **74 / 106** (~70%) — needs-review findings |
+| Manual only | **32 / 106** (~30%) |
+| Unit tests | 158 passing (19 files, Vitest + happy-dom) |
 | CI | typecheck, test, lint, format, build, docs drift, 400 KB gzip content-script budget |
 | Pro tier | Preview toggle in Settings — **no billing wired up** |
 | Browsers | Chrome MV3 only |
@@ -62,12 +62,12 @@ Side panel
 
 Prioritize criteria that are automatable on a single rendered page but still manual-only:
 
-- [ ] **4.7 / 4.8** — non-temporal media identification (SVG/canvas animation, `<object>` embeds without accessible name)
-- [ ] **7.2** — scripted widget missing accessible alternative (heuristic: custom controls without role/name)
-- [ ] **10.5** — background/font color pairs that fail contrast when CSS background-image is removed (partial heuristic)
-- [ ] **11.4** — label proximity heuristic (visually grouped label + input without `for`/`aria-labelledby`)
-- [ ] **12.11** — tooltip keyboard reachability (`title`-only tooltips, `aria-describedby` on non-focusable triggers)
-- [ ] **13.7** — flash / rapid luminance change detection (CSS animation frequency heuristic)
+- [x] **4.7 / 4.8** — `rgaa-media-identification`, `rgaa-media-alternative` (object/embed/animated SVG)
+- [x] **7.2** — `rgaa-script-widget-alt` (ARIA widgets without accessible name)
+- [x] **10.5** — `rgaa-bg-image-contrast` (text contrast when background-image is ignored)
+- [x] **11.4** — `rgaa-label-proximity` (visual label without programmatic association)
+- [x] **12.11** — `rgaa-tooltip-keyboard` (title/aria-describedby on non-focusable elements)
+- [x] **13.7** — `rgaa-flash-content` (rapid CSS animation heuristic)
 
 ### Themes with lowest automation (manual-heavy)
 
@@ -166,7 +166,7 @@ Multi-page / interaction criteria (12.1–12.5, 11.3, 11.12) require a **site cr
 
 ## Done recently ✓
 
-- [x] 30 deterministic RGAA rules (images, colors, presentation, forms, navigation, consultation, multimedia, scripts, tables, mandatory)
+- [x] 37 deterministic RGAA rules (images, colors, presentation, forms, navigation, consultation, multimedia, scripts, tables, mandatory)
 - [x] Same-origin iframe support for custom rules
 - [x] AI deep scan with evidence + selector validation
 - [x] AI fix generation with local cache

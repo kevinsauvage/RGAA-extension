@@ -2,6 +2,64 @@ import { auditGetElementById, auditQueryAll, auditQuerySelector } from '../audit
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
+const FIELD_SELECTOR =
+  'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="image"]), select, textarea';
+
+function hasProgrammaticLabel(field: HTMLElement): boolean {
+  if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement) {
+    if (field.labels && field.labels.length > 0) return true;
+  }
+  if (field.closest('label')) return true;
+  if (field.getAttribute('aria-label')?.trim()) return true;
+  if (field.getAttribute('aria-labelledby')?.trim()) return true;
+  const id = field.getAttribute('id');
+  if (id && auditQuerySelector(`label[for="${CSS.escape(id)}"]`)) return true;
+  return false;
+}
+
+function hasVisualProximityLabel(field: HTMLElement): boolean {
+  const container = field.closest('div, li, p, td, fieldset, [class*="field"], [class*="form"]') ?? field.parentElement;
+  if (!container) return false;
+
+  let prev: Element | null = field.previousElementSibling;
+  while (prev) {
+    const text = prev.textContent?.trim() ?? '';
+    if (text.length > 0 && text.length <= 80 && !prev.querySelector(FIELD_SELECTOR)) return true;
+    prev = prev.previousElementSibling;
+  }
+
+  for (const candidate of container.querySelectorAll('span, div, p, label, strong, b')) {
+    if (candidate === field || candidate.contains(field) || field.contains(candidate)) continue;
+    if (candidate.querySelector(FIELD_SELECTOR)) continue;
+    const text = candidate.textContent?.trim() ?? '';
+    if (text.length > 0 && text.length <= 80) return true;
+  }
+
+  return false;
+}
+
+/** RGAA 11.4 — visually grouped label without programmatic association. */
+export function checkLabelProximity(): RuleFinding | null {
+  const offenders: Element[] = [];
+
+  for (const field of auditQueryAll<HTMLElement>(FIELD_SELECTOR)) {
+    if (!isVisible(field)) continue;
+    if (hasProgrammaticLabel(field)) continue;
+    if (hasVisualProximityLabel(field)) offenders.push(field);
+  }
+
+  return multiNodeFinding(offenders, {
+    criterion: '11.4',
+    ruleId: 'rgaa-label-proximity',
+    severity: 'moderate',
+    title: 'Étiquette visuelle sans association programmée',
+    description:
+      'Un champ de formulaire semble avoir une étiquette visuelle proche, mais sans label[for], aria-label ou aria-labelledby.',
+    userImpact:
+      'Les utilisateurs de lecteur d’écran ne savent pas quel libellé est associé au champ lors de la navigation.',
+  });
+}
+
 const REQUIRED_MARKERS = /obligatoire|required|\*|requis/i;
 const ERROR_HINT_PATTERN = /erreur|error|correction|invalid|aide|suggestion|exemple|format attendu/i;
 

@@ -1,6 +1,43 @@
 import { auditDoc, auditGetElementById, auditQueryAll } from '../audit-context';
+import {
+  contrastRatio,
+  effectiveBackgroundColor,
+  hasBackgroundImage,
+} from '../contrast-utils';
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
+
+const AA_CONTRAST = 4.5;
+
+const TEXT_WITH_COLOR =
+  'p, span, a, li, h1, h2, h3, h4, h5, h6, label, td, th, button, legend, figcaption';
+
+/** RGAA 10.5 (partial) — text contrast fails when background-image is ignored. */
+export function checkBackgroundImageContrast(): RuleFinding | null {
+  const offenders: Element[] = [];
+
+  for (const el of auditQueryAll<HTMLElement>(TEXT_WITH_COLOR)) {
+    if (!isVisible(el)) continue;
+    if (!el.textContent?.trim()) continue;
+    if (!hasBackgroundImage(el)) continue;
+
+    const fg = getComputedStyle(el).color;
+    const bg = effectiveBackgroundColor(el);
+    const ratio = contrastRatio(fg, bg);
+    if (ratio !== null && ratio < AA_CONTRAST) offenders.push(el);
+  }
+
+  return multiNodeFinding(offenders, {
+    criterion: '10.5',
+    ruleId: 'rgaa-bg-image-contrast',
+    severity: 'moderate',
+    title: 'Contraste texte insuffisant sans image de fond',
+    description:
+      'Du texte sur fond image semble lisible visuellement, mais le contraste couleur/fond CSS seul est inférieur à 4,5:1 (l’image masque probablement le problème).',
+    userImpact:
+      'Les utilisateurs qui désactivent les images ou utilisent un mode à contraste élevé ne peuvent pas lire le texte.',
+  });
+}
 
 const FOCUSABLE =
   'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';

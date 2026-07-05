@@ -68,3 +68,57 @@ export function checkKeyboardTrap(): RuleFinding | null {
       'Les utilisateurs au clavier ne peuvent pas quitter la fenêtre pour accéder au reste de la page.',
   });
 }
+
+const FOCUSABLE_TRIGGER =
+  'a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"]), [contenteditable="true"]';
+
+function isKeyboardReachable(el: Element): boolean {
+  if (!(el instanceof HTMLElement)) return false;
+  if (el.matches(FOCUSABLE_TRIGGER)) return true;
+  return el.tabIndex >= 0;
+}
+
+/** RGAA 12.11 — tooltips on non-focusable elements (title-only or aria-describedby). */
+export function checkTooltipKeyboardAccess(): RuleFinding | null {
+  const offenders: Element[] = [];
+  const seen = new Set<Element>();
+
+  for (const el of auditQueryAll<HTMLElement>('[title]')) {
+    if (!isVisible(el)) continue;
+    if (el.getAttribute('aria-hidden') === 'true') continue;
+    const title = el.getAttribute('title')?.trim();
+    if (!title) continue;
+    if (isKeyboardReachable(el)) continue;
+    if (el.getAttribute('aria-label')?.trim()) continue;
+    if (seen.has(el)) continue;
+    seen.add(el);
+    offenders.push(el);
+  }
+
+  for (const el of auditQueryAll<HTMLElement>('[aria-describedby]')) {
+    if (!isVisible(el)) continue;
+    if (isKeyboardReachable(el)) continue;
+    const ids = el.getAttribute('aria-describedby')?.split(/\s+/) ?? [];
+    const hasTooltipTarget = ids.some((id) => {
+      const target = auditGetElementById(id);
+      if (!target) return false;
+      const role = target.getAttribute('role');
+      const cls = String(target.className);
+      return role === 'tooltip' || /tooltip|infobulle|popover/i.test(cls);
+    });
+    if (!hasTooltipTarget || seen.has(el)) continue;
+    seen.add(el);
+    offenders.push(el);
+  }
+
+  return multiNodeFinding(offenders, {
+    criterion: '12.11',
+    ruleId: 'rgaa-tooltip-keyboard',
+    severity: 'moderate',
+    title: 'Infobulle inaccessible au clavier',
+    description:
+      'Une infobulle (title ou aria-describedby) est attachée à un élément non focusable — inaccessible au clavier.',
+    userImpact:
+      'Les utilisateurs au clavier ne peuvent pas afficher l’infobulle pour obtenir l’information complémentaire.',
+  });
+}
