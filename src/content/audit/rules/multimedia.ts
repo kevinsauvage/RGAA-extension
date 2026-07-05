@@ -1,11 +1,11 @@
-import { isVisible } from '../dom-utils';
+import { isAuditableMedia, isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
 /** RGAA 4.3 — video without caption/subtitle track. */
 export function checkVideoCaptions(): RuleFinding | null {
   const offenders: Element[] = [];
   for (const video of document.querySelectorAll('video')) {
-    if (!isVisible(video)) continue;
+    if (!isAuditableMedia(video)) continue;
     const hasCaptions = [...video.querySelectorAll('track')].some((track) => {
       const kind = track.getAttribute('kind') ?? '';
       return kind === 'captions' || kind === 'subtitles';
@@ -29,7 +29,7 @@ export function checkVideoCaptions(): RuleFinding | null {
 export function checkAutoplayMedia(): RuleFinding | null {
   const offenders: Element[] = [];
   for (const media of document.querySelectorAll('video, audio')) {
-    if (!isVisible(media)) continue;
+    if (!isAuditableMedia(media)) continue;
     if (media.hasAttribute('autoplay') && !media.hasAttribute('controls') && !media.hasAttribute('muted')) {
       offenders.push(media);
     }
@@ -53,7 +53,7 @@ export function checkMovingContent(): RuleFinding | null {
     if (isVisible(el)) offenders.push(el);
   }
   for (const video of document.querySelectorAll('video[autoplay]')) {
-    if (isVisible(video) && !video.hasAttribute('controls')) offenders.push(video);
+    if (isAuditableMedia(video) && !video.hasAttribute('controls')) offenders.push(video);
   }
   return multiNodeFinding(offenders, {
     criterion: '13.8',

@@ -84,10 +84,14 @@ Then load the extension:
 
 ```bash
 npm run build      # generates icons, type-checks, and bundles into dist/
+npm test           # run deterministic rule tests (Vitest)
+npm run test:watch # watch mode
 ```
 
 Load the generated `dist/` folder as an unpacked extension, or zip it for the
 Chrome Web Store.
+
+See **[todo.md](todo.md)** for the project backlog (architecture, coverage, features, testing).
 
 ## How the audit works
 

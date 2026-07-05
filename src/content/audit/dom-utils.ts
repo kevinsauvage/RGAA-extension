@@ -1,5 +1,13 @@
 /** Shared DOM helpers for the audit modules (content-script only). */
 
+/** Whether a media element should be included in audit checks. */
+export function isAuditableMedia(el: Element): boolean {
+  if (el.getAttribute('aria-hidden') === 'true') return false;
+  if (el instanceof HTMLElement && el.hidden) return false;
+  const inline = el.getAttribute('style') ?? '';
+  return !/display\s*:\s*none/i.test(inline);
+}
+
 export function isVisible(el: Element): boolean {
   const inline = el.getAttribute('style') ?? '';
   if (/display\s*:\s*none/i.test(inline) || /visibility\s*:\s*hidden/i.test(inline)) {
