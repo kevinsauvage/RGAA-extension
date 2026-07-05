@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import type { AccessibilityIssue, AffectedNode } from '@/lib/types';
 import { clearHighlightOnPage, focusIssueOnPage, highlightOnPage } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n/useI18n';
 import { SeverityBadge } from './SeverityBadge';
 import { AIFixPanel } from './AIFixPanel';
 
 export function IssueCard({ issue }: { issue: AccessibilityIssue }) {
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -36,7 +38,7 @@ export function IssueCard({ issue }: { issue: AccessibilityIssue }) {
                 className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-950 dark:text-amber-300"
                 title="AI finding from full-page analysis — verify manually before reporting"
               >
-                Review
+                {t('issues.review')}
               </span>
             )}
             {issue.rgaa.map((r) => (
@@ -49,7 +51,7 @@ export function IssueCard({ issue }: { issue: AccessibilityIssue }) {
               </span>
             ))}
             <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500 dark:bg-slate-800">
-              {issue.nodes.length} element{issue.nodes.length > 1 ? 's' : ''}
+              {t('issues.elements', { count: issue.nodes.length })}
             </span>
           </div>
         </div>
@@ -59,7 +61,7 @@ export function IssueCard({ issue }: { issue: AccessibilityIssue }) {
       {expanded && (
         <div className="space-y-3 border-t border-slate-100 p-3 dark:border-slate-800">
           <p className="text-xs text-slate-600 dark:text-slate-300">
-            <span className="font-semibold">Impact: </span>
+            <span className="font-semibold">{t('issues.impact')} </span>
             {issue.userImpact}
           </p>
 
@@ -83,7 +85,7 @@ export function IssueCard({ issue }: { issue: AccessibilityIssue }) {
               rel="noreferrer"
               className="inline-block text-[11px] font-medium text-brand-600 hover:underline"
             >
-              Reference documentation →
+              {t('issues.refDoc')}
             </a>
           )}
         </div>
@@ -93,6 +95,7 @@ export function IssueCard({ issue }: { issue: AccessibilityIssue }) {
 }
 
 function IssueNodeBlock({ node }: { node: AffectedNode }) {
+  const { t } = useI18n();
   const [active, setActive] = useState(false);
 
   const scrollToNode = async () => {
@@ -118,7 +121,7 @@ function IssueNodeBlock({ node }: { node: AffectedNode }) {
         {node.html}
       </code>
       <span className="mt-1 block text-[10px] font-medium text-brand-600 opacity-0 transition-opacity group-hover:opacity-100 dark:text-brand-300">
-        Click to scroll →
+        {t('issues.scrollHint')}
       </span>
     </button>
   );

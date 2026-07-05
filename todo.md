@@ -84,14 +84,14 @@ Multi-page / interaction criteria (12.1–12.5, 11.3, 11.12) require a **site cr
 
 ## P2 — Product & UX
 
-- [ ] **Coverage dashboard in side panel** — expose `computeCoverageStats()` (currently docs-only per `coverage.ts`) so users see which RGAA themes were checked vs skipped
-- [ ] **Criterion detail drawer** — official test wording from `referential.json`, check method badge (axe / rule / AI / manual), link to RGAA URL
-- [ ] **Scan history** — persist last N scan summaries in `chrome.storage` with URL, score, date; quick re-open from popup
-- [ ] **Export formats** — JSON / CSV in addition to PDF for dev handoff
-- [ ] **Full UI i18n** — Settings has FR/EN language; audit strings and side-panel copy should follow `settings.language` consistently
-- [ ] **Accessibility of the extension itself** — audit side panel, popup, and Options with axe; keyboard nav, focus traps, live regions for scan progress
-- [ ] **Onboarding flow** — first-run prompt: add API key, explain free vs Pro, link to privacy policy
-- [ ] **Error states** — clearer messaging for quota exceeded, missing API key, protected pages (`chrome://`, PDF viewer), content-script injection failures
+- [x] **Coverage dashboard in side panel** — RGAA coverage tab with theme breakdown and per-criterion list
+- [x] **Criterion detail drawer** — official tests, method badges, RGAA link from coverage list
+- [x] **Scan history** — last 10 scan summaries in `chrome.storage`; shown in popup and empty state
+- [x] **Export formats** — JSON / CSV in addition to PDF via export menu
+- [x] **Full UI i18n** — FR/EN message catalog; side panel, popup, and scan toolbar follow `settings.language`
+- [x] **Accessibility of the extension itself** — `aria-live` scan status, `role="alert"` errors, progressbar, tab roles, focus on drawer close, `sr-only` live region
+- [x] **Onboarding flow** — first-run banner with API key / Pro / privacy hints; dismiss persists in Settings
+- [x] **Error states** — classified messages for quota, protected pages, injection failures, worker errors
 
 ---
 

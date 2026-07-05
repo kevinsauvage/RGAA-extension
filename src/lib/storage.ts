@@ -1,4 +1,4 @@
-import type { AiFix } from './types';
+import type { AiFix, ScanResult } from './types';
 import { DEFAULT_OPENAI_MODEL } from './ai/models';
 
 /**
@@ -11,6 +11,18 @@ export interface Settings {
   model: string;
   language: 'fr' | 'en';
   plan: 'free' | 'pro';
+  /** First-run onboarding banner dismissed. */
+  onboardingDismissed?: boolean;
+}
+
+/** Lightweight scan summary for history (no full issue payloads). */
+export interface ScanHistoryEntry {
+  id: string;
+  url: string;
+  title: string;
+  timestamp: number;
+  score: number;
+  issueCount: number;
 }
 
 export interface UsageState {
@@ -29,6 +41,8 @@ export const DEFAULT_SETTINGS: Settings = {
 const SETTINGS_KEY = 'settings';
 const USAGE_KEY = 'usage';
 const FIX_CACHE_KEY = 'aiFixes';
+const SCAN_HISTORY_KEY = 'scanHistory';
+const MAX_SCAN_HISTORY = 10;
 
 export async function getSettings(): Promise<Settings> {
   const stored = await chrome.storage.local.get(SETTINGS_KEY);
@@ -73,4 +87,27 @@ export async function cacheFix(fix: AiFix): Promise<void> {
   const cache = (stored[FIX_CACHE_KEY] as Record<string, AiFix>) ?? {};
   cache[fix.issueId] = fix;
   await chrome.storage.local.set({ [FIX_CACHE_KEY]: cache });
+}
+
+export async function getScanHistory(): Promise<ScanHistoryEntry[]> {
+  const stored = await chrome.storage.local.get(SCAN_HISTORY_KEY);
+  return (stored[SCAN_HISTORY_KEY] as ScanHistoryEntry[] | undefined) ?? [];
+}
+
+export async function pushScanHistory(result: ScanResult): Promise<void> {
+  const entry: ScanHistoryEntry = {
+    id: result.id,
+    url: result.url,
+    title: result.title,
+    timestamp: result.timestamp,
+    score: result.summary.score,
+    issueCount: result.accessibilityIssues.length,
+  };
+  const history = await getScanHistory();
+  const next = [entry, ...history.filter((h) => h.id !== entry.id)].slice(0, MAX_SCAN_HISTORY);
+  await chrome.storage.local.set({ [SCAN_HISTORY_KEY]: next });
+}
+
+export async function dismissOnboarding(): Promise<void> {
+  await saveSettings({ onboardingDismissed: true });
 }

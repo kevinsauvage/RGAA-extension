@@ -7,23 +7,28 @@ import {
   runScanOnActiveTab,
   verifySelectorsOnTab,
 } from '@/lib/utils';
-import { getSettings } from '@/lib/storage';
-import { canUseProFeature, proFeatureMessage } from '@/lib/scan-limits';
-import { exportReportPdf } from '@/lib/report/pdf';
+import { getSettings, getScanHistory, pushScanHistory, type ScanHistoryEntry } from '@/lib/storage';
+import { canUseProFeature } from '@/lib/scan-limits';
 import { runDeepScan } from '@/lib/ai/deep-scan';
+import { formatProtectedPageError, formatScanError } from '@/lib/scan-errors';
+import { useI18n } from '@/lib/i18n/useI18n';
 import { Logo } from '@/components/Logo';
 import { useQuota } from '@/hooks/useQuota';
 import { usePanelStore } from './store';
 import { SummaryCards } from './components/SummaryCards';
 import { IssueCard } from './components/IssueCard';
 import { PerformancePanel } from './components/PerformancePanel';
+import { CoveragePanel } from './components/CoveragePanel';
+import { OnboardingBanner } from './components/OnboardingBanner';
+import { ScanHistoryList } from './components/ScanHistoryList';
+import { ExportMenu } from './components/ExportMenu';
 import {
   DeepScanProgress,
   IssueFilters,
   ScanToolbar,
 } from './components/ScanToolbar';
 
-type Tab = 'accessibility' | 'performance';
+type Tab = 'accessibility' | 'performance' | 'coverage';
 type SourceFilter = 'all' | 'auto' | 'ai';
 
 const SEVERITY_ORDER: Record<Severity, number> = {
@@ -50,6 +55,7 @@ function matchesFilter(source: IssueSource, filter: SourceFilter): boolean {
 }
 
 export function App() {
+  const { t, language } = useI18n();
   const {
     status,
     result,
@@ -68,21 +74,36 @@ export function App() {
     setAiAuditInfo,
     mergeAiIssues,
   } = usePanelStore();
-  const { quota, isPro, refresh: refreshQuota } = useQuota();
+  const { quota, isPro, hasApiKey, refresh: refreshQuota } = useQuota();
   const [tab, setTab] = useState<Tab>('accessibility');
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
   const [pageUrl, setPageUrl] = useState<string | undefined>();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [scanHistory, setScanHistory] = useState<ScanHistoryEntry[]>([]);
 
   useEffect(() => {
-    void getActiveTab().then((t) => setPageUrl(t?.url));
-    void refreshQuota().then((settings) => setLanguage(settings.language));
+    document.documentElement.lang = language;
+  }, [language]);
+
+  useEffect(() => {
+    void (async () => {
+      const [activeTab, settings, history] = await Promise.all([
+        getActiveTab(),
+        getSettings(),
+        getScanHistory(),
+      ]);
+      setPageUrl(activeTab?.url);
+      setLanguage(settings.language);
+      setShowOnboarding(!settings.onboardingDismissed);
+      setScanHistory(history);
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const scan = async () => {
     const activeTab = await getActiveTab();
     if (!activeTab?.id || !isScannable(activeTab.url)) {
-      setError('This page cannot be scanned (browser-internal or unsupported URL).');
+      setError(formatProtectedPageError(language));
       return;
     }
     setStatus('scanning');
@@ -93,8 +114,11 @@ export function App() {
     if (response.ok && 'result' in response) {
       setResult(response.result);
       setPageUrl(response.result.url);
+      void pushScanHistory(response.result).then(() => getScanHistory().then(setScanHistory));
     } else {
-      setError('error' in response ? response.error : 'Scan failed.');
+      const errMsg = 'error' in response ? response.error : 'Scan failed.';
+      const reason = 'reason' in response ? response.reason : undefined;
+      setError(formatScanError(language, errMsg, reason));
     }
     const settings = await refreshQuota();
     setLanguage(settings.language);
@@ -113,12 +137,12 @@ export function App() {
     if (!result) return;
     const settings = await getSettings();
     if (!canUseProFeature(settings, 'deep_scan')) {
-      setAiAuditError(proFeatureMessage('deep_scan'));
+      setAiAuditError(t('errors.deepScanPro'));
       setAiAuditStatus('error');
       return;
     }
     if (!settings.openaiApiKey) {
-      setAiAuditError('Add an OpenAI API key in Settings to run the deep scan.');
+      setAiAuditError(t('deepScan.noApiKey'));
       setAiAuditStatus('error');
       return;
     }
@@ -129,7 +153,7 @@ export function App() {
 
     try {
       const { html, styleSnippets } = await getPageHtmlFromTab();
-      const scan = await runDeepScan(
+      const scanResult = await runDeepScan(
         html,
         knownIssueRefs(),
         settings,
@@ -137,11 +161,11 @@ export function App() {
         setAiAuditProgress,
         styleSnippets,
       );
-      mergeAiIssues(scan.issues);
+      mergeAiIssues(scanResult.issues);
       setAiAuditInfo({
-        criteriaChecked: scan.criteriaChecked,
-        found: scan.issues.length,
-        rejected: scan.rejected,
+        criteriaChecked: scanResult.criteriaChecked,
+        found: scanResult.issues.length,
+        rejected: scanResult.rejected,
       });
       setAiAuditStatus('done');
     } catch (err) {
@@ -168,18 +192,25 @@ export function App() {
     };
   }, [result]);
 
+  const statusMessage =
+    status === 'scanning'
+      ? t('scan.scanning')
+      : aiAuditStatus === 'running'
+        ? aiAuditProgress?.checkLabel ?? t('scan.scanning')
+        : '';
+
   return (
     <div className="flex h-screen flex-col bg-slate-50 dark:bg-slate-950">
       <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center gap-2">
           <Logo />
           <div>
-            <h1 className="text-sm font-bold leading-tight">A11yFix AI</h1>
+            <h1 className="text-sm font-bold leading-tight">{t('app.title')}</h1>
             <p className="text-[10px] text-slate-400">
               {quota?.unlimited
-                ? 'Pro · unlimited scans'
+                ? t('app.proUnlimited')
                 : quota
-                  ? `${quota.remaining}/${quota.limit} scans left`
+                  ? t('app.scansLeft', { remaining: quota.remaining, limit: quota.limit })
                   : ''}
             </p>
           </div>
@@ -189,7 +220,7 @@ export function App() {
           className="btn-ghost text-xs"
           onClick={() => chrome.runtime.openOptionsPage()}
         >
-          Settings
+          {t('app.settings')}
         </button>
       </header>
 
@@ -200,14 +231,13 @@ export function App() {
         isPro={isPro}
         hasResult={Boolean(result)}
         aiAuditStatus={aiAuditStatus}
-        deepScanTitle={
-          isPro
-            ? 'Full-page AI analysis against the RGAA criteria list — findings need manual review'
-            : proFeatureMessage('deep_scan')
-        }
         onScan={() => void scan()}
         onDeepScan={() => void runAiDeepScan()}
       />
+
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {statusMessage}
+      </div>
 
       <DeepScanProgress
         progress={aiAuditProgress}
@@ -218,21 +248,37 @@ export function App() {
         proRequired={Boolean(result && !isPro)}
       />
 
-      <main className="flex-1 space-y-3 overflow-y-auto p-4">
+      <main id="main-content" className="flex-1 space-y-3 overflow-y-auto p-4" tabIndex={-1}>
         {error && (
-          <div className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">
+          <div
+            role="alert"
+            className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300"
+          >
             {error}
           </div>
         )}
 
-        {!result && status !== 'scanning' && !error && <EmptyState />}
+        {showOnboarding && !result && (
+          <OnboardingBanner
+            hasApiKey={hasApiKey}
+            onOpenSettings={() => chrome.runtime.openOptionsPage()}
+            onDismissed={() => setShowOnboarding(false)}
+          />
+        )}
+
+        {!result && status !== 'scanning' && !error && (
+          <EmptyState history={scanHistory} />
+        )}
 
         {result && (
           <>
             <SummaryCards result={result} />
 
             {result.warnings && result.warnings.length > 0 && (
-              <div className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+              <div
+                role="status"
+                className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
+              >
                 {result.warnings.map((warning) => (
                   <p key={warning.code}>{warning.message}</p>
                 ))}
@@ -240,34 +286,28 @@ export function App() {
             )}
 
             <div className="flex items-center justify-between gap-2">
-              <div className="flex gap-1 rounded-lg bg-slate-100 p-1 dark:bg-slate-800">
+              <div
+                className="flex gap-1 rounded-lg bg-slate-100 p-1 dark:bg-slate-800"
+                role="tablist"
+                aria-label={t('tabs.accessibility')}
+              >
                 <TabButton
                   active={tab === 'accessibility'}
                   onClick={() => setTab('accessibility')}
-                  label={`Accessibility (${result.accessibilityIssues.length})`}
+                  label={`${t('tabs.accessibility')} (${result.accessibilityIssues.length})`}
                 />
                 <TabButton
                   active={tab === 'performance'}
                   onClick={() => setTab('performance')}
-                  label={`Perf (${result.performanceIssues.length})`}
+                  label={`${t('tabs.performance')} (${result.performanceIssues.length})`}
+                />
+                <TabButton
+                  active={tab === 'coverage'}
+                  onClick={() => setTab('coverage')}
+                  label={t('tabs.coverage')}
                 />
               </div>
-              <button
-                type="button"
-                className="btn-ghost text-xs"
-                disabled={!isPro}
-                onClick={async () => {
-                  const settings = await getSettings();
-                  if (!canUseProFeature(settings, 'pdf_export')) {
-                    setError(proFeatureMessage('pdf_export'));
-                    return;
-                  }
-                  await exportReportPdf(result);
-                }}
-                title={isPro ? 'Export a client-ready PDF report' : proFeatureMessage('pdf_export')}
-              >
-                PDF
-              </button>
+              <ExportMenu result={result} isPro={isPro} onError={setError} />
             </div>
 
             {tab === 'accessibility' ? (
@@ -277,15 +317,17 @@ export function App() {
                 {visibleIssues.length === 0 ? (
                   <p className="rounded-lg bg-lime-50 px-3 py-4 text-center text-sm text-lime-700 dark:bg-lime-950/30 dark:text-lime-300">
                     {result.accessibilityIssues.length === 0
-                      ? 'No automated violations found. Run Deep scan for AI-assisted RGAA review.'
-                      : 'No issues match this filter.'}
+                      ? t('issues.noneAuto')
+                      : t('issues.noneFilter')}
                   </p>
                 ) : (
                   visibleIssues.map((issue) => <IssueCard key={issue.id} issue={issue} />)
                 )}
               </>
-            ) : (
+            ) : tab === 'performance' ? (
               <PerformancePanel webVitals={result.webVitals} issues={result.performanceIssues} />
+            ) : (
+              <CoveragePanel result={result} />
             )}
           </>
         )}
@@ -306,6 +348,8 @@ function TabButton({
   return (
     <button
       type="button"
+      role="tab"
+      aria-selected={active}
       onClick={onClick}
       className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
         active
@@ -318,15 +362,20 @@ function TabButton({
   );
 }
 
-function EmptyState() {
+function EmptyState({ history }: { history: ScanHistoryEntry[] }) {
+  const { t } = useI18n();
+
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
+    <div className="flex flex-col items-center justify-center py-10 text-center">
       <Logo size={48} />
-      <h2 className="mt-4 text-base font-semibold">Ready to audit</h2>
-      <p className="mt-1 max-w-xs text-xs text-slate-500">
-        Run a real-time RGAA/WCAG accessibility and Core Web Vitals scan, then use Deep scan for
-        AI-assisted RGAA review.
-      </p>
+      <h2 className="mt-4 text-base font-semibold">{t('scan.readyTitle')}</h2>
+      <p className="mt-1 max-w-xs text-xs text-slate-500">{t('scan.readyBody')}</p>
+      {history.length > 0 && (
+        <div className="mt-6 w-full max-w-sm text-left">
+          <h3 className="mb-2 text-xs font-semibold text-slate-500">{t('scan.history')}</h3>
+          <ScanHistoryList entries={history} compact />
+        </div>
+      )}
     </div>
   );
 }
