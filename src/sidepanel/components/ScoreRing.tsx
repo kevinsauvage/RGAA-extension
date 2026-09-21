@@ -7,7 +7,15 @@ function scoreColor(score: number): string {
   return '#dc2626';
 }
 
-export function ScoreRing({ score, size = 96 }: { score: number; size?: number }) {
+export function ScoreRing({
+  score,
+  size = 96,
+  label = 'score',
+}: {
+  score: number;
+  size?: number;
+  label?: string;
+}) {
   const stroke = 9;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -43,7 +51,7 @@ export function ScoreRing({ score, size = 96 }: { score: number; size?: number }
           {score}
         </span>
         <span className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-          score
+          {label}
         </span>
       </div>
     </div>

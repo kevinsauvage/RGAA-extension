@@ -1,6 +1,10 @@
 import { clsx, type ClassValue } from 'clsx';
 import type { ContentResponse } from './messaging';
+import { getAuditTab } from './audit-tab';
 import { sendRuntimeMessage } from './tab-messaging';
+
+export { isScannable } from './scannable-url';
+export { getAuditTab, setAuditTab } from './audit-tab';
 
 export function cn(...inputs: ClassValue[]): string {
   return clsx(inputs);
@@ -12,8 +16,8 @@ export async function getActiveTab(): Promise<chrome.tabs.Tab | undefined> {
 }
 
 export async function getPageHtmlFromTab(): Promise<{ html: string; styleSnippets: string }> {
-  const tab = await getActiveTab();
-  if (!tab?.id) throw new Error('No active tab.');
+  const tab = await getAuditTab();
+  if (!tab?.id) throw new Error('No scannable tab.');
   const response = await sendRuntimeMessage<
     { ok: true; html: string; styleSnippets: string } | { ok: false; error: string }
   >({
@@ -29,8 +33,8 @@ export async function getPageHtmlFromTab(): Promise<{ html: string; styleSnippet
 
 export async function verifySelectorsOnTab(selectors: string[]): Promise<Record<string, boolean>> {
   if (selectors.length === 0) return {};
-  const tab = await getActiveTab();
-  if (!tab?.id) throw new Error('No active tab.');
+  const tab = await getAuditTab();
+  if (!tab?.id) throw new Error('No scannable tab.');
   const response = await sendRuntimeMessage<
     { ok: true; selectors: Record<string, boolean> } | { ok: false; error: string }
   >({
@@ -45,16 +49,11 @@ export async function verifySelectorsOnTab(selectors: string[]): Promise<Record<
   return response.selectors;
 }
 
-export function isScannable(url: string | undefined): boolean {
-  if (!url) return false;
-  return /^https?:\/\//i.test(url) || url.startsWith('file://');
-}
-
 export async function focusIssueOnPage(
   target: string,
   options: { targets?: string[]; persist?: boolean } = {},
 ): Promise<boolean> {
-  const tab = await getActiveTab();
+  const tab = await getAuditTab();
   if (!tab?.id) return false;
   const response = await sendRuntimeMessage<{ ok: true } | { ok: false; error: string }>({
     type: 'HIGHLIGHT_NODE',
@@ -71,7 +70,7 @@ export async function highlightOnPage(target: string, targets?: string[]): Promi
 }
 
 export async function clearHighlightOnPage(pinned = false): Promise<void> {
-  const tab = await getActiveTab();
+  const tab = await getAuditTab();
   if (!tab?.id) return;
   try {
     await sendRuntimeMessage({
@@ -89,8 +88,10 @@ export async function openSidePanelForTab(tabId: number): Promise<void> {
 }
 
 export async function runScanOnActiveTab(): Promise<ContentResponse> {
-  const tab = await getActiveTab();
-  if (!tab?.id) throw new Error('No active tab.');
+  const tab = await getAuditTab();
+  if (!tab?.id) {
+    return { ok: false, error: 'No scannable tab found. Focus a normal web page and try again.' };
+  }
   try {
     return await sendRuntimeMessage<ContentResponse>({ type: 'RUN_SCAN', tabId: tab.id });
   } catch (error) {

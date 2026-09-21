@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { IssueSource, KnownIssueRef, Severity } from '@/lib/types';
 import {
-  getActiveTab,
+  getAuditTab,
   getPageHtmlFromTab,
   isScannable,
   runScanOnActiveTab,
@@ -16,20 +16,17 @@ import { useI18n } from '@/lib/i18n/useI18n';
 import { Logo } from '@/components/Logo';
 import { useQuota } from '@/hooks/useQuota';
 import { usePanelStore } from './store';
-import { SummaryCards } from './components/SummaryCards';
-import { IssueCard } from './components/IssueCard';
-import { PerformancePanel } from './components/PerformancePanel';
-import { CoveragePanel } from './components/CoveragePanel';
+import { AccessibilityTab } from './components/AccessibilityTab';
+import { MainTabBar, type MainTab } from './components/MainTabBar';
+import { PerformanceTab } from './components/PerformanceTab';
 import { OnboardingBanner } from './components/OnboardingBanner';
 import { ScanHistoryList } from './components/ScanHistoryList';
 import { ExportMenu } from './components/ExportMenu';
 import {
   DeepScanProgress,
-  IssueFilters,
   ScanToolbar,
 } from './components/ScanToolbar';
 
-type Tab = 'accessibility' | 'performance' | 'coverage';
 type SourceFilter = 'all' | 'auto' | 'ai';
 
 const SEVERITY_ORDER: Record<Severity, number> = {
@@ -76,7 +73,7 @@ export function App() {
     mergeAiIssues,
   } = usePanelStore();
   const { quota, isPro, hasApiKey, refresh: refreshQuota } = useQuota();
-  const [tab, setTab] = useState<Tab>('accessibility');
+  const [tab, setTab] = useState<MainTab>('rgaa');
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
   const [pageUrl, setPageUrl] = useState<string | undefined>();
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -88,12 +85,12 @@ export function App() {
 
   useEffect(() => {
     void (async () => {
-      const [activeTab, settings, history] = await Promise.all([
-        getActiveTab(),
+      const [auditTab, settings, history] = await Promise.all([
+        getAuditTab(),
         getSettings(),
         getScanHistory(),
       ]);
-      setPageUrl(activeTab?.url);
+      setPageUrl(auditTab?.url);
       setLanguage(settings.language);
       setShowOnboarding(!settings.onboardingDismissed);
       setScanHistory(history);
@@ -101,9 +98,28 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const syncAuditTabUrl = (
+      tabId: number,
+      changeInfo: { url?: string; status?: string },
+      tab: chrome.tabs.Tab,
+    ) => {
+      void getAuditTab().then((auditTab) => {
+        if (auditTab?.id === tabId && changeInfo.url) {
+          setPageUrl(changeInfo.url);
+        } else if (auditTab?.id === tabId && tab.url) {
+          setPageUrl(tab.url);
+        }
+      });
+    };
+
+    chrome.tabs.onUpdated.addListener(syncAuditTabUrl);
+    return () => chrome.tabs.onUpdated.removeListener(syncAuditTabUrl);
+  }, []);
+
   const scan = async () => {
-    const activeTab = await getActiveTab();
-    if (!activeTab?.id || !isScannable(activeTab.url)) {
+    const auditTab = await getAuditTab();
+    if (!auditTab?.id || !isScannable(auditTab.url)) {
       setError(formatProtectedPageError(language));
       return;
     }
@@ -274,93 +290,37 @@ export function App() {
 
         {result && (
           <>
-            <SummaryCards result={result} />
-
-            {result.warnings && result.warnings.length > 0 && (
-              <div
-                role="status"
-                className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
-              >
-                {result.warnings.map((warning) => (
-                  <p key={warning.code}>{warning.message}</p>
-                ))}
-              </div>
-            )}
-
             <div className="flex items-center justify-between gap-2">
-              <div
-                className="flex gap-1 rounded-lg bg-slate-100 p-1 dark:bg-slate-800"
-                role="tablist"
-                aria-label={t('tabs.accessibility')}
-              >
-                <TabButton
-                  active={tab === 'accessibility'}
-                  onClick={() => setTab('accessibility')}
-                  label={`${t('tabs.accessibility')} (${result.accessibilityIssues.length})`}
-                />
-                <TabButton
-                  active={tab === 'performance'}
-                  onClick={() => setTab('performance')}
-                  label={`${t('tabs.performance')} (${result.performanceIssues.length})`}
-                />
-                <TabButton
-                  active={tab === 'coverage'}
-                  onClick={() => setTab('coverage')}
-                  label={t('tabs.coverage')}
-                />
-              </div>
+              <MainTabBar
+                active={tab}
+                accessibilityCount={result.accessibilityIssues.length}
+                performanceCount={result.performanceIssues.length}
+                onChange={setTab}
+              />
               <ExportMenu result={result} isPro={isPro} onError={setError} />
             </div>
 
-            {tab === 'accessibility' ? (
-              <>
-                <IssueFilters sourceFilter={sourceFilter} counts={counts} onChange={setSourceFilter} />
-
-                {visibleIssues.length === 0 ? (
-                  <p className="rounded-lg bg-lime-50 px-3 py-4 text-center text-sm text-lime-700 dark:bg-lime-950/30 dark:text-lime-300">
-                    {result.accessibilityIssues.length === 0
-                      ? t('issues.noneAuto')
-                      : t('issues.noneFilter')}
-                  </p>
-                ) : (
-                  visibleIssues.map((issue) => <IssueCard key={issue.id} issue={issue} />)
-                )}
-              </>
-            ) : tab === 'performance' ? (
-              <PerformancePanel webVitals={result.webVitals} issues={result.performanceIssues} />
-            ) : (
-              <CoveragePanel result={result} />
-            )}
+            <div
+              role="tabpanel"
+              id={tab === 'rgaa' ? 'rgaa-panel' : 'performance-panel'}
+              aria-labelledby={tab === 'rgaa' ? 'rgaa-panel-tab' : 'performance-panel-tab'}
+            >
+              {tab === 'rgaa' ? (
+                <AccessibilityTab
+                  result={result}
+                  sourceFilter={sourceFilter}
+                  onSourceFilterChange={setSourceFilter}
+                  visibleIssues={visibleIssues}
+                  counts={counts}
+                />
+              ) : (
+                <PerformanceTab result={result} />
+              )}
+            </div>
           </>
         )}
       </main>
     </div>
-  );
-}
-
-function TabButton({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={active}
-      onClick={onClick}
-      className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-        active
-          ? 'bg-white text-brand-700 shadow-sm dark:bg-slate-700 dark:text-white'
-          : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-      }`}
-    >
-      {label}
-    </button>
   );
 }
 

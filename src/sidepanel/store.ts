@@ -41,11 +41,12 @@ interface PanelState {
 }
 
 function recomputeSummary(result: ScanResult): ScanResult {
-  const allSeverities = [
-    ...result.accessibilityIssues.map((i) => ({ severity: i.severity })),
-    ...result.performanceIssues.map((i) => ({ severity: i.severity })),
-  ];
-  return { ...result, summary: summarizeIssues(allSeverities) };
+  return {
+    ...result,
+    summary: summarizeIssues(
+      result.accessibilityIssues.map((issue) => ({ severity: issue.severity })),
+    ),
+  };
 }
 
 export const usePanelStore = create<PanelState>((set) => ({

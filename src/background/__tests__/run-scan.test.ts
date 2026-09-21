@@ -79,11 +79,18 @@ describe('runScanForTab', () => {
     expect(incrementUsage).not.toHaveBeenCalled();
   });
 
-  it('increments usage after a successful scan', async () => {
-    vi.mocked(sendToTab).mockResolvedValue({ ok: true, result: sampleResult });
+  it('rejects unscannable extension pages before scanning', async () => {
+    vi.mocked(chrome.tabs.get).mockResolvedValueOnce({
+      id: 99,
+      url: 'chrome-extension://abc/src/options/index.html',
+    } as chrome.tabs.Tab);
 
-    const response = await runScanForTab(1);
-    expect(response).toEqual({ ok: true, result: sampleResult });
-    expect(incrementUsage).toHaveBeenCalledOnce();
+    const response = await runScanForTab(99);
+    expect(response).toEqual({
+      ok: false,
+      reason: 'runtime',
+      error: expect.stringContaining('cannot be scanned'),
+    });
+    expect(sendToTab).not.toHaveBeenCalled();
   });
 });

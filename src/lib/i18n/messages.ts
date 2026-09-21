@@ -11,6 +11,21 @@ const en = {
     proUnlimited: 'Pro · unlimited scans',
     scansLeft: '{remaining}/{limit} scans left',
   },
+  summary: {
+    accessibilityScore: 'A11y score',
+    performanceScore: 'Perf score',
+    critical: 'Critical',
+    serious: 'Serious',
+    moderate: 'Moderate',
+    minor: 'Minor',
+  },
+  sections: {
+    findings: 'Findings',
+    coverage: 'RGAA coverage',
+  },
+  performance: {
+    noIssues: 'No performance issues detected in this sample.',
+  },
   scan: {
     scanPage: 'Scan this page',
     scanning: 'Scanning…',
@@ -27,9 +42,9 @@ const en = {
     score: 'Score {score}',
   },
   tabs: {
-    accessibility: 'Accessibility',
-    performance: 'Perf',
-    coverage: 'RGAA coverage',
+    mainLabel: 'Scan results',
+    rgaa: 'RGAA & Accessibility ({count})',
+    performance: 'Performance ({count})',
   },
   export: {
     label: 'Export',
@@ -139,7 +154,7 @@ const en = {
   },
   errors: {
     protectedPage:
-      'This page cannot be scanned. Browser-internal pages (chrome://, edge://), the Web Store, and PDF viewer tabs are not supported.',
+      'This page cannot be scanned. Use a normal website tab — not Settings, the side panel, or browser-internal pages (chrome://, edge://).',
     noTab: 'No active tab found. Focus a normal web page and try again.',
     quota: 'Free tier limit reached ({limit} scans this month). Enable Pro in Settings for unlimited scans.',
     injection:
@@ -160,6 +175,21 @@ const fr: MessageTree = {
     proUnlimited: 'Pro · scans illimités',
     scansLeft: '{remaining}/{limit} scans restants',
   },
+  summary: {
+    accessibilityScore: 'Score a11y',
+    performanceScore: 'Score perf',
+    critical: 'Critique',
+    serious: 'Grave',
+    moderate: 'Modéré',
+    minor: 'Mineur',
+  },
+  sections: {
+    findings: 'Résultats',
+    coverage: 'Couverture RGAA',
+  },
+  performance: {
+    noIssues: 'Aucun problème de performance détecté sur cet échantillon.',
+  },
   scan: {
     scanPage: 'Auditer cette page',
     scanning: 'Analyse…',
@@ -176,9 +206,9 @@ const fr: MessageTree = {
     score: 'Score {score}',
   },
   tabs: {
-    accessibility: 'Accessibilité',
-    performance: 'Perf',
-    coverage: 'Couverture RGAA',
+    mainLabel: 'Résultats du scan',
+    rgaa: 'RGAA & Accessibilité ({count})',
+    performance: 'Performance ({count})',
   },
   export: {
     label: 'Exporter',
@@ -290,7 +320,7 @@ const fr: MessageTree = {
   },
   errors: {
     protectedPage:
-      'Cette page ne peut pas être auditée. Les pages internes (chrome://, edge://), le Web Store et les PDF ne sont pas pris en charge.',
+      'Cette page ne peut pas être auditée. Utilisez un onglet de site web normal — pas Paramètres, le panneau latéral, ni les pages internes (chrome://, edge://).',
     noTab: 'Aucun onglet actif. Focus sur une page web normale et réessayez.',
     quota:
       'Limite gratuite atteinte ({limit} scans ce mois-ci). Activez Pro dans Paramètres pour des scans illimités.',

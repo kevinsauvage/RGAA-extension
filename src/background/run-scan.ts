@@ -3,6 +3,7 @@ import type { ScanResult } from '@/lib/types';
 import { sendToTab, toError } from '@/lib/tab-messaging';
 import { getSettings, getUsage, incrementUsage } from '@/lib/storage';
 import { evaluateQuota } from '@/lib/scan-limits';
+import { isScannable } from '@/lib/scannable-url';
 
 export type ScanRunResponse =
   | { ok: true; result: ScanResult }
@@ -10,6 +11,19 @@ export type ScanRunResponse =
 
 /** Run a classic scan on a tab, enforcing free-tier quota. */
 export async function runScanForTab(tabId: number): Promise<ScanRunResponse> {
+  try {
+    const tab = await chrome.tabs.get(tabId);
+    if (!isScannable(tab.url)) {
+      return {
+        ok: false,
+        reason: 'runtime',
+        error: 'This page cannot be scanned. Switch to a normal website tab and try again.',
+      };
+    }
+  } catch {
+    return { ok: false, reason: 'runtime', error: 'The target tab is no longer available.' };
+  }
+
   const [settings, usage] = await Promise.all([getSettings(), getUsage()]);
   const quota = evaluateQuota(settings, usage);
   if (!quota.allowed) {

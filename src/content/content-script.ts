@@ -35,18 +35,13 @@ async function runScan(): Promise<ScanResult> {
   const axeIssues = await runAxeAudit();
   const accessibilityIssues = dedupeAccessibilityIssues([...axeIssues, ...runRgaaRules()]);
 
-  const allSeverities = [
-    ...accessibilityIssues.map((issue) => ({ severity: issue.severity })),
-    ...perf.issues.map((issue) => ({ severity: issue.severity })),
-  ];
-
   return {
     id: uid(),
     url: location.href,
     title: document.title || location.hostname,
     timestamp: Date.now(),
     durationMs: Math.round(performance.now() - started),
-    summary: summarize(allSeverities),
+    summary: summarize(accessibilityIssues.map((issue) => ({ severity: issue.severity }))),
     accessibilityIssues,
     performanceIssues: perf.issues,
     webVitals: perf.webVitals,

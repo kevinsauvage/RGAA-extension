@@ -6,7 +6,9 @@ export type ScanErrorReason = 'protected' | 'no_tab' | 'quota' | 'injection' | '
 export function classifyScanError(error: string, reason?: string): ScanErrorReason {
   if (reason === 'quota') return 'quota';
   const lower = error.toLowerCase();
-  if (/chrome:\/\/|edge:\/\/|protected|cannot be scanned|unsupported url/i.test(lower)) {
+  if (/chrome:\/\/|edge:\/\/|chrome-extension:\/\/|protected|cannot be scanned|cannot access contents|extension manifest must request permission|unsupported url/i.test(
+    lower,
+  )) {
     return 'protected';
   }
   if (/inject|content script|could not find|receiving end does not exist/i.test(lower)) {

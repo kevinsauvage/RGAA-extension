@@ -1,4 +1,5 @@
 import type { CoreWebVitals, PerformanceIssue } from '@/lib/types';
+import { useI18n } from '@/lib/i18n/useI18n';
 import { SeverityBadge } from './SeverityBadge';
 
 const VITALS: Array<{ key: keyof CoreWebVitals; label: string; unit: string }> = [
@@ -15,6 +16,8 @@ export function PerformancePanel({
   webVitals: CoreWebVitals;
   issues: PerformanceIssue[];
 }) {
+  const { t } = useI18n();
+
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-4 gap-2">
@@ -33,9 +36,9 @@ export function PerformancePanel({
         })}
       </div>
 
-      {issues.length === 0 ? (
+        {issues.length === 0 ? (
         <p className="rounded-lg bg-lime-50 px-3 py-2 text-xs text-lime-700 dark:bg-lime-950/30 dark:text-lime-300">
-          No performance issues detected in this sample.
+          {t('performance.noIssues')}
         </p>
       ) : (
         issues.map((issue) => (

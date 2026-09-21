@@ -51,6 +51,12 @@ export function installChromeMock(): ChromeMock {
       setPanelBehavior: vi.fn().mockResolvedValue(undefined),
       open: vi.fn().mockResolvedValue(undefined),
     },
+    tabs: {
+      get: vi.fn(async (tabId: number) => ({
+        id: tabId,
+        url: 'https://example.com/page',
+      })),
+    },
   };
 
   vi.stubGlobal('chrome', chromeMock);

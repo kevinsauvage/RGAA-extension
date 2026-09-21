@@ -6,6 +6,14 @@ describe('scan-errors', () => {
     expect(classifyScanError('limit reached', 'quota')).toBe('quota');
   });
 
+  it('classifies extension injection errors as protected pages', () => {
+    expect(
+      classifyScanError(
+        'Cannot access contents of url "chrome-extension://abc/src/options/index.html". Extension manifest must request permission to access this host.',
+      ),
+    ).toBe('protected');
+  });
+
   it('classifies injection errors', () => {
     expect(classifyScanError('Could not establish connection. Receiving end does not exist.')).toBe(
       'injection',

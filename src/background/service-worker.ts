@@ -2,6 +2,7 @@ import type { ContentResponse, RuntimeMessage } from '@/lib/messaging';
 import type { ScanResult } from '@/lib/types';
 import { sendToTab, toError } from '@/lib/tab-messaging';
 import { runScanForTab } from './run-scan';
+import { setAuditTab } from '@/lib/audit-tab';
 
 type BgResponse =
   | { ok: true; result: ScanResult }
@@ -69,6 +70,10 @@ chrome.runtime.onMessage.addListener(
           .catch(() => sendResponse({ ok: true }));
         return true;
       case 'OPEN_SIDE_PANEL':
+        chrome.tabs
+          .get(message.tabId)
+          .then((tab) => setAuditTab(tab))
+          .catch(() => undefined);
         chrome.sidePanel
           .open({ tabId: message.tabId })
           .then(() => sendResponse({ ok: true }))
