@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { AccessibilityIssue } from '@/lib/types';
 import type { Settings } from '@/lib/storage';
 import { generateFix } from '../client';
