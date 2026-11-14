@@ -39,7 +39,7 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install chromium
 
-      - run: npm run test:e2e
+      - run: xvfb-run -a npm run test:e2e
 
       - name: Content script bundle size budget (gzip)
         run: |
