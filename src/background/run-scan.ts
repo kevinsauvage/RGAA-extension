@@ -6,8 +6,7 @@ import { evaluateQuota } from '@/lib/scan-limits';
 import { isScannable } from '@/lib/scannable-url';
 
 export type ScanRunResponse =
-  | { ok: true; result: ScanResult }
-  | { ok: false; error: string; reason?: 'quota' | 'runtime' };
+  { ok: true; result: ScanResult } | { ok: false; error: string; reason?: 'quota' | 'runtime' };
 
 /** Run a classic scan on a tab, enforcing free-tier quota. */
 export async function runScanForTab(tabId: number): Promise<ScanRunResponse> {

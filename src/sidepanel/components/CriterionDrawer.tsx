@@ -54,7 +54,12 @@ export function CriterionDrawer({ criterion, onClose }: CriterionDrawerProps) {
               RGAA {criterion.id}
             </h2>
           </div>
-          <button ref={closeRef} type="button" className="btn-ghost px-2 py-1 text-xs" onClick={onClose}>
+          <button
+            ref={closeRef}
+            type="button"
+            className="btn-ghost px-2 py-1 text-xs"
+            onClick={onClose}
+          >
             ✕
           </button>
         </header>

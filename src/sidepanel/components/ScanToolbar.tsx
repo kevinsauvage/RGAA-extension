@@ -133,9 +133,7 @@ export function DeepScanProgress({
             found: info.found,
             criteria: info.criteriaChecked,
             rejected:
-              info.rejected > 0
-                ? t('deepScan.rejectedSuffix', { count: info.rejected })
-                : '',
+              info.rejected > 0 ? t('deepScan.rejectedSuffix', { count: info.rejected }) : '',
           })}
         </p>
       )}

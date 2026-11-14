@@ -16,5 +16,8 @@ export function useI18n() {
 
 /** For popup/options without panel store — pass language explicitly. */
 export function useTranslate(lang: Language) {
-  return useCallback((key: string, vars?: Record<string, string | number>) => t(lang, key, vars), [lang]);
+  return useCallback(
+    (key: string, vars?: Record<string, string | number>) => t(lang, key, vars),
+    [lang],
+  );
 }

@@ -1,8 +1,4 @@
-import {
-  auditDoc,
-  auditQueryAll,
-  collectOpenShadowRoots,
-} from './audit-context';
+import { auditDoc, auditQueryAll, collectOpenShadowRoots } from './audit-context';
 import { isVisible } from './dom-utils';
 
 const TABBABLE_SELECTOR =

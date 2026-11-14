@@ -17,7 +17,8 @@ async function launchWithExtension(): Promise<BrowserContext> {
 
 async function extensionId(context: BrowserContext): Promise<string> {
   const serviceWorker =
-    context.serviceWorkers()[0] ?? (await context.waitForEvent('serviceworker', { timeout: 15_000 }));
+    context.serviceWorkers()[0] ??
+    (await context.waitForEvent('serviceworker', { timeout: 15_000 }));
   return new URL(serviceWorker.url()).host;
 }
 

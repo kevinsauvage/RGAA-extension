@@ -1,13 +1,7 @@
 import { t, type Language } from '@/lib/i18n/messages';
 
 export type OpenAiErrorKind =
-  | 'quota'
-  | 'rate_limit'
-  | 'auth'
-  | 'model'
-  | 'server'
-  | 'network'
-  | 'unknown';
+  'quota' | 'rate_limit' | 'auth' | 'model' | 'server' | 'network' | 'unknown';
 
 export interface DeepScanErrorAction {
   label: string;
@@ -93,11 +87,20 @@ function classifyOpenAiResponse(
     return { kind: 'rate_limit', apiMessage };
   }
 
-  if (status === 401 || status === 403 || code.includes('invalid_api_key') || /invalid.*api key/i.test(message)) {
+  if (
+    status === 401 ||
+    status === 403 ||
+    code.includes('invalid_api_key') ||
+    /invalid.*api key/i.test(message)
+  ) {
     return { kind: 'auth', apiMessage };
   }
 
-  if (status === 404 || code.includes('model') || /model.*not found|does not exist/i.test(message)) {
+  if (
+    status === 404 ||
+    code.includes('model') ||
+    /model.*not found|does not exist/i.test(message)
+  ) {
     return { kind: 'model', apiMessage };
   }
 
@@ -110,7 +113,8 @@ function classifyOpenAiResponse(
 
 function classifyErrorMessage(message: string): OpenAiErrorKind {
   const lower = message.toLowerCase();
-  if (/429/.test(message) && /quota|billing|exceeded your current quota/i.test(lower)) return 'quota';
+  if (/429/.test(message) && /quota|billing|exceeded your current quota/i.test(lower))
+    return 'quota';
   if (/429/.test(message) || /rate.?limit/i.test(lower)) return 'rate_limit';
   if (/401|403/.test(message) || /invalid.*api key/i.test(lower)) return 'auth';
   if (/model.*not found|does not exist/i.test(lower)) return 'model';
@@ -222,7 +226,10 @@ export function formatAiFixError(lang: Language, error: unknown): string {
   return [display.title, display.body, display.hint].filter(Boolean).join(' ');
 }
 
-export function formatDeepScanErrorFromMessage(lang: Language, message: string): DeepScanErrorDisplay {
+export function formatDeepScanErrorFromMessage(
+  lang: Language,
+  message: string,
+): DeepScanErrorDisplay {
   const decoded = decodeDeepScanError(message);
   if (decoded !== message) {
     return formatDeepScanError(lang, decoded);

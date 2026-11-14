@@ -6,7 +6,11 @@ const FIELD_SELECTOR =
   'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="image"]), select, textarea';
 
 function hasProgrammaticLabel(field: HTMLElement): boolean {
-  if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement || field instanceof HTMLTextAreaElement) {
+  if (
+    field instanceof HTMLInputElement ||
+    field instanceof HTMLSelectElement ||
+    field instanceof HTMLTextAreaElement
+  ) {
     if (field.labels && field.labels.length > 0) return true;
   }
   if (field.closest('label')) return true;
@@ -18,7 +22,9 @@ function hasProgrammaticLabel(field: HTMLElement): boolean {
 }
 
 function hasVisualProximityLabel(field: HTMLElement): boolean {
-  const container = field.closest('div, li, p, td, fieldset, [class*="field"], [class*="form"]') ?? field.parentElement;
+  const container =
+    field.closest('div, li, p, td, fieldset, [class*="field"], [class*="form"]') ??
+    field.parentElement;
   if (!container) return false;
 
   let prev: Element | null = field.previousElementSibling;
@@ -61,7 +67,8 @@ export function checkLabelProximity(): RuleFinding | null {
 }
 
 const REQUIRED_MARKERS = /obligatoire|required|\*|requis/i;
-const ERROR_HINT_PATTERN = /erreur|error|correction|invalid|aide|suggestion|exemple|format attendu/i;
+const ERROR_HINT_PATTERN =
+  /erreur|error|correction|invalid|aide|suggestion|exemple|format attendu/i;
 
 /** RGAA 11.5 — radio groups not in fieldset. */
 export function checkRadioGroups(): RuleFinding | null {
@@ -115,9 +122,7 @@ export function checkRequiredIndication(): RuleFinding | null {
     if (!isVisible(input)) continue;
     const labelText =
       input.labels?.[0]?.textContent ??
-      (input.id
-        ? auditQuerySelector(`label[for="${CSS.escape(input.id)}"]`)?.textContent
-        : null) ??
+      (input.id ? auditQuerySelector(`label[for="${CSS.escape(input.id)}"]`)?.textContent : null) ??
       input.getAttribute('aria-label') ??
       '';
     if (!REQUIRED_MARKERS.test(labelText)) offenders.push(input);
@@ -184,7 +189,8 @@ export function checkInvalidFieldHint(): RuleFinding | null {
     }
 
     if (!hasHint) {
-      const container = input.closest('form, fieldset, [class*="form"], [class*="field"]') ?? input.parentElement;
+      const container =
+        input.closest('form, fieldset, [class*="form"], [class*="field"]') ?? input.parentElement;
       const nearby = container?.querySelector(
         '.error, .invalid, .invalid-feedback, [role="alert"], [class*="error-message"]',
       );

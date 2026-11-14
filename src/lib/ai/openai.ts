@@ -80,7 +80,9 @@ export async function openaiChatCompletion(
   const content = data.choices?.[0]?.message?.content;
   if (!content) {
     throw new Error(
-      options.context ? `${options.context}: empty response.` : 'OpenAI returned an empty response.',
+      options.context
+        ? `${options.context}: empty response.`
+        : 'OpenAI returned an empty response.',
     );
   }
   return content;

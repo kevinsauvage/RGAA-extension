@@ -20,7 +20,9 @@ export function DeepScanErrorAlert({
         <AlertIcon kind={display.kind} />
         <div className="min-w-0 flex-1 space-y-1.5">
           <p className="text-xs font-semibold text-red-900 dark:text-red-100">{display.title}</p>
-          <p className="text-[11px] leading-relaxed text-red-800 dark:text-red-200">{display.body}</p>
+          <p className="text-[11px] leading-relaxed text-red-800 dark:text-red-200">
+            {display.body}
+          </p>
           {display.hint && (
             <p className="text-[11px] text-red-700/90 dark:text-red-300/90">{display.hint}</p>
           )}

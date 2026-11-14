@@ -41,7 +41,10 @@ export function AccessibilityTab({
       )}
 
       <section aria-labelledby="issues-heading">
-        <h2 id="issues-heading" className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <h2
+          id="issues-heading"
+          className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
+        >
           {t('sections.findings')}
         </h2>
         <IssueFilters sourceFilter={sourceFilter} counts={counts} onChange={onSourceFilterChange} />
@@ -58,7 +61,10 @@ export function AccessibilityTab({
       </section>
 
       <section aria-labelledby="coverage-heading">
-        <h2 id="coverage-heading" className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <h2
+          id="coverage-heading"
+          className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500"
+        >
           {t('sections.coverage')}
         </h2>
         <CoveragePanel result={result} />

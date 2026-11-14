@@ -64,7 +64,8 @@ export function checkCanvasAlt(): RuleFinding | null {
 
 const DECORATIVE_ALT_PATTERN =
   /^(?:image|img|photo|picture|icon|logo|spacer|decoration|decorative)(?:\.(?:png|jpe?g|gif|svg|webp))?$/i;
-const DECORATIVE_CLASS_PATTERN = /(?:^|\s)(?:icon|decorative|decoration|spacer|avatar|emoji)(?:\s|$|-)/i;
+const DECORATIVE_CLASS_PATTERN =
+  /(?:^|\s)(?:icon|decorative|decoration|spacer|avatar|emoji)(?:\s|$|-)/i;
 
 /** RGAA 1.2 (partial) — likely decorative images with non-empty alt instead of aria-hidden. */
 export function checkDecorativeImageAlt(): RuleFinding | null {
@@ -75,7 +76,8 @@ export function checkDecorativeImageAlt(): RuleFinding | null {
 
     const alt = img.getAttribute('alt');
     if (alt === null || alt.trim() === '') continue;
-    if (img.getAttribute('role') === 'presentation' || img.getAttribute('role') === 'none') continue;
+    if (img.getAttribute('role') === 'presentation' || img.getAttribute('role') === 'none')
+      continue;
     if (img.getAttribute('aria-hidden') === 'true') continue;
 
     const parentLink = img.closest('a');

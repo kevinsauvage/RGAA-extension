@@ -6,17 +6,17 @@ Living task list for the RGAA/WCAG Chrome extension. Regenerate coverage stats w
 
 ## Snapshot
 
-| Area | Status |
-|------|--------|
-| Version | `0.1.0` |
-| RGAA criteria | 106 (RGAA 4.1.2) |
-| Deterministic coverage | **64 / 106** (~60%) — axe-core + 37 custom rules |
-| + AI deep scan | **74 / 106** (~70%) — needs-review findings |
-| Manual only | **32 / 106** (~30%) |
-| Unit tests | 168+ passing (Vitest + happy-dom); coverage gate on rules |
-| CI | typecheck, test, lint, format, build, docs drift, 400 KB gzip content-script budget |
-| Pro tier | Preview toggle in Settings — **no billing wired up** |
-| Browsers | Chrome MV3 only |
+| Area                   | Status                                                                              |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| Version                | `0.1.0`                                                                             |
+| RGAA criteria          | 106 (RGAA 4.1.2)                                                                    |
+| Deterministic coverage | **64 / 106** (~60%) — axe-core + 37 custom rules                                    |
+| + AI deep scan         | **74 / 106** (~70%) — needs-review findings                                         |
+| Manual only            | **32 / 106** (~30%)                                                                 |
+| Unit tests             | 168+ passing (Vitest + happy-dom); coverage gate on rules                           |
+| CI                     | typecheck, test, lint, format, build, docs drift, 400 KB gzip content-script budget |
+| Pro tier               | Preview toggle in Settings — **no billing wired up**                                |
+| Browsers               | Chrome MV3 only                                                                     |
 
 ### Audit architecture (current)
 
@@ -71,12 +71,12 @@ Prioritize criteria that are automatable on a single rendered page but still man
 
 ### Themes with lowest automation (manual-heavy)
 
-| Theme | Manual only | Notes |
-|-------|------------:|-------|
-| Multimédia (4) | 9 | Playback, transcript quality, AT compatibility |
-| Navigation (12) | 6 | Site-wide consistency, sitemap, search |
-| Consultation (13) | 7 | Gestures, pointer cancellation, motion actuation |
-| Images (1) | 4 | CAPTCHA, text-as-image |
+| Theme             | Manual only | Notes                                            |
+| ----------------- | ----------: | ------------------------------------------------ |
+| Multimédia (4)    |           9 | Playback, transcript quality, AT compatibility   |
+| Navigation (12)   |           6 | Site-wide consistency, sitemap, search           |
+| Consultation (13) |           7 | Gestures, pointer cancellation, motion actuation |
+| Images (1)        |           4 | CAPTCHA, text-as-image                           |
 
 Multi-page / interaction criteria (12.1–12.5, 11.3, 11.12) require a **site crawl mode** (see P2) — not solvable on a single tab scan alone.
 

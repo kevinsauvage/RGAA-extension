@@ -36,7 +36,7 @@ export function PerformancePanel({
         })}
       </div>
 
-        {issues.length === 0 ? (
+      {issues.length === 0 ? (
         <p className="rounded-lg bg-lime-50 px-3 py-2 text-xs text-lime-700 dark:bg-lime-950/30 dark:text-lime-300">
           {t('performance.noIssues')}
         </p>

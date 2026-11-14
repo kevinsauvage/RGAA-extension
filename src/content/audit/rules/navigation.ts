@@ -52,7 +52,10 @@ export function checkKeyboardTrap(): RuleFinding | null {
     const innerTabbables = getTabbableElements(modal);
     if (innerTabbables.length === 0) continue;
 
-    if (!hasDismiss && (hasFocusTrap(modal, outsideTabbables(modal)) || innerTabbables.length >= 2)) {
+    if (
+      !hasDismiss &&
+      (hasFocusTrap(modal, outsideTabbables(modal)) || innerTabbables.length >= 2)
+    ) {
       offenders.push(modal);
     }
   }

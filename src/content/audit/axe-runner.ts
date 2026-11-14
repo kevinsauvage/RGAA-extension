@@ -19,7 +19,7 @@ async function loadAxe(): Promise<AxeCore> {
 }
 
 const AXE_RUN_OPTIONS = {
-  resultTypes: ['violations'] as ('violations')[],
+  resultTypes: ['violations'] as 'violations'[],
   // WCAG-tagged rules only — excludes best-practice (extra noise, weak RGAA mapping).
   runOnly: {
     type: 'tag' as const,

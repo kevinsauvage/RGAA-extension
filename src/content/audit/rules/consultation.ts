@@ -35,7 +35,10 @@ function mayFlashRapidly(el: HTMLElement): boolean {
       animationName = 'inline';
       const durMatch = parts.match(/([\d.]+)\s*(ms|s)/i);
       if (durMatch) {
-        duration = durMatch[2].toLowerCase() === 's' ? parseFloat(durMatch[1]) * 1000 : parseFloat(durMatch[1]);
+        duration =
+          durMatch[2].toLowerCase() === 's'
+            ? parseFloat(durMatch[1]) * 1000
+            : parseFloat(durMatch[1]);
       }
       if (/infinite/i.test(parts)) iterations = 'infinite';
     }

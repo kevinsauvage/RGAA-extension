@@ -12,8 +12,7 @@ const PING_INTERVAL_MS = 50;
 async function pingContentScript(tabId: number): Promise<boolean> {
   try {
     const res = (await chrome.tabs.sendMessage(tabId, { type: 'PING' })) as
-      | ContentResponse
-      | undefined;
+      ContentResponse | undefined;
     return !!(res && 'ok' in res && res.ok);
   } catch {
     return false;
@@ -27,9 +26,7 @@ async function waitForContentScript(tabId: number): Promise<void> {
     if (await pingContentScript(tabId)) return;
     await new Promise((resolve) => setTimeout(resolve, PING_INTERVAL_MS));
   }
-  throw new Error(
-    'The audit script did not start in time. Reload the page and try again.',
-  );
+  throw new Error('The audit script did not start in time. Reload the page and try again.');
 }
 
 /** Inject the bundled content script when a tab was opened before the extension loaded. */
@@ -48,9 +45,7 @@ export async function ensureContentScript(tabId: number): Promise<void> {
     });
   } catch (error) {
     const message =
-      error instanceof Error
-        ? error.message
-        : 'Unable to inject the audit script on this page.';
+      error instanceof Error ? error.message : 'Unable to inject the audit script on this page.';
     throw new Error(message, { cause: error });
   }
 

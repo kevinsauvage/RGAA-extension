@@ -11,7 +11,9 @@ function relativeLuminance(r: number, g: number, b: number): number {
 
 /** Parse rgb()/rgba() from getComputedStyle. Returns null for unparseable values. */
 export function parseRgb(color: string): [number, number, number, number] | null {
-  const match = color.match(/rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?\s*\)/i);
+  const match = color.match(
+    /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+))?\s*\)/i,
+  );
   if (!match) return null;
   return [
     Number(match[1]),

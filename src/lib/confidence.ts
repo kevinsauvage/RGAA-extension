@@ -9,8 +9,7 @@ export interface ConfidenceDisplay {
 export const CONFIDENCE_DISPLAY: Record<IssueConfidence, ConfidenceDisplay> = {
   certain: {
     label: { en: 'Certain', fr: 'Certain' },
-    badgeClass:
-      'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200',
+    badgeClass: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200',
   },
   likely: {
     label: { en: 'Likely', fr: 'Probable' },
@@ -28,10 +27,7 @@ const SOURCE_HINT: Record<IssueSource, { en: string; fr: string }> = {
   ai: { en: 'AI analysis', fr: 'Analyse IA' },
 };
 
-export function confidenceLabel(
-  confidence: IssueConfidence,
-  lang: 'en' | 'fr' = 'en',
-): string {
+export function confidenceLabel(confidence: IssueConfidence, lang: 'en' | 'fr' = 'en'): string {
   return CONFIDENCE_DISPLAY[confidence].label[lang];
 }
 

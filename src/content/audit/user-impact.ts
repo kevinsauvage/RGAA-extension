@@ -73,15 +73,12 @@ const IMPACTS: Record<string, string> = {
     'The entire page is hidden from assistive technology, making all content unreachable.',
   'aria-hidden-focus':
     'Focus can land on elements hidden from assistive tech, creating confusing navigation.',
-  blink:
-    'Blinking text distracts users and can trigger seizures or vestibular symptoms.',
-  marquee:
-    'Moving text is hard to read and cannot be paused by users who need static content.',
+  blink: 'Blinking text distracts users and can trigger seizures or vestibular symptoms.',
+  marquee: 'Moving text is hard to read and cannot be paused by users who need static content.',
 
   'document-title':
     'Users cannot tell tabs apart and screen readers announce a meaningless page name.',
-  'html-has-lang':
-    'Screen readers may pronounce the whole page with the wrong accent and voice.',
+  'html-has-lang': 'Screen readers may pronounce the whole page with the wrong accent and voice.',
   'html-lang-valid':
     'An invalid page language code causes incorrect pronunciation for the entire document.',
   'html-xml-lang-mismatch':
@@ -95,20 +92,14 @@ const IMPACTS: Record<string, string> = {
     'Screen reader users who navigate by headings get a broken, confusing outline of the page.',
   'empty-heading':
     'Empty headings pollute the document outline and waste navigation for screen reader users.',
-  'p-as-heading':
-    'Styled paragraphs pretend to be headings, breaking the logical page structure.',
+  'p-as-heading': 'Styled paragraphs pretend to be headings, breaking the logical page structure.',
   'landmark-one-main':
     'Without a single main landmark, users cannot jump directly to primary content.',
-  'landmark-unique':
-    'Duplicate landmarks make “skip to navigation/main” commands unreliable.',
-  region:
-    'Content outside landmarks is harder to reach with screen reader region navigation.',
-  list:
-    'Lists built without proper list markup are read without item counts or structure.',
-  listitem:
-    'List items outside ul/ol/dl are not announced as part of a list.',
-  'definition-list':
-    'Definition lists with invalid structure hide term/definition relationships.',
+  'landmark-unique': 'Duplicate landmarks make “skip to navigation/main” commands unreliable.',
+  region: 'Content outside landmarks is harder to reach with screen reader region navigation.',
+  list: 'Lists built without proper list markup are read without item counts or structure.',
+  listitem: 'List items outside ul/ol/dl are not announced as part of a list.',
+  'definition-list': 'Definition lists with invalid structure hide term/definition relationships.',
 
   'meta-viewport':
     'Users who zoom to read are blocked, forcing tiny text on people who need it largest.',
@@ -123,19 +114,16 @@ const IMPACTS: Record<string, string> = {
     'Fields labeled only by title are often skipped or misidentified by assistive tech.',
   'form-field-multiple-labels':
     'Conflicting labels cause screen readers to announce the wrong field name.',
-  'select-name':
-    'Select menus without accessible names are announced as unlabeled controls.',
+  'select-name': 'Select menus without accessible names are announced as unlabeled controls.',
   'aria-input-field-name':
     'Custom input widgets lack an accessible name, so their purpose is unknown.',
   'autocomplete-valid':
     'Invalid autocomplete tokens prevent browsers from offering helpful autofill suggestions.',
 
-  bypass:
-    'Keyboard and screen reader users must tab through every menu item on every page load.',
+  bypass: 'Keyboard and screen reader users must tab through every menu item on every page load.',
   'skip-link':
     'The skip link target is missing or invalid, so it fails to bypass repetitive navigation.',
-  tabindex:
-    'Positive tabindex values disrupt natural tab order and confuse keyboard users.',
+  tabindex: 'Positive tabindex values disrupt natural tab order and confuse keyboard users.',
   accesskeys:
     'Access keys can conflict with browser or assistive tech shortcuts, causing accidental actions.',
 

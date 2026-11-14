@@ -39,7 +39,12 @@ chrome.runtime.onMessage.addListener(
         runScan(message.tabId).then(sendResponse);
         return true;
       case 'GET_PAGE_HTML':
-        relayTabMessage(message.tabId, { type: 'GET_PAGE_HTML' }, 'Unable to read this page.', sendResponse);
+        relayTabMessage(
+          message.tabId,
+          { type: 'GET_PAGE_HTML' },
+          'Unable to read this page.',
+          sendResponse,
+        );
         return true;
       case 'VERIFY_SELECTORS':
         relayTabMessage(

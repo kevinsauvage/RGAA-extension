@@ -1,9 +1,5 @@
 import { auditDoc, auditGetElementById, auditQueryAll } from '../audit-context';
-import {
-  contrastRatio,
-  effectiveBackgroundColor,
-  hasBackgroundImage,
-} from '../contrast-utils';
+import { contrastRatio, effectiveBackgroundColor, hasBackgroundImage } from '../contrast-utils';
 import { isVisible } from '../dom-utils';
 import { multiNodeFinding, type RuleFinding } from './shared';
 
@@ -232,7 +228,8 @@ export function checkTextSpacingOverride(): RuleFinding | null {
   };
 }
 
-const EXPANDED_POPUP_SELECTOR = '[aria-expanded="true"][aria-haspopup], [aria-expanded="true"][aria-controls]';
+const EXPANDED_POPUP_SELECTOR =
+  '[aria-expanded="true"][aria-haspopup], [aria-expanded="true"][aria-controls]';
 
 /** RGAA 10.13 (partial) — expanded hover/focus popups without dismiss control. */
 export function checkHoverFocusOverlay(): RuleFinding | null {
@@ -273,7 +270,11 @@ export function checkCssInteractiveReachability(): RuleFinding | null {
 
   for (const el of auditQueryAll<HTMLElement>('*')) {
     if (!isVisible(el)) continue;
-    if (el.matches('a[href], button, input, select, textarea, summary, [role="button"], [role="link"]')) {
+    if (
+      el.matches(
+        'a[href], button, input, select, textarea, summary, [role="button"], [role="link"]',
+      )
+    ) {
       continue;
     }
     if (el.tabIndex >= 0) continue;

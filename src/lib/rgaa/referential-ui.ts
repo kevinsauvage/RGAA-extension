@@ -1,9 +1,5 @@
 import referential from '@/lib/rgaa/referential.json';
-import {
-  CRITERION_COVERAGE,
-  computeCoverageStats,
-  type CheckMethod,
-} from '@/lib/rgaa/coverage';
+import { CRITERION_COVERAGE, computeCoverageStats, type CheckMethod } from '@/lib/rgaa/coverage';
 import { RGAA_THEMES, criterionHelpUrl } from '@/lib/rgaa/criteria';
 
 export interface ReferentialCriterion {

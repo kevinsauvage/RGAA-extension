@@ -7,7 +7,11 @@ interface OnboardingBannerProps {
   onDismissed: () => void;
 }
 
-export function OnboardingBanner({ hasApiKey, onOpenSettings, onDismissed }: OnboardingBannerProps) {
+export function OnboardingBanner({
+  hasApiKey,
+  onOpenSettings,
+  onDismissed,
+}: OnboardingBannerProps) {
   const { t } = useI18n();
 
   const dismiss = async () => {
@@ -20,7 +24,10 @@ export function OnboardingBanner({ hasApiKey, onOpenSettings, onDismissed }: Onb
       className="card border-brand-200 bg-brand-50/80 p-4 dark:border-brand-900 dark:bg-brand-950/30"
       aria-labelledby="onboarding-title"
     >
-      <h2 id="onboarding-title" className="text-sm font-semibold text-brand-900 dark:text-brand-100">
+      <h2
+        id="onboarding-title"
+        className="text-sm font-semibold text-brand-900 dark:text-brand-100"
+      >
         {t('onboarding.title')}
       </h2>
       <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">{t('onboarding.body')}</p>

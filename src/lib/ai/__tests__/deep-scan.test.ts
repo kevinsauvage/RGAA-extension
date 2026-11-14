@@ -16,8 +16,7 @@ const settings: Settings = {
   plan: 'pro',
 };
 
-const html =
-  '<html><body><ul class="fake-list"><li>One</li><li>Two</li></ul></body></html>';
+const html = '<html><body><ul class="fake-list"><li>One</li><li>Two</li></ul></body></html>';
 
 describe('runDeepScan', () => {
   beforeEach(() => {

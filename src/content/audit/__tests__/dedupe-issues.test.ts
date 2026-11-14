@@ -3,7 +3,8 @@ import type { AccessibilityIssue } from '@/lib/types';
 import { dedupeAccessibilityIssues } from '../dedupe-issues';
 
 function issue(
-  partial: Partial<AccessibilityIssue> & Pick<AccessibilityIssue, 'ruleId' | 'source' | 'confidence'>,
+  partial: Partial<AccessibilityIssue> &
+    Pick<AccessibilityIssue, 'ruleId' | 'source' | 'confidence'>,
 ): AccessibilityIssue {
   return {
     id: partial.id ?? '1',

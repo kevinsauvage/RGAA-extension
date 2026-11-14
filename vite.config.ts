@@ -25,9 +25,7 @@ function contentScriptWebAccessibleResources(): CrxPlugin {
 
 export default defineConfig(({ mode }) => ({
   plugins:
-    mode === 'test'
-      ? []
-      : [react(), crx({ manifest }), contentScriptWebAccessibleResources()],
+    mode === 'test' ? [] : [react(), crx({ manifest }), contentScriptWebAccessibleResources()],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),

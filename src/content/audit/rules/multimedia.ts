@@ -6,8 +6,8 @@ import { multiNodeFinding, type RuleFinding } from './shared';
 function embedHasIdentification(el: Element): boolean {
   return Boolean(
     el.getAttribute('title')?.trim() ||
-      el.getAttribute('aria-label')?.trim() ||
-      computeAccessibleName(el),
+    el.getAttribute('aria-label')?.trim() ||
+    computeAccessibleName(el),
   );
 }
 
@@ -54,8 +54,7 @@ export function checkMediaIdentification(): RuleFinding | null {
     title: 'Média non temporel non identifié',
     description:
       'Des contenus object, embed ou SVG animé n’ont pas d’intitulé (title, aria-label ou alternative textuelle).',
-    userImpact:
-      'Les utilisateurs ne savent pas quel type de contenu non temporel ils rencontrent.',
+    userImpact: 'Les utilisateurs ne savent pas quel type de contenu non temporel ils rencontrent.',
   });
 }
 
@@ -173,10 +172,12 @@ export function checkMediaControlFocus(): RuleFinding | null {
       media.parentElement;
     if (!wrapper || !CUSTOM_PLAYER_HINT.test(String(wrapper.className))) continue;
 
-    const controls = [...wrapper.querySelectorAll<HTMLElement>('button, [role="button"], [tabindex]')].filter(
-      isVisible,
+    const controls = [
+      ...wrapper.querySelectorAll<HTMLElement>('button, [role="button"], [tabindex]'),
+    ].filter(isVisible);
+    const focusableControls = controls.filter(
+      (control) => control.tabIndex >= 0 || control.matches('button'),
     );
-    const focusableControls = controls.filter((control) => control.tabIndex >= 0 || control.matches('button'));
     if (focusableControls.length === 0) offenders.push(wrapper);
   }
 

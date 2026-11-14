@@ -22,10 +22,7 @@ import { PerformanceTab } from './components/PerformanceTab';
 import { OnboardingBanner } from './components/OnboardingBanner';
 import { ScanHistoryList } from './components/ScanHistoryList';
 import { ExportMenu } from './components/ExportMenu';
-import {
-  DeepScanProgress,
-  ScanToolbar,
-} from './components/ScanToolbar';
+import { DeepScanProgress, ScanToolbar } from './components/ScanToolbar';
 
 type SourceFilter = 'all' | 'auto' | 'ai';
 
@@ -213,7 +210,7 @@ export function App() {
     status === 'scanning'
       ? t('scan.scanning')
       : aiAuditStatus === 'running'
-        ? aiAuditProgress?.checkLabel ?? t('scan.scanning')
+        ? (aiAuditProgress?.checkLabel ?? t('scan.scanning'))
         : '';
 
   return (
@@ -284,9 +281,7 @@ export function App() {
           />
         )}
 
-        {!result && status !== 'scanning' && !error && (
-          <EmptyState history={scanHistory} />
-        )}
+        {!result && status !== 'scanning' && !error && <EmptyState history={scanHistory} />}
 
         {result && (
           <>

@@ -72,7 +72,8 @@ const en = {
       'Deep scan complete — {found} finding(s) to review across {criteria} RGAA criteria{rejected}.',
     rejectedSuffix: ' ({count} unverified AI suggestion(s) dropped)',
     proRequired: 'Deep scan, AI fixes, and PDF export require Pro (preview) in Settings.',
-    quotaBlocked: 'Monthly free scan limit reached — enable Pro (preview) in Settings for unlimited scans.',
+    quotaBlocked:
+      'Monthly free scan limit reached — enable Pro (preview) in Settings for unlimited scans.',
     noApiKey: 'Add an OpenAI API key in Settings to run the deep scan.',
     errors: {
       unknownBatch: 'this step',
@@ -156,7 +157,8 @@ const en = {
     protectedPage:
       'This page cannot be scanned. Use a normal website tab — not Settings, the side panel, or browser-internal pages (chrome://, edge://).',
     noTab: 'No active tab found. Focus a normal web page and try again.',
-    quota: 'Free tier limit reached ({limit} scans this month). Enable Pro in Settings for unlimited scans.',
+    quota:
+      'Free tier limit reached ({limit} scans this month). Enable Pro in Settings for unlimited scans.',
     injection:
       'Could not inject the audit script on this page. Try refreshing the tab, or check if an extension is blocking content scripts.',
     worker:
@@ -223,7 +225,8 @@ const fr: MessageTree = {
     ai: 'IA ({count})',
   },
   issues: {
-    noneAuto: 'Aucune violation automatisée. Lancez l’analyse approfondie pour une revue RGAA assistée par IA.',
+    noneAuto:
+      'Aucune violation automatisée. Lancez l’analyse approfondie pour une revue RGAA assistée par IA.',
     noneFilter: 'Aucun problème ne correspond à ce filtre.',
     impact: 'Impact :',
     elements: '{count} élément(s)',
@@ -308,7 +311,8 @@ const fr: MessageTree = {
   onboarding: {
     title: 'Bienvenue sur A11yFix AI',
     body: 'Auditez vos pages RGAA/WCAG, lancez une analyse IA approfondie avec votre clé OpenAI, exportez des rapports. Gratuit : 10 scans/mois.',
-    apiKey: 'Ajoutez votre clé OpenAI dans Paramètres pour les corrections IA et l’analyse approfondie.',
+    apiKey:
+      'Ajoutez votre clé OpenAI dans Paramètres pour les corrections IA et l’analyse approfondie.',
     proNote: 'Pro (aperçu) : scans illimités, analyse approfondie, corrections IA et export PDF.',
     privacy: 'Votre clé API reste dans le navigateur — voir Paramètres.',
     dismiss: 'Compris',
@@ -330,7 +334,8 @@ const fr: MessageTree = {
       'Impossible de joindre le service worker. Rechargez l’extension depuis chrome://extensions.',
     generic: 'Échec du scan : {message}',
     pdfPro: 'L’export PDF est une fonction Pro. Activez Pro (aperçu) dans Paramètres.',
-    deepScanPro: 'L’analyse approfondie IA est une fonction Pro. Activez Pro (aperçu) dans Paramètres.',
+    deepScanPro:
+      'L’analyse approfondie IA est une fonction Pro. Activez Pro (aperçu) dans Paramètres.',
   },
 };
 
@@ -345,11 +350,7 @@ function getNested(tree: MessageTree, path: string): string | undefined {
 }
 
 /** Resolve a dot-path message key with optional `{var}` interpolation. */
-export function t(
-  lang: Language,
-  key: string,
-  vars?: Record<string, string | number>,
-): string {
+export function t(lang: Language, key: string, vars?: Record<string, string | number>): string {
   const raw = getNested(messages[lang], key) ?? getNested(messages.en, key) ?? key;
   if (!vars) return raw;
   return raw.replace(/\{(\w+)\}/g, (_, name: string) => String(vars[name] ?? `{${name}}`));
