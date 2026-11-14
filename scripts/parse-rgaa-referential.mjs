@@ -6,7 +6,7 @@
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
-import { resolve, dirname } from 'node:path';
+import { resolve, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -49,7 +49,7 @@ writeFileSync(
     {
       source: 'https://accessibilite.numerique.gouv.fr/methode/criteres-et-tests/',
       version: '4.1.2',
-      generatedFrom: inputPath,
+      generatedFrom: relative(root, inputPath),
       criteriaCount: criteria.length,
       criteria,
     },
