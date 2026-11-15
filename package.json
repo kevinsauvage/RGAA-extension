@@ -1,5 +1,5 @@
 {
-  "name": "a11yfix-ai",
+  "name": "rgaa-extension",
   "version": "0.1.0",
   "description": "A11yFix AI — RGAA/WCAG accessibility & performance copilot Chrome extension",
   "type": "module",
