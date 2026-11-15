@@ -29,7 +29,7 @@
     "audit",
     "ai"
   ],
-  "license": "MIT",
+  "license": "UNLICENSED",
   "dependencies": {
     "axe-core": "^4.12.1",
     "clsx": "^2.1.1",

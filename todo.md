@@ -23,7 +23,7 @@ Living task list for the RGAA/WCAG Chrome extension. Regenerate coverage stats w
 ```
 Classic scan (automatic, free tier quota)
 ├── axe-core          → top document only, WCAG-tagged rules → RGAA mapping
-└── rules/ (30)       → same-origin iframes via getAuditableDocuments()
+└── rules/ (37)       → same-origin iframes via getAuditableDocuments()
 
 Deep scan (on demand, Pro preview)
 └── OpenAI + pruned HTML → subjective / markup criteria (evidence + selector validation)
