@@ -54,6 +54,8 @@ export default defineConfig(({ mode }) => ({
   },
   test: {
     environment: 'happy-dom',
+    // happy-dom 21 no longer loads iframe documents by default; the same-origin iframe rules need them.
+    environmentOptions: { happyDOM: { settings: { enableIframePageLoading: true } } },
     setupFiles: ['src/content/audit/rules/__tests__/setup.ts'],
     include: ['src/**/*.test.ts', 'e2e/**/*.test.ts'],
     coverage: {

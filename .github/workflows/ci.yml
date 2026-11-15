@@ -43,7 +43,7 @@ jobs:
 
       - name: Content script bundle size budget (gzip)
         run: |
-          FILE=$(find dist/assets -name 'content-script*.js' ! -name '*loader*' | head -1)
+          FILE=$(find dist/assets -name '*content-script*.js' ! -name '*loader*' | head -1)
           if [ -z "$FILE" ]; then
             echo "Content script bundle not found"
             exit 1
