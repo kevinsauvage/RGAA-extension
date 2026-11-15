@@ -7,6 +7,7 @@ const VITALS: Array<{ key: keyof CoreWebVitals; label: string; unit: string }> =
   { key: 'cls', label: 'CLS', unit: '' },
   { key: 'fcp', label: 'FCP', unit: 'ms' },
   { key: 'ttfb', label: 'TTFB', unit: 'ms' },
+  { key: 'inp', label: 'INP', unit: 'ms' },
 ];
 
 export function PerformancePanel({
@@ -20,7 +21,7 @@ export function PerformancePanel({
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-5 gap-2">
         {VITALS.map((vital) => {
           const value = webVitals[vital.key];
           return (
@@ -29,7 +30,7 @@ export function PerformancePanel({
                 {vital.label}
               </div>
               <div className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                {value === null ? '—' : `${value}${vital.unit}`}
+                {value == null ? '—' : `${value}${vital.unit}`}
               </div>
             </div>
           );

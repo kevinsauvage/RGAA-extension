@@ -98,8 +98,8 @@ Multi-page / interaction criteria (12.1–12.5, 11.3, 11.12) require a **site cr
 ## P3 — AI copilot
 
 - [ ] **Deep scan cost controls** — token estimate before run, optional batch skip, model selection impact on price
-- [ ] **Deep scan tests** — mock OpenAI responses; verify evidence/selector rejection path (`deep-scan.ts`)
-- [ ] **AI fix tests** — mock `generateFix` / cache behavior (`client.ts`)
+- [x] **Deep scan tests** — mock OpenAI responses; verify evidence/selector rejection path (`deep-scan.ts`)
+- [x] **AI fix tests** — mock `generateFix` / cache behavior (`client.ts`)
 - [ ] **Prompt tuning** — reduce false positives on 6.1 (vague links), 9.3 (fake lists), 11.2 (label relevance) using real-site eval set
 - [ ] **Alternative providers** — abstract `openai.ts` for Anthropic / local models (Settings already has custom model id)
 - [ ] **Optional backend proxy** — hide API key from extension for team/enterprise (server-side key + rate limiting)
@@ -108,7 +108,7 @@ Multi-page / interaction criteria (12.1–12.5, 11.3, 11.12) require a **site cr
 
 ## P4 — Performance module
 
-- [ ] **INP metric** — add Interaction to Next Paint where `PerformanceObserver` supports it
+- [x] **INP metric** — add Interaction to Next Paint where `PerformanceObserver` supports it
 - [ ] **Actionable perf hints** — tie LCP element / CLS shift sources to DOM nodes (like accessibility highlighting)
 - [ ] **Perf regression baseline** — compare vitals across rescans of the same URL in history
 
@@ -139,7 +139,7 @@ Multi-page / interaction criteria (12.1–12.5, 11.3, 11.12) require a **site cr
 
 ## DevOps & distribution
 
-- [ ] **Release GitHub Action** — tag → build → zip `dist/` artifact for store upload
+- [x] **Release GitHub Action** — tag → build → zip `dist/` artifact for store upload
 - [ ] **Version bump workflow** — sync `package.json`, manifest, store listing
 - [ ] **Firefox MV3 port** — evaluate `@crxjs` compatibility or web-ext build; adjust `browser.*` polyfill if needed
 - [ ] **Edge Add-ons** — usually compatible with Chrome build; verify side panel API

@@ -1,0 +1,43 @@
+name: Release
+
+# Push a tag (`npm version patch && git push --follow-tags`) to build the extension and attach the zip that the
+# Chrome Web Store upload form takes. The manifest version comes from package.json (src/manifest.config.ts).
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Check the tag matches package.json
+        run: |
+          VERSION="v$(node -p "require('./package.json').version")"
+          if [ "$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json ($VERSION). Tag with 'npm version'."
+            exit 1
+          fi
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Zip the build
+        run: cd dist && zip -r "../a11yfix-ai-$GITHUB_REF_NAME.zip" .
+      - uses: actions/upload-artifact@v7
+        with:
+          name: a11yfix-ai-${{ github.ref_name }}
+          path: a11yfix-ai-${{ github.ref_name }}.zip
+      - name: Create the GitHub release
+        run: gh release create "$GITHUB_REF_NAME" "a11yfix-ai-$GITHUB_REF_NAME.zip" --title "$GITHUB_REF_NAME" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

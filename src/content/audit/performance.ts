@@ -6,6 +6,7 @@ const THRESHOLDS = {
   cls: 0.1,
   ttfb: 800,
   fcp: 1800,
+  inp: 200,
 } as const;
 
 function readNavigationTiming(): { ttfb: number | null; fcp: number | null } {
@@ -65,6 +66,53 @@ function readCls(): Promise<number | null> {
   });
 }
 
+/** One entry of the Event Timing API; `interactionId` is 0 for events that are not a discrete interaction. */
+type EventTimingEntry = { duration: number; interactionId?: number };
+
+/**
+ * INP is the slowest interaction, where an interaction is the longest of the events sharing an
+ * `interactionId` (a tap is pointerdown + pointerup + click). Pages with fewer than 50 interactions
+ * report their worst one, which is what a scan sees.
+ */
+export function inpFromEntries(entries: EventTimingEntry[]): number | null {
+  const byInteraction = new Map<number, number>();
+  for (const entry of entries) {
+    if (!entry.interactionId) continue;
+    byInteraction.set(
+      entry.interactionId,
+      Math.max(byInteraction.get(entry.interactionId) ?? 0, entry.duration),
+    );
+  }
+  if (byInteraction.size === 0) return null;
+  return Math.round(Math.max(...byInteraction.values()));
+}
+
+function readInp(): Promise<number | null> {
+  return new Promise((resolve) => {
+    if (!('PerformanceObserver' in window)) return resolve(null);
+    if (!PerformanceObserver.supportedEntryTypes?.includes('event')) return resolve(null);
+    const entries: EventTimingEntry[] = [];
+    try {
+      const observer = new PerformanceObserver((list) => {
+        entries.push(...(list.getEntries() as unknown as EventTimingEntry[]));
+      });
+      // `buffered` replays the interactions that happened before the scan; 40 ms is the lowest
+      // duration the API reports.
+      observer.observe({
+        type: 'event',
+        buffered: true,
+        durationThreshold: 40,
+      } as PerformanceObserverInit);
+      setTimeout(() => {
+        observer.disconnect();
+        resolve(inpFromEntries(entries));
+      }, 600);
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
 function severityFor(value: number, threshold: number): Severity {
   const ratio = value / threshold;
   if (ratio <= 1) return 'minor';
@@ -78,9 +126,9 @@ export async function collectPerformance(): Promise<{
   issues: PerformanceIssue[];
 }> {
   const { ttfb, fcp } = readNavigationTiming();
-  const [lcp, cls] = await Promise.all([readLcp(), readCls()]);
+  const [lcp, cls, inp] = await Promise.all([readLcp(), readCls(), readInp()]);
 
-  const webVitals: CoreWebVitals = { lcp, cls, ttfb, fcp };
+  const webVitals: CoreWebVitals = { lcp, cls, ttfb, fcp, inp };
   const issues: PerformanceIssue[] = [];
 
   const push = (
@@ -136,6 +184,15 @@ export async function collectPerformance(): Promise<{
     'ms',
     'First Contentful Paint is slow',
     'The first pixels appear late. Reduce render-blocking CSS/JS and inline critical styles.',
+  );
+
+  push(
+    'INP',
+    inp,
+    THRESHOLDS.inp,
+    'ms',
+    'Interactions respond slowly',
+    'The page takes too long to react to a click, tap or key press. Break up long tasks, defer non-critical scripts and keep event handlers short.',
   );
 
   return { webVitals, issues };

@@ -69,6 +69,12 @@ export interface CoreWebVitals {
   cls: number | null;
   ttfb: number | null;
   fcp: number | null;
+  /**
+   * Interaction to Next Paint (ms): the slowest interaction seen since the page loaded. `null` when the
+   * person has not interacted yet or the browser lacks the Event Timing API; absent on scans stored
+   * before the metric existed.
+   */
+  inp?: number | null;
 }
 
 export interface ScanSummary {
