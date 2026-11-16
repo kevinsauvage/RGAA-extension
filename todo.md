@@ -41,7 +41,7 @@ Side panel
 ## P0 — Launch readiness
 
 - [ ] **Chrome Web Store submission pack** — listing copy (FR + EN), screenshots, promo tile, category, single-purpose justification
-- [~] **Privacy policy page** — written as `docs/privacy.md` and linked from the README; still to do: link it from the Options page and the store listing
+- [~] **Privacy policy page** — written as `docs/privacy.md` and linked from the README; linked from the Options page; still to do: link it from the store listing
 - [ ] **Decide monetization path** — ship as free + BYOK only, or integrate billing before public Pro launch
 - [ ] **Production build checklist** — verify `npm run build` output, load unpacked in Chrome, smoke-test scan → highlight → AI fix → PDF on 2–3 real sites
 - [ ] **Remove or gate dev-only Pro toggle** — replace preview toggle with real entitlement once billing exists, or document BYOK-only launch clearly in UI

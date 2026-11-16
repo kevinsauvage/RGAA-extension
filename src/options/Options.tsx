@@ -85,6 +85,18 @@ export function Options() {
           </span>
         </label>
 
+        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+          The deep scan sends the page's visible text and form values to OpenAI.{' '}
+          <a
+            href="https://github.com/kevinsauvage/RGAA-extension/blob/main/docs/privacy.md"
+            target="_blank"
+            rel="noreferrer"
+            className="underline"
+          >
+            What leaves your browser (opens in a new tab)
+          </a>
+        </p>
+
         <label className="block">
           <span className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-300">
             Model
