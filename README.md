@@ -5,7 +5,7 @@ A Chrome extension (Manifest V3, Chrome 116+) that audits the page you're on for
 What it does:
 
 - Audits with axe-core and custom RGAA rules (images, forms, navigation, focus, hidden content and more)
-- Samples LCP, CLS, FCP and TTFB
+- Samples LCP, CLS, FCP, TTFB and INP
 - Explains issues and suggests fixes through the OpenAI API
 - Exports the audit as a PDF
 - Has Free and Pro tiers. Free allows 10 scans a month; Pro is a preview and billing isn't built yet.
@@ -90,7 +90,8 @@ changes a committed file, and enforces a 400 KB gzip budget on the content scrip
 The e2e tests open a real (headed) Chromium with the extension loaded, so on a machine without a display they
 need a virtual one (`xvfb-run -a npm run test:e2e`).
 
-To publish, zip `dist/` after `npm run build` and upload it to the Chrome Web Store.
+To publish, tag a version (`npm version patch && git push --follow-tags`): the release workflow builds the
+extension and attaches the zip for the Chrome Web Store to a GitHub release.
 
 See **[todo.md](todo.md)** for the backlog and **[AGENTS.md](AGENTS.md)** for the conventions AI coding agents
 follow in this repository.
@@ -127,7 +128,8 @@ official [RGAA 4.1.2 referential](https://accessibilite.numerique.gouv.fr/method
 
 The OpenAI API key is entered per-user in Settings and stored in
 `chrome.storage.local`. It is only sent in direct requests to the OpenAI API.
-No audit data is sent anywhere else.
+No audit data is sent anywhere else. The full account, including what the deep scan sends, is in
+[docs/privacy.md](docs/privacy.md).
 
 ## Notes
 

@@ -41,7 +41,7 @@ Side panel
 ## P0 — Launch readiness
 
 - [ ] **Chrome Web Store submission pack** — listing copy (FR + EN), screenshots, promo tile, category, single-purpose justification
-- [ ] **Privacy policy page** — document what leaves the browser (OpenAI API calls, no other telemetry); link from store listing and Options
+- [~] **Privacy policy page** — written as `docs/privacy.md` and linked from the README; still to do: link it from the Options page and the store listing
 - [ ] **Decide monetization path** — ship as free + BYOK only, or integrate billing before public Pro launch
 - [ ] **Production build checklist** — verify `npm run build` output, load unpacked in Chrome, smoke-test scan → highlight → AI fix → PDF on 2–3 real sites
 - [ ] **Remove or gate dev-only Pro toggle** — replace preview toggle with real entitlement once billing exists, or document BYOK-only launch clearly in UI
@@ -140,7 +140,7 @@ Multi-page / interaction criteria (12.1–12.5, 11.3, 11.12) require a **site cr
 ## DevOps & distribution
 
 - [x] **Release GitHub Action** — tag → build → zip `dist/` artifact for store upload
-- [ ] **Version bump workflow** — sync `package.json`, manifest, store listing
+- [x] **Version bump workflow** (`npm version` is enough: the manifest reads `package.json`; documented in CONTRIBUTING.md) — — sync `package.json`, manifest, store listing
 - [ ] **Firefox MV3 port** — evaluate `@crxjs` compatibility or web-ext build; adjust `browser.*` polyfill if needed
 - [ ] **Edge Add-ons** — usually compatible with Chrome build; verify side panel API
 
@@ -148,10 +148,10 @@ Multi-page / interaction criteria (12.1–12.5, 11.3, 11.12) require a **site cr
 
 ## Documentation
 
-- [ ] Keep **`docs/coverage.md`** and **`docs/rgaa-criteria.md`** in sync (`npm run docs` — enforced in CI)
-- [ ] **User guide** — how to interpret confidence levels (certain / likely / needs-review)
-- [ ] **Rule authoring guide** — how to add a rule: `rules/*.ts` → `index.ts` → `coverage.ts` → tests → `npm run docs`
-- [ ] **CONTRIBUTING.md** — dev setup, test commands, PR expectations
+- Keep **`docs/coverage.md`** and **`docs/rgaa-criteria.md`** in sync (`npm run docs` — enforced in CI; a standing rule, not a task)
+- [x] **User guide** — how to interpret confidence levels (certain / likely / needs-review)
+- [x] **Rule authoring guide** — how to add a rule: `rules/*.ts` → `index.ts` → `coverage.ts` → tests → `npm run docs`
+- [x] **CONTRIBUTING.md** — dev setup, test commands, PR expectations
 
 ---
 
