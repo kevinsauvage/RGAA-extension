@@ -53,7 +53,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.14.0",
     "happy-dom": "^21.0.4",
-    "postcss": "^8.5.16",
+    "postcss": "^8.5.33",
     "prettier": "^3.10.1",
     "tailwindcss": "^3.4.19",
     "tsx": "^4.23.15",
