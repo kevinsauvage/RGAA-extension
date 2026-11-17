@@ -4,6 +4,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # Tailwind 4 is a migration (CSS-first config, new PostCSS plugin), not a bump; the extension is paused.
+      - dependency-name: tailwindcss
+        update-types: ['version-update:semver-major']
     groups:
       vite-ecosystem:
         patterns:
