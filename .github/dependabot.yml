@@ -8,6 +8,9 @@ updates:
       # Tailwind 4 is a migration (CSS-first config, new PostCSS plugin), not a bump; the extension is paused.
       - dependency-name: tailwindcss
         update-types: ['version-update:semver-major']
+      # TypeScript 7: typescript-eslint 8 caps its peer range below 7 (npm ERESOLVE on #17).
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
     groups:
       vite-ecosystem:
         patterns:
