@@ -27,3 +27,7 @@ updates:
       openai-related:
         patterns:
           - jspdf
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
